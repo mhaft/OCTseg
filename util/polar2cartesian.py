@@ -15,22 +15,22 @@ from __future__ import print_function
 import numpy as np
 
 
-def polar2cartesian(im, r0=0, full=True, deg=1):
+def polar2cartesian(im, r0=0, full=True, deg=1, scale=1):
     if r0 >= 0:
         im = im[..., int(r0):, :]
     else:
         im = np.concatenate((im[..., -int(r0 + 1)::-1, :], im), axis=-2)
     if full:
-        w = 2 * im.shape[-2]
+        w = int(2 * im.shape[-2] * scale)
     else:
-        w = 2 * (np.floor(im.shape[-2] / np.sqrt(2))).astype(int)
+        w = int(2 * np.floor(im.shape[-2] / np.sqrt(2)) * scale)
     if len(im.shape) == 2:
         out = np.zeros((w, w), dtype=im.dtype)
     else:
         out = np.zeros((im.shape[0], w, w), dtype=im.dtype)
     c = w / 2 - 0.5
     x, y = np.unravel_index((np.arange(w * w)).astype(int), (w, w))
-    r = np.sqrt((x - c) ** 2 + (y - c) ** 2)
+    r = np.sqrt((x - c) ** 2 + (y - c) ** 2) / scale
     a = (np.arctan2(x - c, c - y) / np.pi + 1) * 180 * (im.shape[-1] / 360)
     valid_r = np.ceil(r) <= im.shape[-2]
     x, y, r, a = x[valid_r], y[valid_r], r[valid_r], a[valid_r]
