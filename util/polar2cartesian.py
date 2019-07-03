@@ -46,9 +46,9 @@ def polar2cartesian(im, r0=0, full=True, deg=1, scale=1):
     return out
 
 
-def polar2cartesian_large_3d_file(im, r0=0, full=True, deg=1):
-    out = polar2cartesian(im[0:100, ...], r0=r0, full=full, deg=deg)
+def polar2cartesian_large_3d_file(im, r0=0, full=True, deg=1, scale=1):
+    out = polar2cartesian(im[0:100, ...], r0=r0, full=full, deg=deg, scale=scale)
     for i in range(1, int(np.ceil((im.shape[0] - 1)/100)) + 1):
-        sub_out = polar2cartesian(im[(i * 100):((i + 1) * 100), ...], r0=r0, full=full, deg=deg)
+        sub_out = polar2cartesian(im[(i * 100):((i + 1) * 100), ...], r0=r0, full=full, deg=deg, scale=scale)
         out = np.concatenate((out, sub_out), axis=0)
     return out
