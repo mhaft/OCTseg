@@ -16,10 +16,14 @@ import numpy as np
 
 
 def polar2cartesian(im, r0=0, full=True, deg=1):
-    if full:
-        w = 2 * (im.shape[-2] - r0)
+    if r0 >= 0:
+        im = im[..., int(r0):, :]
     else:
-        w = 2 * (np.floor((im.shape[-2] - r0) / np.sqrt(2))).astype(int)
+        im = np.concatenate((im[..., -int(r0 + 1)::-1, :], im), axis=-2)
+    if full:
+        w = 2 * im.shape[-2]
+    else:
+        w = 2 * (np.floor(im.shape[-2] / np.sqrt(2))).astype(int)
     if len(im.shape) == 2:
         out = np.zeros((w, w), dtype=im.dtype)
     else:

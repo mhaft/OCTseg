@@ -36,6 +36,10 @@ class TestPolar2cartesian:
         im_polar = np.zeros((10, 10))
         im_cartesian = polar2cartesian(im_polar, full=False)
         np.testing.assert_array_equal(im_cartesian.shape, [14, 14])
+        # negative radius
+        im_polar = np.zeros((10, 10))
+        im_cartesian = polar2cartesian(im_polar, r0=-2)
+        np.testing.assert_array_equal(im_cartesian.shape, [24, 24])
 
     def test_input_image_with_shape(self):
         # box
