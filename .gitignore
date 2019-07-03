@@ -1,6 +1,7 @@
 .DS_Store
 .idea/**
 data/
-.pytest_cache/**
+.pytest_cache
 *.pyc
 .coverage
+__pycache__
