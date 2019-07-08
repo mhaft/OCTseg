@@ -8,9 +8,7 @@
 """Convert an 2D or 3D image from polar or cylindrical coordinate to the 
     cartesian coordinate."""
     
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import numpy as np
 
