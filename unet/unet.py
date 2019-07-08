@@ -44,17 +44,17 @@ def max_pool_2_2(x):
 def conv_bn_relu(x, ChIn, ChOut):
     W_conv = weight_variable([3, 3, ChIn, ChOut])
     b_conv = bias_variable([ChOut])
-    h_conv = tf.nn.leaky_relu(tf.layers.batch_normalization(conv2d(x, W_conv) + b_conv))
+    h_conv = tf.nn.leaky_relu(tf.keras.layers.BatchNormalization()(conv2d(x, W_conv) + b_conv))
     return h_conv, W_conv, b_conv
 
 
 def up_conv_2_2(x):
     x_shape = x.get_shape()
-    w = weight_variable([2, 2, x_shape[3].value, x_shape[3].value])
-    return tf.compat.v1.nn.conv2d_transpose(x, filter=w,
-                                  output_shape=[2, 2 * x_shape[1].value,
-                                                2 * x_shape[2].value, x_shape[3].value], strides=2)
-
+    # w = weight_variable([2, 2, x_shape[3].value, x_shape[3].value])
+    # return tf.compat.v1.nn.conv2d_transpose(x, filter=w,
+    #                               output_shape=[2, 2 * x_shape[1].value,
+    #                                             2 * x_shape[2].value, x_shape[3].value], strides=2)
+    return tf.keras.layers.Conv2DTranspose(x_shape[3].value, 2, 2)(x)
 
 def img_aug(im, l):
     p_lim = 0.05
@@ -132,7 +132,7 @@ starter_learning_rate = 1e-4
 lr = tf.compat.v1.train.exponential_decay(starter_learning_rate, global_step, 20000, 0.1, staircase=True)
 train_step = tf.compat.v1.train.AdamOptimizer(lr).minimize(cross_entropy, global_step=global_step)
 
-sess.run(tf.compat.v1.initializers.global_variabless())
+sess.run(tf.compat.v1.global_variables_initializer())
 saver = tf.compat.v1.train.Saver()
 print('Model is initialized.')
 
@@ -155,13 +155,13 @@ for epoch in range(nEpoch):
     x1, l1 = img_aug(im[j, ...], label[j, ...])
     print('epoch {}'.format(epoch))
     train_step.run(feed_dict={x: x1, y_: l1})
-    if epoch % 10 == 0:
+    if True:  # epoch % 10 == 0:
         print("epoch %d: %f hour to finish. Learning rate: %e. Cross Entropy: %f." % (epoch,
               ((nEpoch - epoch - 1) / (epoch + 1.0) * (time.time() - start) / 3600.0), lr.eval(), cross_entropy.eval(
                   feed_dict={x: x1, y_: l1}),))
 
-    if epoch % 1000 == 999:
-        save_path = saver.save(sess, "model-epoch" + str(epoch) + ".ckpt")
+    if True:  # epoch % 1000 == 999:
+        save_path = saver.save(sess, "model/model-epoch" + str(epoch) + ".ckpt")
         print("epoch %d, Model saved in file: %s" % (epoch, save_path))
 
 
