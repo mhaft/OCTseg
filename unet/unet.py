@@ -12,17 +12,22 @@ from __future__ import absolute_import, division, print_function
 
 import time
 import tifffile
+import platform
 import numpy as np
 import tensorflow as tf
 
 from util.make_data_h5 import make_data_h5
 
 im_shape = (1, 512, 512, 1)
-nEpoch = 2
-nBatch = 2
-folder_path = 'C:\\Users\\Mohammad\\Desktop\\MachineLearning-3 files\\PSTIFS\\'
-# folder_path = '/content/drive/My Drive/Colab Notebooks/PSTIFS/'
-
+nEpoch = 2000
+nBatch = 5
+platform = platform.platform()
+if platform[:10] == 'Windows-10':
+    folder_path = 'C:\\Users\\Mohammad\\Desktop\\MachineLearning-3 files\\PSTIFS\\'
+elif platform[:9] == 'Windows-7':
+    folder_path = 'D:\\MachineLearning\\PSTIFFS-cp\\'
+else:
+    folder_path = '/content/drive/My Drive/Colab Notebooks/PSTIFS/'
 
 
 def weight_variable(shape):
@@ -47,7 +52,8 @@ def max_pool_2_2(x):
 def conv_bn_relu(x, ChIn, ChOut):
     W_conv = weight_variable([3, 3, ChIn, ChOut])
     b_conv = bias_variable([ChOut])
-    h_conv = tf.nn.leaky_relu(tf.keras.layers.BatchNormalization()(conv2d(x, W_conv) + b_conv))
+    # h_conv = tf.nn.leaky_relu(tf.keras.layers.BatchNormalization()(conv2d(x, W_conv) + b_conv))
+    h_conv = tf.nn.leaky_relu(conv2d(x, W_conv) + b_conv)
     return h_conv, W_conv, b_conv
 
 
@@ -58,6 +64,7 @@ def up_conv_2_2(x):
     #                               output_shape=[2, 2 * x_shape[1].value,
     #                                             2 * x_shape[2].value, x_shape[3].value], strides=2)
     return tf.keras.layers.Conv2DTranspose(x_shape[3].value, 2, 2)(x)
+
 
 def img_aug(im, l):
     p_lim = 0.05
@@ -81,8 +88,8 @@ def img_aug(im, l):
         if np.random.rand() > p_lim:  # 3rd 90 degree rotation
             im_ = np.rot90(im_, k=1, axes=(0, 1))
             l_ = np.rot90(l_, k=1, axes=(0, 1))
-        if np.random.rand() > p_lim:  # salt-and-pepper noise
-            im_ = im_ + 0.02 * np.random.rand() - 0.01
+        # if np.random.rand() > p_lim:  # salt-and-pepper noise
+        #     im_ = im_ + 0.02 * np.random.rand() - 0.01
         im[i, ...], l[i, ...] = im_, l_
     return im, l
 
@@ -133,8 +140,8 @@ cross_entropy = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=y_
 accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(y_conv, -1), tf.argmax(y_, -1)), tf.float32), [1, 2])
 
 global_step = tf.Variable(0, trainable=False)
-starter_learning_rate = 1e-4
-lr = tf.compat.v1.train.exponential_decay(starter_learning_rate, global_step, 10, 0.1, staircase=True)
+starter_learning_rate = 1e-5
+lr = tf.compat.v1.train.exponential_decay(starter_learning_rate, global_step, 1000, 0.1, staircase=True)
 train_step = tf.compat.v1.train.AdamOptimizer(lr).minimize(cross_entropy, global_step=global_step)
 
 sess.run(tf.compat.v1.global_variables_initializer())
@@ -158,33 +165,32 @@ start = time.time()
 for epoch in range(nEpoch):
     j = np.random.randint(0, len(train_data_id), nBatch)
     x1, l1 = img_aug(im[train_data_id[j], ...], label[train_data_id[j], ...])
-    print('epoch {}'.format(epoch))
     train_step.run(feed_dict={x: x1, y_: l1})
-    if True:  # epoch % 10 == 0:
+    if epoch % 100 == 99:
         test_accuracy = []
         for i in range(len(train_data_id) // nBatch):
-            j_i = np.arange((i * nBatch), ((i + 1) * nBatch))
-            x1, l1 = img_aug(im[train_data_id[j_i], ...], label[train_data_id[j_i], ...])
+            j1, j2 = (i * nBatch), ((i + 1) * nBatch)
+            x1, l1 = img_aug(im[train_data_id[j1:j2], ...], label[train_data_id[j1:j2], ...])
             test_accuracy.append(accuracy.eval(feed_dict={x: x1, y_: l1}))
         valid_accuracy = []
         for i in range(len(valid_data_id) // nBatch):
             j_i = np.arange((i * nBatch), ((i + 1) * nBatch))
             x1, l1 = img_aug(im[valid_data_id[j_i], ...], label[valid_data_id[j_i], ...])
             valid_accuracy.append(accuracy.eval(feed_dict={x: x1, y_: l1}))
-        print("epoch %d: %f hour to finish. Learning rate: %e. Cross Entropy: %f." % (epoch,
+        print("epoch %d: %f hour to finish. Learning rate: %e. Cross Entropy: %f." % (epoch + 1,
               ((nEpoch - epoch - 1) / (epoch + 1.0) * (time.time() - start) / 3600.0), lr.eval(), cross_entropy.eval(
                   feed_dict={x: x1, y_: l1}),))
         print([np.mean(test_accuracy), np.mean(valid_accuracy)])
 
-    if epoch % 10 == 9:
-        save_path = saver.save(sess, "model/model-epoch" + str(epoch) + ".ckpt")
-        print("epoch %d, Model saved in file: %s" % (epoch, save_path))
+    if epoch % 1000 == 999:
+        save_path = saver.save(sess, "model/model-epoch" + str(epoch + 1) + ".ckpt")
+        print("epoch %d, Model saved in file: %s" % (epoch + 1, save_path))
 
 label = np.argmax(label, -1)
 out = np.zeros_like(label)
-for i in range(im.shape[0] // nBatch):
+for i in range(im.shape[0] // nBatch + 1):
     j = np.arange((i * nBatch), ((i + 1) * nBatch))
-    x1 = im[j, ...]
+    x1 = im[(i * nBatch):((i + 1) * nBatch), ...]
     out[j, ...] = np.argmax(y_conv.eval(feed_dict={x: x1}), -1)
 
 tifffile.imwrite('label.tif', label.astype(np.uint8))
