@@ -40,7 +40,7 @@ def make_data_h5(folder_path, im_shape):
     for case in cases:
         tmp = tifffile.imread(case)
         tmp = im_fix_width(tmp, im_shape[1])
-        slice_list = np.nonzero(np.any(np.any(tmp, axis=-1), axis=-1))[0]
+        slice_list = np.nonzero(np.any(np.any(tmp > 1, axis=-1), axis=-1))[0]
         for i in slice_list:
             tmp_label[0, 0, :, :, 0] = tmp[i, ...]
             label = np.concatenate((label, tmp_label), axis=0)
