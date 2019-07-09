@@ -98,9 +98,9 @@ def one_hot(l, num_classes):
     return np.reshape(np.squeeze(np.eye(num_classes)[l.reshape(-1)]), l.shape + (num_classes, ))
 
 
-sess = tf.compat.v1.InteractiveSession()
-x = tf.compat.v1.placeholder(tf.float32, shape=[None, im_shape[1], im_shape[2], im_shape[3]])
-y_ = tf.compat.v1.placeholder(tf.float32, shape=[None, im_shape[1], im_shape[2], 3])
+sess = tf.InteractiveSession()
+x = tf.placeholder(tf.float32, shape=[None, im_shape[1], im_shape[2], im_shape[3]])
+y_ = tf.placeholder(tf.float32, shape=[None, im_shape[1], im_shape[2], 3])
 
 # Define the Architecture
 h_conv1a, W_conv1a, b_conv1a = conv_bn_relu(x, 1, 32)
@@ -141,11 +141,11 @@ accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(y_conv, -1), tf.argmax(y_, 
 
 global_step = tf.Variable(0, trainable=False)
 starter_learning_rate = 1e-5
-lr = tf.compat.v1.train.exponential_decay(starter_learning_rate, global_step, 1000, 0.1, staircase=True)
-train_step = tf.compat.v1.train.AdamOptimizer(lr).minimize(cross_entropy, global_step=global_step)
+lr = tf.train.exponential_decay(starter_learning_rate, global_step, 1000, 0.1, staircase=True)
+train_step = tf.train.AdamOptimizer(lr).minimize(cross_entropy, global_step=global_step)
 
-sess.run(tf.compat.v1.global_variables_initializer())
-saver = tf.compat.v1.train.Saver()
+sess.run(tf.global_variables_initializer())
+saver = tf.train.Saver()
 print('Model is initialized.')
 
 im, label = make_data_h5(folder_path, im_shape)
