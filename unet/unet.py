@@ -19,15 +19,19 @@ import tensorflow as tf
 from util.make_data_h5 import make_data_h5
 
 im_shape = (1, 512, 512, 1)
-nEpoch = 2000
-nBatch = 5
 platform = platform.platform()
 if platform[:10] == 'Windows-10':
     folder_path = 'C:\\Users\\Mohammad\\Desktop\\MachineLearning-3 files\\PSTIFS\\'
+    nEpoch = 2000
+    nBatch = 3
 elif platform[:9] == 'Windows-7':
     folder_path = 'D:\\MachineLearning\\PSTIFFS-cp\\'
+    nEpoch = 10
+    nBatch = 2
 else:
     folder_path = '/content/drive/My Drive/Colab Notebooks/PSTIFS/'
+    nEpoch = 2000
+    nBatch = 5
 
 
 def weight_variable(shape):
@@ -100,7 +104,7 @@ def one_hot(l, num_classes):
 
 sess = tf.InteractiveSession()
 x = tf.placeholder(tf.float32, shape=[None, im_shape[1], im_shape[2], im_shape[3]])
-y_ = tf.placeholder(tf.float32, shape=[None, im_shape[1], im_shape[2], 3])
+y_ = tf.placeholder(tf.float32, shape=[None, im_shape[1], im_shape[2], 2])
 
 # Define the Architecture
 h_conv1a, W_conv1a, b_conv1a = conv_bn_relu(x, 1, 32)
@@ -151,7 +155,8 @@ print('Model is initialized.')
 im, label = make_data_h5(folder_path, im_shape)
 
 im = im.astype(np.float32) / 255
-label = np.clip(label, 1, None) - 1
+# label = np.clip(label, 1, None) - 1
+label = (label == 1).astype(np.float32)
 im, label = np.squeeze(im, axis=1), np.squeeze(np.squeeze(label, axis=1), axis=-1)
 label = one_hot(label, 3)
 
@@ -189,9 +194,8 @@ for epoch in range(nEpoch):
 label = np.argmax(label, -1)
 out = np.zeros_like(label)
 for i in range(im.shape[0] // nBatch + 1):
-    j = np.arange((i * nBatch), ((i + 1) * nBatch))
     x1 = im[(i * nBatch):((i + 1) * nBatch), ...]
-    out[j, ...] = np.argmax(y_conv.eval(feed_dict={x: x1}), -1)
+    out[(i * nBatch):((i + 1) * nBatch), ...] = np.argmax(y_conv.eval(feed_dict={x: x1}), -1)
 
 tifffile.imwrite('label.tif', label.astype(np.uint8))
 tifffile.imwrite('out.tif', out.astype(np.uint8))
