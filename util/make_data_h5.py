@@ -47,7 +47,7 @@ def make_data_h5(folder_path, im_shape):
         tmp = tifffile.imread(case[:-8] + '*-im.tif')
         tmp = im_fix_width(tmp, im_shape[1])
         if im_shape[-1] == 1:
-            tmp = np.expand_dims(tmp[1::3, ...], axis=-1)
+            tmp = np.expand_dims(tmp[::3, ...], axis=-1)
         else:
             tmp = np.moveaxis(np.reshape(tmp, (-1, 3,) + tmp.shape[1:]), 1, -1)
         for i in slice_list:
