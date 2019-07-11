@@ -36,11 +36,13 @@ def roi_file_parser(file_path):
 def lumen_iel_mask(obj_list, im_shape):
     """generate lumen or IEL mask based on the point list."""
     obj_list = np.array(obj_list) - 1 # match 1-index to 0-index
-    _, idx = np.unique(obj_list[:, 1], return_index=True)
+    x, idx = np.unique(obj_list[:, 1], return_index=True)
+    for i in x:
+        obj_list[obj_list[:, 1] == i, 0] = np.mean(obj_list[obj_list[:, 1] == i, 0])
     obj_list = obj_list[idx]
-    obj_list = np.concatenate((obj_list[[-1], :] - [0, im_shape[-1], 0], obj_list, obj_list[[0], :] +
+    obj_list = np.concatenate((obj_list - [0, im_shape[-1], 0], obj_list, obj_list +
                                [0, im_shape[-1], 0]), axis=0)
-    f = interp1d(obj_list[:, 1], obj_list[:, 0], kind='quadratic')
+    f = interp1d(obj_list[:, 1], obj_list[:, 0], kind='cubic')
     y_lim = np.tile(f(np.arange(im_shape[-1])).T, reps=(im_shape[-2], 1))
     y = np.tile(np.arange(im_shape[-2]).T, reps=(im_shape[-1], 1)).T
     return (y <= y_lim).astype('uint8')
