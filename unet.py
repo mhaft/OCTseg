@@ -187,7 +187,7 @@ label = (label == 3).astype(np.uint8)
 im, label = np.squeeze(im, axis=1), np.squeeze(np.squeeze(label, axis=1), axis=-1)
 label = one_hot(label, 2)
 
-train_data_id = np.arange(0, im.shape[0], 2)
+train_data_id = np.arange(0, im.shape[0], 2)par
 test_data_id = np.arange(1, im.shape[0], 4)
 valid_data_id = np.arange(3, im.shape[0], 4)
 print('Data is loaded')
@@ -197,6 +197,7 @@ if not os.path.exists('model/' + experiment_def):
     os.makedirs('model/' + experiment_def)
 log_file = 'model/' + experiment_def +'/log.csv'
 with open(log_file, 'w') as f:
+    f.write(str(args) + '\n')
     f.write('epoch, passed_time_hr, learning_rate, cross_entropy_loss, dice_loss, smooth_loss, Test_JI, Valid_JI \n')
 start = time.time()
 for epoch in range(nEpoch):
