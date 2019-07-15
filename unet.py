@@ -23,7 +23,7 @@ from util.make_data_h5 import make_data_h5
 parser = argparse.ArgumentParser()
 parser.add_argument("-exp_def", type=str, default="test", help="experiment definition")
 parser.add_argument("-lr", type=float, help="learning rate", default=1e-5)
-parser.add_argument("-data_path", type=str, default="./data/", help="data fold path")
+parser.add_argument("-data_path", type=str, default="./data/", help="data folder path")
 parser.add_argument("-nEpoch", type=int, default=1000, help="number if epochs")
 parser.add_argument("-nBatch", type=int, default=1, help="batch size")
 parser.add_argument("-outCh", type=int, default=2, help="size of output channel")
@@ -179,7 +179,7 @@ saver = tf.train.Saver()
 print('Model is initialized.')
 
 im, label = make_data_h5(folder_path, im_shape)
-assert len(im) > 0, "The data folder is empty."
+assert len(im) > 0, "The data folder is empty: %s"%folder_path
 
 im = im.astype(np.float32) / 255
 # label = np.clip(label, 1, None) - 1
