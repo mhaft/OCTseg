@@ -14,6 +14,7 @@ import numpy as np
 
 
 def polar2cartesian(im, r0=0, full=True, deg=1, scale=1):
+    r0 = int(r0)
     if r0 >= 0:
         im = im[..., int(r0):, :]
     else:

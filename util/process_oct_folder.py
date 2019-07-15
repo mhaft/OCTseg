@@ -28,7 +28,8 @@ def process_oct_folder(folder_path):
             r0 = 1
             for row in reader:
                 if row[0] == 'zeroOffset':
-                    r0 = int(row[1]) - 1
+                    # str to float to int
+                    r0 = float(row[1]) - 1
         im = tifffile.imread(case)
         cart = polar2cartesian_large_3d_file(im, r0=r0, full=True, deg=1, scale=0.25)
         tifffile.imwrite(case[:-6] + '-im.tif', cart)
