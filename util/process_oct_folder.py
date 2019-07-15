@@ -36,5 +36,5 @@ def process_oct_folder(folder_path):
         seg = read_oct_roi_file(case[:-6] + 'ROI.txt', (int(im.shape[0] / 3),) + im.shape[1:])
         seg = polar2cartesian_large_3d_file(seg, r0=r0, full=True, deg=0, scale=0.25)
         tifffile.imwrite(case[:-6] + '-Seg.tif', seg)
-
+    return
 

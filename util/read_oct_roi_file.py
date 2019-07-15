@@ -37,28 +37,29 @@ def lumen_iel_mask(obj_list, im_shape):
     """generate lumen or IEL mask based on the point list."""
     obj_list = np.array(obj_list) - 1 # match 1-index to 0-index
     x, idx = np.unique(obj_list[:, 1], return_index=True)
-    for i in x:
-        obj_list[obj_list[:, 1] == i, 0] = np.mean(obj_list[obj_list[:, 1] == i, 0])
     obj_list = obj_list[idx]
     obj_list = np.concatenate((obj_list - [0, im_shape[-1], 0], obj_list, obj_list +
                                [0, im_shape[-1], 0]), axis=0)
     f = interp1d(obj_list[:, 1], obj_list[:, 0], kind='cubic')
     y_lim = np.tile(f(np.arange(im_shape[-1])).T, reps=(im_shape[-2], 1))
     y = np.tile(np.arange(im_shape[-2]).T, reps=(im_shape[-1], 1)).T
-    return (y <= y_lim).astype('uint8')
+    return y <= y_lim
 
 
 def read_oct_roi_file(file_path, im_shape):
     obj_list = roi_file_parser(file_path)
     out = np.zeros(im_shape, dtype='uint8')
     for iel in obj_list['IEL']:
-        out[iel[0][2] - 1, ...] += lumen_iel_mask(iel, im_shape)
+        tmp = out[iel[0][2] - 1, ...]
+        tmp[lumen_iel_mask(iel, im_shape)] = 3
+        out[iel[0][2] - 1, ...] = tmp
     for lumen in obj_list['Lumen']:
-        out[lumen[0][2] - 1, ...] += lumen_iel_mask(lumen, im_shape)
+        tmp = out[lumen[0][2] - 1, ...]
+        tmp[lumen_iel_mask(lumen, im_shape)] = 2
+        out[lumen[0][2] - 1, ...] = tmp
     for gw in obj_list['GW']:
         z = gw[1][2] - 1
         gw = np.array([gw[1][1], gw[2][1]])
-        out[z, :, :] += 1
         if gw.ptp() < (im_shape[-1]/2):
             out[z, :, (gw[0] - 1):gw[1]] = 1
         else:
