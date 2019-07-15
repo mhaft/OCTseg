@@ -187,7 +187,7 @@ label = (label == 3).astype(np.uint8)
 im, label = np.squeeze(im, axis=1), np.squeeze(np.squeeze(label, axis=1), axis=-1)
 label = one_hot(label, 2)
 
-train_data_id = np.arange(0, im.shape[0], 2)par
+train_data_id = np.arange(0, im.shape[0], 2)
 test_data_id = np.arange(1, im.shape[0], 4)
 valid_data_id = np.arange(3, im.shape[0], 4)
 print('Data is loaded')
