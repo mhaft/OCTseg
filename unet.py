@@ -22,10 +22,11 @@ from util.make_data_h5 import make_data_h5
 # parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("-exp_def", type=str, default="test", help="experiment definition")
-parser.add_argument("-lr", type=float, help="learning rate", default=1e-5)
+parser.add_argument("-lr", type=float, help="learning rate", default=1e-4)
+parser.add_argument("-lr_step", type=float, help="learning rate step for decay", default=1000)
 parser.add_argument("-data_path", type=str, default="./data/", help="data folder path")
-parser.add_argument("-nEpoch", type=int, default=1000, help="number if epochs")
-parser.add_argument("-nBatch", type=int, default=1, help="batch size")
+parser.add_argument("-nEpoch", type=int, default=3000, help="number of epochs")
+parser.add_argument("-nBatch", type=int, default=5, help="batch size")
 parser.add_argument("-outCh", type=int, default=2, help="size of output channel")
 parser.add_argument("-inCh", type=int, default=1, help="size of input channel")
 parser.add_argument("-nZ", type=int, default=1, help="size of input depth")
@@ -170,7 +171,7 @@ jaccard = tf.divide(tf.reduce_sum(tf.cast(correct_prediction, tf.float32)),
                     tf.reduce_sum(tf.cast(allButTN, tf.float32)))
 
 global_step = tf.Variable(0, trainable=False)
-lr = tf.train.exponential_decay(starter_learning_rate, global_step, 2000, 0.1, staircase=True)
+lr = tf.train.exponential_decay(starter_learning_rate, global_step, args.lr_step, 0.1, staircase=True)
 loss = loss_weight[0] * cross_entropy + loss_weight[1] * dice + loss_weight[2] * smooth
 train_step = tf.train.AdamOptimizer(lr).minimize(loss, global_step=global_step)
 
