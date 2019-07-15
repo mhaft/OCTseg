@@ -17,7 +17,7 @@ import os
 import numpy as np
 import tensorflow as tf
 
-from util.make_data_h5 import make_data_h5
+from ..util.make_data_h5 import make_data_h5
 
 # parse arguments
 parser = argparse.ArgumentParser()
