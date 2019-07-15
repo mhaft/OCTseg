@@ -179,7 +179,7 @@ saver = tf.train.Saver()
 print('Model is initialized.')
 
 im, label = make_data_h5(folder_path, im_shape)
-assert len(im) > 0, "The data folder is empty: %s"%folder_path
+assert im.size > 0, "The data folder is empty: %s"%folder_path
 
 im = im.astype(np.float32) / 255
 # label = np.clip(label, 1, None) - 1
