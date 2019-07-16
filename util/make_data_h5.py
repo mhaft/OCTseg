@@ -52,6 +52,6 @@ def make_data_h5(folder_path, im_shape):
         else:
             tmp = np.moveaxis(np.reshape(tmp, (-1, 3,) + tmp.shape[1:]), 1, -1)
         for i in slice_list:
-            tmp_im[:] = tmp[(i - z_pad):(i - z_pad + 1), ...]
+            tmp_im[:] = tmp[(i - z_pad):(i + z_pad + 1), ...]
             im = np.concatenate((im, tmp_im), axis=0)
     return im, label
