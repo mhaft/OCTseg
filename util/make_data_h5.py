@@ -33,16 +33,17 @@ def make_data_h5(folder_path, im_shape):
     if len(im_shape) == 3:
         im_shape = tuple(im_shape) + (1, )
     tmp_im = np.zeros((1,) + tuple(im_shape), dtype='uint8')
-    tmp_label = np.zeros((1, 1,) + tuple(im_shape[1:-1]) + (1, ), dtype='uint8')
+    tmp_label = np.zeros((1,) + tuple(im_shape[:-1]) + (1, ), dtype='uint8')
     im = np.zeros((0,)+tuple(im_shape), dtype='uint8')
-    label = np.zeros((0, 1,) + tuple(im_shape[1:-1]) + (1,), dtype='uint8')
+    label = np.zeros((0, ) + tuple(im_shape[:-1]) + (1,), dtype='uint8')
     cases = glob.glob(folder_path + '*-Seg.tif')
+    z_pad = (im_shape[0] - 1) // 2
     for case in cases:
         tmp = tifffile.imread(case)
         tmp = im_fix_width(tmp, im_shape[1])
         slice_list = np.nonzero(np.any(np.any(tmp > 1, axis=-1), axis=-1))[0]
         for i in slice_list:
-            tmp_label[0, 0, :, :, 0] = tmp[i, ...]
+            tmp_label[0, :, :, :, 0] = tmp[(i - z_pad):(i + z_pad + 1), ...]
             label = np.concatenate((label, tmp_label), axis=0)
         tmp = tifffile.imread(case[:-8] + '*-im.tif')
         tmp = im_fix_width(tmp, im_shape[1])
@@ -51,6 +52,6 @@ def make_data_h5(folder_path, im_shape):
         else:
             tmp = np.moveaxis(np.reshape(tmp, (-1, 3,) + tmp.shape[1:]), 1, -1)
         for i in slice_list:
-            tmp_im[:] = tmp[(i - (im_shape[0] // 2)):(i - (im_shape[0]//2) + im_shape[0]), ...]
+            tmp_im[:] = tmp[(i - z_pad):(i - z_pad + 1), ...]
             im = np.concatenate((im, tmp_im), axis=0)
     return im, label

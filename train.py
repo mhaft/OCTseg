@@ -26,14 +26,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-exp_def", type=str, default="test", help="experiment definition")
 parser.add_argument("-lr", type=float, help="learning rate", default=1e-4)
 parser.add_argument("-lr_step", type=float, help="learning rate step for decay", default=1000)
-parser.add_argument("-data_path", type=str, default="./data/", help="data folder path")
+parser.add_argument("-data_path", type=str, default="/home/ubuntu/PSTIFS/", help="data folder path")
 parser.add_argument("-nEpoch", type=int, default=3000, help="number of epochs")
 parser.add_argument("-nBatch", type=int, default=5, help="batch size")
 parser.add_argument("-outCh", type=int, default=2, help="size of output channel")
 parser.add_argument("-inCh", type=int, default=1, help="size of input channel")
 parser.add_argument("-nZ", type=int, default=1, help="size of input depth")
 parser.add_argument("-w", type=int, default=512, help="size of input width")
-parser.add_argument("-loss_w", type=str, default="1, 0.5, 0", help="loss wights")
+parser.add_argument("-loss_w", type=str, default="1, 100, 0", help="loss wights")
 
 args = parser.parse_args()
 experiment_def = args.exp_def
@@ -51,10 +51,15 @@ x, y_ = placeholder_inputs(im_shape, outCh)
 
 y_conv = unet_model(x)
 
-accuracy, jaccard = accuracy(y_, y_conv)
-dice = dice_loss(y_, y_conv)
-smooth = smooth_loss(y_conv)
-cross_entropy = tf.reduce_mean(tf.nn.weighted_cross_entropy_with_logits(labels=y_, logits=y_conv, pos_weight=10))
+if im_shape[0] == 1:  # 2D
+    labels, logits = y_, y_conv
+else:  # 3D
+    mid_z = (im_shape[0] + 1) // 2
+    labels, logits = y_[:, mid_z, ...], y_conv[:, mid_z, ...]
+accuracy, jaccard = accuracy(labels, logits)
+dice = dice_loss(labels, logits)
+smooth = smooth_loss(logits)
+cross_entropy = tf.reduce_mean(tf.nn.weighted_cross_entropy_with_logits(labels=labels, logits=logits, pos_weight=10))
 loss = loss_weight[0] * cross_entropy + loss_weight[1] * dice + loss_weight[2] * smooth
 
 global_step = tf.Variable(0, trainable=False)

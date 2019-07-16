@@ -8,7 +8,7 @@
 """CNN related loss functions"""
 
 import tensorflow as tf
-from unet.ops import conv2d
+from unet.ops import conv
 
 
 def dice_loss(target, label):
@@ -22,5 +22,5 @@ def dice_loss(target, label):
 def smooth_loss(target):
     y = tf.nn.softmax(target)
     w = tf.ones((3, 3, y.shape[-1], y.shape[-1]))
-    y_smooth = conv2d(y, w) / tf.cast(tf.size(w), tf.float32)
+    y_smooth = conv(y, w) / tf.cast(tf.size(w), tf.float32)
     return tf.losses.mean_squared_error(y_smooth, y)
