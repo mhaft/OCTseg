@@ -38,12 +38,14 @@ def make_data_h5(folder_path, im_shape):
     label = np.zeros((0, ) + tuple(im_shape[:-1]) + (1,), dtype='uint8')
     cases = glob.glob(folder_path + '*-Seg.tif')
     z_pad = (im_shape[0] - 1) // 2
+    print(z_pad)
     for case in cases:
         tmp = tifffile.imread(case)
         tmp = im_fix_width(tmp, im_shape[1])
         slice_list = np.nonzero(np.any(np.any(tmp > 1, axis=-1), axis=-1))[0]
         for i in slice_list:
-            tmp_label[0, :, :, :, 0] = tmp[(i - z_pad):(i + z_pad + 1), ...]
+            j1, j2, j3, j4 = max(0, i - z_pad), i + z_pad + 1, max(0, z_pad - i), max(0, z_pad - i) + im_shape[0]
+            tmp_label[0, j3:j4, :, :, 0] = tmp[j1:j2, ...]
             label = np.concatenate((label, tmp_label), axis=0)
         tmp = tifffile.imread(case[:-8] + '*-im.tif')
         tmp = im_fix_width(tmp, im_shape[1])
@@ -52,6 +54,7 @@ def make_data_h5(folder_path, im_shape):
         else:
             tmp = np.moveaxis(np.reshape(tmp, (-1, 3,) + tmp.shape[1:]), 1, -1)
         for i in slice_list:
-            tmp_im[:] = tmp[(i - z_pad):(i + z_pad + 1), ...]
+            j1, j2, j3, j4 = max(0, i - z_pad), i + z_pad + 1, max(0, z_pad - i), max(0, z_pad - i) + im_shape[0]
+            tmp_im[0, j3:j4, ...] = tmp[j1:j2, ...]
             im = np.concatenate((im, tmp_im), axis=0)
     return im, label
