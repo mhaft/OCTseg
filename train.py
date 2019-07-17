@@ -81,8 +81,8 @@ if not os.path.exists('model/' + experiment_def):
     os.makedirs('model/' + experiment_def)
 log_file = 'model/' + experiment_def +'/log.csv'
 with open(log_file, 'w') as f:
-    f.write(str(args) + '\n')
-    f.write('epoch, passed_time_hr, learning_rate, cross_entropy_loss, dice_loss, smooth_loss, Test_JI, Valid_JI \n')
+    f.write('epoch, passed_time_hr, learning_rate, cross_entropy_loss, dice_loss, smooth_loss, Test_JI, Valid_JI, ' +
+            str(args) + '\n')
 start = time.time()
 for epoch in range(nEpoch):
     x1, l1 = load_batch(im, label, train_data_id, nBatch, iBatch=0, isTrain=True, isRandom=True, isAug=True)
