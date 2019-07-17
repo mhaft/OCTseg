@@ -12,7 +12,7 @@ from __future__ import absolute_import, division, print_function
 
 import glob
 import tifffile
-
+from tqdm import tqdm
 import numpy as np
 
 
@@ -38,8 +38,7 @@ def make_data_h5(folder_path, im_shape):
     label = np.zeros((0, ) + tuple(im_shape[:-1]) + (1,), dtype='uint8')
     cases = glob.glob(folder_path + '*-Seg.tif')
     z_pad = (im_shape[0] - 1) // 2
-    print(z_pad)
-    for case in cases:
+    for case in tqdm(cases):
         tmp = tifffile.imread(case)
         tmp = im_fix_width(tmp, im_shape[1])
         slice_list = np.nonzero(np.any(np.any(tmp > 1, axis=-1), axis=-1))[0]
