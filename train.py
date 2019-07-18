@@ -18,8 +18,9 @@ import numpy as np
 import tensorflow as tf
 
 from unet.unet import unet_model
-from unet.ops import accuracy, placeholder_inputs, load_train_data, load_batch
+from unet.ops import accuracy, placeholder_inputs, load_batch
 from unet.loss import dice_loss, smooth_loss
+from util.load_data import load_train_data
 
 # parse arguments
 parser = argparse.ArgumentParser()
@@ -34,6 +35,8 @@ parser.add_argument("-inCh", type=int, default=1, help="size of input channel")
 parser.add_argument("-nZ", type=int, default=1, help="size of input depth")
 parser.add_argument("-w", type=int, default=512, help="size of input width")
 parser.add_argument("-loss_w", type=str, default="1, 100, 0", help="loss wights")
+parser.add_argument("-isAug", type=int, default=1, help="Is data augmentation")
+
 
 args = parser.parse_args()
 experiment_def = args.exp_def
@@ -70,10 +73,7 @@ sess.run(tf.global_variables_initializer())
 saver = tf.train.Saver()
 print('Model is initialized.')
 
-im, label = load_train_data(folder_path, im_shape)
-train_data_id = np.arange(0, im.shape[0], 2)
-test_data_id = np.arange(1, im.shape[0], 4)
-valid_data_id = np.arange(3, im.shape[0], 4)
+im, label, train_data_id, test_data_id, valid_data_id = load_train_data(folder_path, im_shape)
 print('Data is loaded')
 
 
@@ -85,18 +85,18 @@ with open(log_file, 'w') as f:
             str(args) + '\n')
 start = time.time()
 for epoch in range(nEpoch):
-    x1, l1 = load_batch(im, label, train_data_id, nBatch, iBatch=0, isTrain=True, isRandom=True, isAug=True)
+    x1, l1 = load_batch(im, train_data_id, nBatch, label, isAug=args.isAug)
     train_step.run(feed_dict={x: x1, y_: l1})
     if epoch % 100 == 99:
         test_JI, valid_JI= [], []
         for i in range(len(train_data_id) // nBatch):
-            x1, l1 = load_batch(im, label, train_data_id, nBatch, iBatch=i, isTrain=True, isRandom=False, isAug=False)
+            x1, l1 = load_batch(im, train_data_id, nBatch, label, iBatch=i)
             test_JI.append(jaccard.eval(feed_dict={x: x1, y_: l1}))
         for i in range(len(valid_data_id) // nBatch):
             j_i = np.arange((i * nBatch), ((i + 1) * nBatch))
-            x1, l1 = load_batch(im, label, valid_data_id, nBatch, iBatch=i, isTrain=True, isRandom=False, isAug=False)
+            x1, l1 = load_batch(im, valid_data_id, nBatch, label, iBatch=i)
             valid_JI.append(jaccard.eval(feed_dict={x: x1, y_: l1}))
-        x1, l1 = load_batch(im, label, train_data_id, nBatch, iBatch=0, isTrain=True, isRandom=False, isAug=False)
+        x1, l1 = load_batch(im, train_data_id, nBatch, label, iBatch=0)
         log_value = (epoch + 1, (nEpoch - epoch - 1) / (epoch + 1.0) * (time.time() - start) / 3600.0,
                      lr.eval(), cross_entropy.eval(feed_dict={x: x1, y_: l1}),
                      dice.eval(feed_dict={x: x1, y_: l1}), smooth.eval(feed_dict={x: x1, y_: l1}),

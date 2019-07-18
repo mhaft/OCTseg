@@ -10,8 +10,6 @@
 import numpy as np
 import tensorflow as tf
 
-from util.make_data_h5 import make_data_h5
-
 
 def weight_variable(shape):
     initial = tf.random.truncated_normal(shape, stddev=0.1)
@@ -95,10 +93,6 @@ def img_aug(im, l):
     return im, l
 
 
-def one_hot(l, num_classes):
-    return np.reshape(np.squeeze(np.eye(num_classes)[l.reshape(-1)]), l.shape + (num_classes, ))
-
-
 def accuracy(labels, logits):
     """measure accuracy metrics"""
     accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(logits, -1), tf.argmax(labels, -1)), tf.float32), [1, 2])
@@ -120,33 +114,17 @@ def placeholder_inputs(im_shape, outCh):
     return image, label
 
 
-def load_train_data(folder_path, im_shape):
-    im, label = make_data_h5(folder_path, im_shape)
-    assert im.size > 0, "The data folder is empty: %s" % folder_path
-
-    im = im.astype(np.float32) / 255
-    # label = np.clip(label, 1, None) - 1
-    label = (label == 3).astype(np.uint8)
-    label = np.squeeze(label, axis=-1)
-    if im_shape[0] == 1:
-        im, label = np.squeeze(im, axis=1), np.squeeze(label, axis=1)
-    label = one_hot(label, 2)
-    return im, label
-
-
-def load_batch(im, label, datasetID, nBatch, iBatch=0, isTrain=True, isRandom=True, isAug=True):
-    if isRandom:
+def load_batch(im, datasetID, nBatch, label=None, iBatch=None, isAug=False):
+    if iBatch is None:
         j = np.random.randint(0, len(datasetID), nBatch)
         im = im[datasetID[j], ...]
-        if isTrain:
-            label =label[datasetID[j], ...]
+        if label is not None:
+            label = label[datasetID[j], ...]
     else:
         j1, j2 = (iBatch * nBatch), ((iBatch + 1) * nBatch)
         im = im[datasetID[j1:j2], ...]
-        if isTrain:
-            label =label[datasetID[j1:j2], ...]
+        if label is not None:
+            label = label[datasetID[j1:j2], ...]
     if isAug:
         im, label = img_aug(im, label)
-    if not isTrain:
-        label = None
     return im, label
