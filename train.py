@@ -38,6 +38,7 @@ parser.add_argument("-loss_w", type=str, default="1, 100, 0", help="loss wights"
 parser.add_argument("-isAug", type=int, default=1, help="Is data augmentation")
 parser.add_argument("-saveEpoch", type=int, default=1000, help="epoch interval to save the model")
 parser.add_argument("-logEpoch", type=int, default=100, help="epoch interval to save the log")
+parser.add_argument("-nFeature", type=int, default=32, help="number of features in the first layer")
 
 args = parser.parse_args()
 experiment_def = args.exp_def
@@ -53,7 +54,7 @@ loss_weight = [float(i) for i in args.loss_w.split(',')]
 sess = tf.InteractiveSession()
 x, y_ = placeholder_inputs(im_shape, outCh)
 
-y_conv = unet_model(x)
+y_conv = unet_model(x, nFeature=args.nFeature, outCh=outCh)
 
 if im_shape[0] == 1:  # 2D
     labels, logits = y_, y_conv
@@ -66,7 +67,7 @@ smooth = smooth_loss(logits)
 cross_entropy = tf.reduce_mean(tf.nn.weighted_cross_entropy_with_logits(labels=labels, logits=logits, pos_weight=10))
 loss = loss_weight[0] * cross_entropy + loss_weight[1] * dice + loss_weight[2] * smooth
 
-global_step = tf.Variable(0, trainable=False)
+global_step = tf.Variable(-1, trainable=False)
 lr = tf.train.exponential_decay(starter_learning_rate, global_step, args.lr_step, 0.1, staircase=True)
 train_step = tf.train.AdamOptimizer(lr).minimize(loss, global_step=global_step)
 
@@ -90,11 +91,10 @@ for epoch in range(nEpoch):
     train_step.run(feed_dict={x: x1, y_: l1})
     if (epoch + 1) % args.logEpoch == 0:
         test_DI, valid_DI = [], []
-        for i in range(len(train_data_id) // nBatch + 1):
+        for i in range(len(train_data_id) // nBatch):
             x1, l1 = load_batch(im, train_data_id, nBatch, label, iBatch=i)
-            x1.shape
             test_DI.append(dice.eval(feed_dict={x: x1, y_: l1}))
-        for i in range(len(valid_data_id) // nBatch + 1):
+        for i in range(len(valid_data_id) // nBatch):
             x1, l1 = load_batch(im, valid_data_id, nBatch, label, iBatch=i)
             valid_DI.append(dice.eval(feed_dict={x: x1, y_: l1}))
         x1, l1 = load_batch(im, train_data_id, nBatch, label, iBatch=0)
