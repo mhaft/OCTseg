@@ -47,8 +47,7 @@ def make_dataset(folder_path, im_shape):
         slice_list = np.nonzero(np.any(np.any(tmp > 1, axis=-1), axis=-1))[0]
         for i in slice_list:
             j1, j2, j3, j4 = max(0, i - z_pad), i + z_pad + 1, max(0, z_pad - i), max(0, z_pad - i) + im_shape[0]
-            tmp_label[0, j3:j4, :, :, 0] = zoom(tmp[j1:j2, ...], (1.0,) * (z_pad > 0) + (im_shape[1] / 512,
-                                                                                         im_shape[1] / 512), order=0)
+            tmp_label[0, j3:j4, :, :, 0] = zoom(tmp[j1:j2, ...], (1, im_shape[1] / 512, im_shape[1] / 512, 1), order=0)
             label = np.concatenate((label, tmp_label), axis=0)
             sample_caseID.append(i_case)
         tmp = tifffile.imread(case[:-8] + '*-im.tif')
@@ -59,7 +58,7 @@ def make_dataset(folder_path, im_shape):
             tmp = np.moveaxis(np.reshape(tmp, (-1, 3,) + tmp.shape[1:]), 1, -1)
         for i in slice_list:
             j1, j2, j3, j4 = max(0, i - z_pad), i + z_pad + 1, max(0, z_pad - i), max(0, z_pad - i) + im_shape[0]
-            tmp_im[0, j3:j4, ...] = zoom(tmp[j1:j2, ...], (1.0,) * (z_pad > 0) + (im_shape[1] / 512, im_shape[1] / 512))
+            tmp_im[0, j3:j4, ...] = zoom(tmp[j1:j2, ...], (1, im_shape[1] / 512, im_shape[1] / 512, 1))
             im = np.concatenate((im, tmp_im), axis=0)
     return im, label, sample_caseID
 
