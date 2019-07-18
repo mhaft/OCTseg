@@ -80,7 +80,7 @@ print('Data is loaded')
 
 if not os.path.exists('model/' + experiment_def):
     os.makedirs('model/' + experiment_def)
-log_file = 'model/' + experiment_def +'/log.csv'
+log_file = 'model/' + experiment_def + '/log.csv'
 with open(log_file, 'w') as f:
     f.write('epoch, passed_time_hr, learning_rate, cross_entropy_loss, dice_loss, smooth_loss, Test_JI, Valid_JI, ' +
             str(args) + '\n')
@@ -89,12 +89,12 @@ for epoch in range(nEpoch):
     x1, l1 = load_batch(im, train_data_id, nBatch, label, isAug=args.isAug)
     train_step.run(feed_dict={x: x1, y_: l1})
     if (epoch + 1) % args.logEpoch == 0:
-        test_DI, valid_DI= [], []
-        for i in range(len(train_data_id) // nBatch):
+        test_DI, valid_DI = [], []
+        for i in range(len(train_data_id) // nBatch + 1):
             x1, l1 = load_batch(im, train_data_id, nBatch, label, iBatch=i)
+            x1.shape
             test_DI.append(dice.eval(feed_dict={x: x1, y_: l1}))
-        for i in range(len(valid_data_id) // nBatch):
-            j_i = np.arange((i * nBatch), ((i + 1) * nBatch))
+        for i in range(len(valid_data_id) // nBatch + 1):
             x1, l1 = load_batch(im, valid_data_id, nBatch, label, iBatch=i)
             valid_DI.append(dice.eval(feed_dict={x: x1, y_: l1}))
         x1, l1 = load_batch(im, train_data_id, nBatch, label, iBatch=0)
