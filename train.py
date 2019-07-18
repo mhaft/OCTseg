@@ -54,7 +54,14 @@ loss_weight = [float(i) for i in args.loss_w.split(',')]
 sess = tf.InteractiveSession()
 x, y_ = placeholder_inputs(im_shape, outCh)
 
-y_conv = unet_model(x, nFeature=args.nFeature, outCh=outCh)
+if tf.__version__[:4] == '1.15':
+    strategy = tf.distribute.MirroredStrategy()
+    print('Number of devices: {}'.format(strategy.num_replicas_in_sync))
+    nBatch = nBatch * strategy.num_replicas_in_sync
+    with strategy.scope():
+        y_conv = unet_model(x, nFeature=args.nFeature, outCh=outCh)
+else:
+    y_conv = unet_model(x, nFeature=args.nFeature, outCh=outCh)
 
 if im_shape[0] == 1:  # 2D
     labels, logits = y_, y_conv
@@ -83,8 +90,8 @@ if not os.path.exists('model/' + experiment_def):
     os.makedirs('model/' + experiment_def)
 log_file = 'model/' + experiment_def + '/log.csv'
 with open(log_file, 'w') as f:
-    f.write('epoch, passed_time_hr, learning_rate, cross_entropy_loss, dice_loss, smooth_loss, Test_JI, Valid_JI, ' +
-            str(args) + '\n')
+    f.write('epoch, passed_time_hr, learning_rate, cross_entropy_loss, dice_loss, smooth_loss, Test_Loss,' +
+            ' Valid_Loss, ' + str(args) + '\n')
 start = time.time()
 for epoch in range(nEpoch):
     x1, l1 = load_batch(im, train_data_id, nBatch, label, isAug=args.isAug)
@@ -103,7 +110,7 @@ for epoch in range(nEpoch):
                      dice.eval(feed_dict={x: x1, y_: l1}), smooth.eval(feed_dict={x: x1, y_: l1}),
                      np.mean(test_loss), np.mean(valid_loss))
         print("epoch %d: %f hour to finish. Learning rate: %e. Cross entropy: %f. Dice loss: %f. Smooth_loss: %f. "
-              "Test JI: %f. Valid JI: %f." % log_value)
+              "Test Loss: %f. Valid Loss: %f." % log_value)
         with open(log_file, 'a') as f:
             f.write("%d, %f, %e, %f, %f, %f, %f, %f \n" % log_value)
     if (epoch + 1) % args.saveEpoch == 0:
