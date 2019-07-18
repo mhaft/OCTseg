@@ -36,7 +36,8 @@ parser.add_argument("-nZ", type=int, default=1, help="size of input depth")
 parser.add_argument("-w", type=int, default=512, help="size of input width")
 parser.add_argument("-loss_w", type=str, default="1, 100, 0", help="loss wights")
 parser.add_argument("-isAug", type=int, default=1, help="Is data augmentation")
-
+parser.add_argument("-saveEpoch", type=int, default=1000, help="epoch interval to save the model")
+parser.add_argument("-logEpoch", type=int, default=100, help="epoch interval to save the log")
 
 args = parser.parse_args()
 experiment_def = args.exp_def
@@ -57,7 +58,7 @@ y_conv = unet_model(x)
 if im_shape[0] == 1:  # 2D
     labels, logits = y_, y_conv
 else:  # 3D
-    mid_z = (im_shape[0] + 1) // 2
+    mid_z = (im_shape[0]) // 2
     labels, logits = y_[:, mid_z, ...], y_conv[:, mid_z, ...]
 accuracy, jaccard = accuracy(labels, logits)
 dice = dice_loss(labels, logits)
@@ -87,25 +88,25 @@ start = time.time()
 for epoch in range(nEpoch):
     x1, l1 = load_batch(im, train_data_id, nBatch, label, isAug=args.isAug)
     train_step.run(feed_dict={x: x1, y_: l1})
-    if epoch % 100 == 99:
-        test_JI, valid_JI= [], []
+    if (epoch + 1) % args.logEpoch == 0:
+        test_DI, valid_DI= [], []
         for i in range(len(train_data_id) // nBatch):
             x1, l1 = load_batch(im, train_data_id, nBatch, label, iBatch=i)
-            test_JI.append(jaccard.eval(feed_dict={x: x1, y_: l1}))
+            test_DI.append(dice.eval(feed_dict={x: x1, y_: l1}))
         for i in range(len(valid_data_id) // nBatch):
             j_i = np.arange((i * nBatch), ((i + 1) * nBatch))
             x1, l1 = load_batch(im, valid_data_id, nBatch, label, iBatch=i)
-            valid_JI.append(jaccard.eval(feed_dict={x: x1, y_: l1}))
+            valid_DI.append(dice.eval(feed_dict={x: x1, y_: l1}))
         x1, l1 = load_batch(im, train_data_id, nBatch, label, iBatch=0)
         log_value = (epoch + 1, (nEpoch - epoch - 1) / (epoch + 1.0) * (time.time() - start) / 3600.0,
                      lr.eval(), cross_entropy.eval(feed_dict={x: x1, y_: l1}),
                      dice.eval(feed_dict={x: x1, y_: l1}), smooth.eval(feed_dict={x: x1, y_: l1}),
-                     np.mean(test_JI), np.mean(valid_JI))
+                     np.mean(test_DI), np.mean(valid_DI))
         print("epoch %d: %f hour to finish. Learning rate: %e. Cross entropy: %f. Dice loss: %f. Smooth_loss: %f. "
               "Test JI: %f. Valid JI: %f." % log_value)
         with open(log_file, 'a') as f:
             f.write("%d, %f, %e, %f, %f, %f, %f, %f \n" % log_value)
-    if epoch % 1000 == 999:
+    if (epoch + 1) % args.saveEpoch == 0:
         save_path = saver.save(sess, 'model/' + experiment_def + '/model-epoch' + str(epoch + 1) + '.ckpt')
         print("epoch %d, Model saved in file: %s" % (epoch + 1, save_path))
 
