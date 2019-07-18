@@ -14,8 +14,7 @@ import glob
 import tifffile
 from tqdm import tqdm
 import numpy as np
-from scipy.misc import imresize
-
+from scipy.ndimage import zoom
 
 def im_fix_width(im, w):
     """pad or crop the 3D image to have width and length equal to the input width"""
@@ -45,7 +44,7 @@ def make_dataset(folder_path, im_shape):
         tmp = tifffile.imread(case)
         tmp = im_fix_width(tmp, 512)
         if im_shape[1] != 512:
-            tmp = imresize(tmp, (tmp.shape[0], im_shape[1], im_shape[1]))
+            tmp = zoom(tmp, (1, im_shape[1] / 255, im_shape[1] / 255))
         slice_list = np.nonzero(np.any(np.any(tmp > 1, axis=-1), axis=-1))[0]
         for i in slice_list:
             j1, j2, j3, j4 = max(0, i - z_pad), i + z_pad + 1, max(0, z_pad - i), max(0, z_pad - i) + im_shape[0]
@@ -53,7 +52,9 @@ def make_dataset(folder_path, im_shape):
             label = np.concatenate((label, tmp_label), axis=0)
             sample_caseID.append(i_case)
         tmp = tifffile.imread(case[:-8] + '*-im.tif')
-        tmp = im_fix_width(tmp, im_shape[1])
+        tmp = im_fix_width(tmp,  512)
+        if im_shape[1] != 512:
+            tmp = zoom(tmp, (1, im_shape[1] / 255, im_shape[1] / 255), order=0)
         if im_shape[-1] == 1:
             tmp = np.expand_dims(tmp[::3, ...], axis=-1)
         else:
