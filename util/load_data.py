@@ -14,6 +14,7 @@ import glob
 import tifffile
 from tqdm import tqdm
 import numpy as np
+from scipy.misc import imresize
 
 
 def im_fix_width(im, w):
@@ -41,7 +42,10 @@ def make_dataset(folder_path, im_shape):
     sample_caseID = []
     for i_case in tqdm(range(len(cases))):
         case = cases[i_case]
-        tmp = im_fix_width(tifffile.imread(case), im_shape[1])
+        tmp = tifffile.imread(case)
+        tmp = im_fix_width(tmp, 512)
+        if im_shape[1] != 512:
+            tmp = imresize(tmp, (tmp.shape[0], im_shape[1], im_shape[1]))
         slice_list = np.nonzero(np.any(np.any(tmp > 1, axis=-1), axis=-1))[0]
         for i in slice_list:
             j1, j2, j3, j4 = max(0, i - z_pad), i + z_pad + 1, max(0, z_pad - i), max(0, z_pad - i) + im_shape[0]

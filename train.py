@@ -116,9 +116,9 @@ for i in range(im.shape[0] // nBatch + 1):
     x1 = im[(i * nBatch):((i + 1) * nBatch), ...]
     out[(i * nBatch):((i + 1) * nBatch), ...] = np.argmax(y_conv.eval(feed_dict={x: x1}), -1)
 
-tifffile.imwrite('model/' + experiment_def + '/label.tif', label.astype(np.uint8))
-tifffile.imwrite('model/' + experiment_def + '/out.tif', out.astype(np.uint8))
-tifffile.imwrite('model/' + experiment_def + '/im.tif', (im * 255).astype(np.uint8).squeeze())
+tifffile.imwrite('model/' + experiment_def + '/a-label.tif', label.astype(np.uint8))
+tifffile.imwrite('model/' + experiment_def + '/a-out.tif', out.astype(np.uint8))
+tifffile.imwrite('model/' + experiment_def + '/a-im.tif', (im * 255).astype(np.uint8).squeeze())
 
 
 # if __name__ == '__main__':
