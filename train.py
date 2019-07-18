@@ -90,18 +90,18 @@ for epoch in range(nEpoch):
     x1, l1 = load_batch(im, train_data_id, nBatch, label, isAug=args.isAug)
     train_step.run(feed_dict={x: x1, y_: l1})
     if (epoch + 1) % args.logEpoch == 0:
-        test_DI, valid_DI = [], []
+        test_loss, valid_loss = [], []
         for i in range(len(train_data_id) // nBatch):
             x1, l1 = load_batch(im, train_data_id, nBatch, label, iBatch=i)
-            test_DI.append(dice.eval(feed_dict={x: x1, y_: l1}))
+            test_loss.append(loss.eval(feed_dict={x: x1, y_: l1}))
         for i in range(len(valid_data_id) // nBatch):
             x1, l1 = load_batch(im, valid_data_id, nBatch, label, iBatch=i)
-            valid_DI.append(dice.eval(feed_dict={x: x1, y_: l1}))
+            valid_loss.append(loss.eval(feed_dict={x: x1, y_: l1}))
         x1, l1 = load_batch(im, train_data_id, nBatch, label, iBatch=0)
         log_value = (epoch + 1, (nEpoch - epoch - 1) / (epoch + 1.0) * (time.time() - start) / 3600.0,
                      lr.eval(), cross_entropy.eval(feed_dict={x: x1, y_: l1}),
                      dice.eval(feed_dict={x: x1, y_: l1}), smooth.eval(feed_dict={x: x1, y_: l1}),
-                     np.mean(test_DI), np.mean(valid_DI))
+                     np.mean(test_loss), np.mean(valid_loss))
         print("epoch %d: %f hour to finish. Learning rate: %e. Cross entropy: %f. Dice loss: %f. Smooth_loss: %f. "
               "Test JI: %f. Valid JI: %f." % log_value)
         with open(log_file, 'a') as f:
