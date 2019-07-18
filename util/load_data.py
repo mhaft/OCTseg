@@ -16,6 +16,7 @@ from tqdm import tqdm
 import numpy as np
 from scipy.ndimage import zoom
 
+
 def im_fix_width(im, w):
     """pad or crop the 3D image to have width and length equal to the input width"""
     w0 = im.shape[1]
@@ -43,25 +44,21 @@ def make_dataset(folder_path, im_shape):
         case = cases[i_case]
         tmp = tifffile.imread(case)
         tmp = im_fix_width(tmp, 512)
-        if im_shape[1] != 512:
-            tmp = zoom(tmp, (1, im_shape[1] / 255, im_shape[1] / 255))
         slice_list = np.nonzero(np.any(np.any(tmp > 1, axis=-1), axis=-1))[0]
         for i in slice_list:
             j1, j2, j3, j4 = max(0, i - z_pad), i + z_pad + 1, max(0, z_pad - i), max(0, z_pad - i) + im_shape[0]
-            tmp_label[0, j3:j4, :, :, 0] = tmp[j1:j2, ...]
+            tmp_label[0, j3:j4, :, :, 0] = zoom(tmp[j1:j2, ...], (1, im_shape[1] / 512, im_shape[1] / 512), order=0)
             label = np.concatenate((label, tmp_label), axis=0)
             sample_caseID.append(i_case)
         tmp = tifffile.imread(case[:-8] + '*-im.tif')
         tmp = im_fix_width(tmp,  512)
-        if im_shape[1] != 512:
-            tmp = zoom(tmp, (1, im_shape[1] / 255, im_shape[1] / 255), order=0)
         if im_shape[-1] == 1:
             tmp = np.expand_dims(tmp[::3, ...], axis=-1)
         else:
             tmp = np.moveaxis(np.reshape(tmp, (-1, 3,) + tmp.shape[1:]), 1, -1)
         for i in slice_list:
             j1, j2, j3, j4 = max(0, i - z_pad), i + z_pad + 1, max(0, z_pad - i), max(0, z_pad - i) + im_shape[0]
-            tmp_im[0, j3:j4, ...] = tmp[j1:j2, ...]
+            tmp_im[0, j3:j4, ...] = zoom(tmp[j1:j2, ...], (1, im_shape[1] / 512, im_shape[1] / 512))
             im = np.concatenate((im, tmp_im), axis=0)
     return im, label, sample_caseID
 
