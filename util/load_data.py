@@ -75,7 +75,7 @@ def load_train_data(folder_path, im_shape):
     if im_shape[0] == 1:
         im, label = np.squeeze(im, axis=1), np.squeeze(label, axis=1)
     label = np.reshape(np.squeeze(np.eye(num_class)[label.reshape(-1)]), label.shape + (num_class, ))
-    train_data_id = np.nonzero(np.mod(sample_caseID, 2) == 0)[0]
-    test_data_id = np.nonzero(np.mod(sample_caseID, 4) == 1)[0]
-    valid_data_id = np.nonzero(np.mod(sample_caseID, 4) == 3)[0]
+    train_data_id = np.nonzero(np.mod(sample_caseID, 2) == 1)[0]
+    test_data_id = np.nonzero(np.mod(sample_caseID, 4) == 2)[0]
+    valid_data_id = np.nonzero(np.mod(sample_caseID, 4) == 0)[0]
     return im, label, train_data_id, test_data_id, valid_data_id
