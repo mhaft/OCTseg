@@ -39,6 +39,7 @@ parser.add_argument("-isAug", type=int, default=1, help="Is data augmentation")
 parser.add_argument("-saveEpoch", type=int, default=1000, help="epoch interval to save the model")
 parser.add_argument("-logEpoch", type=int, default=100, help="epoch interval to save the log")
 parser.add_argument("-nFeature", type=int, default=32, help="number of features in the first layer")
+parser.add_argument("-gpu_id", type=str, default="0", help="ID of GPUs to be used")
 
 args = parser.parse_args()
 experiment_def = args.exp_def
@@ -49,19 +50,12 @@ nBatch = args.nBatch
 im_shape = (args.nZ, args.w, args.w, args.inCh)
 outCh = args.outCh
 loss_weight = [float(i) for i in args.loss_w.split(',')]
-
+os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
 
 sess = tf.InteractiveSession()
 x, y_ = placeholder_inputs(im_shape, outCh)
 
-if tf.__version__[:4] == '1.15':
-    strategy = tf.distribute.MirroredStrategy()
-    print('Number of devices: {}'.format(strategy.num_replicas_in_sync))
-    nBatch = nBatch * strategy.num_replicas_in_sync
-    with strategy.scope():
-        y_conv = unet_model(x, nFeature=args.nFeature, outCh=outCh)
-else:
-    y_conv = unet_model(x, nFeature=args.nFeature, outCh=outCh)
+y_conv = unet_model(x, nFeature=args.nFeature, outCh=outCh)
 
 if im_shape[0] == 1:  # 2D
     labels, logits = y_, y_conv
@@ -98,10 +92,10 @@ for epoch in range(nEpoch):
     train_step.run(feed_dict={x: x1, y_: l1})
     if (epoch + 1) % args.logEpoch == 0:
         test_loss, valid_loss = [], []
-        for i in range(len(train_data_id) // nBatch):
+        for i in range(np.ceil(len(train_data_id) / nBatch).astype('int')):
             x1, l1 = load_batch(im, train_data_id, nBatch, label, iBatch=i)
             test_loss.append(loss.eval(feed_dict={x: x1, y_: l1}))
-        for i in range(len(valid_data_id) // nBatch):
+        for i in range(np.ceil(len(valid_data_id) / nBatch).astype('int')):
             x1, l1 = load_batch(im, valid_data_id, nBatch, label, iBatch=i)
             valid_loss.append(loss.eval(feed_dict={x: x1, y_: l1}))
         x1, l1 = load_batch(im, train_data_id, nBatch, label, iBatch=0)
