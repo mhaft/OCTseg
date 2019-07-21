@@ -19,7 +19,7 @@ from .polar2cartesian import polar2cartesian_large_3d_file
 from .read_oct_roi_file import read_oct_roi_file
 
 
-def process_oct_folder(folder_path):
+def process_oct_folder(folder_path, scale=0.25):
     cases = glob.glob(folder_path + '*.pstif')
     for case in cases:
         print(case[len(folder_path):])
@@ -31,11 +31,11 @@ def process_oct_folder(folder_path):
                     # str to float to int
                     r0 = float(row[1]) - 1
         im = tifffile.imread(case)
-        cart = polar2cartesian_large_3d_file(im, r0=r0, full=True, deg=1, scale=0.25)
-        tifffile.imwrite(case[:-6] + '-im.tif', cart)
+        im = polar2cartesian_large_3d_file(im, r0=r0, full=True, deg=1, scale=scale)
+        tifffile.imwrite(case[:-6] + '-im.tif', im)
 
         seg = read_oct_roi_file(case[:-6] + 'ROI.txt', (int(im.shape[0] / 3),) + im.shape[1:])
-        seg = polar2cartesian_large_3d_file(seg, r0=r0, full=True, deg=0, scale=0.25)
+        seg = polar2cartesian_large_3d_file(seg, r0=r0, full=True, deg=0, scale=scale)
         tifffile.imwrite(case[:-6] + '-Seg.tif', seg)
     return
 
