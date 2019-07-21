@@ -10,16 +10,19 @@
 
 from __future__ import absolute_import, division, print_function
 
+import os
 import time
+
 import tifffile
 import argparse
-import os
 import numpy as np
-import tensorflow as tf
+from keras.utils import multi_gpu_model
+from keras.optimizers import Adam
+from keras.callbacks import ModelCheckpoint
 
 from unet.unet import unet_model
-from unet.ops import accuracy, placeholder_inputs, load_batch
-from unet.loss import dice_loss, smooth_loss
+from unet.ops import load_batch
+from unet.loss import cross_entropy
 from util.load_data import load_train_data
 
 # parse arguments
@@ -43,7 +46,6 @@ parser.add_argument("-gpu_id", type=str, default="0", help="ID of GPUs to be use
 
 args = parser.parse_args()
 experiment_def = args.exp_def
-starter_learning_rate = args.lr
 folder_path = args.data_path
 nEpoch = args.nEpoch
 nBatch = args.nBatch
@@ -51,72 +53,47 @@ im_shape = (args.nZ, args.w, args.w, args.inCh)
 outCh = args.outCh
 loss_weight = [float(i) for i in args.loss_w.split(',')]
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
+if not os.path.exists('model/' + experiment_def):
+    os.makedirs('model/' + experiment_def)
+save_file_name = 'model/' + experiment_def + '/model-epoch%06d.h5'
+log_file = 'model/' + experiment_def + '/log-' + experiment_def + '.csv'
+with open(log_file, 'w') as f:
+    f.write('epoch, Test_Loss, Valid_Loss, ' + str(args) + '\n')
 
-sess = tf.InteractiveSession()
-x, y_ = placeholder_inputs(im_shape, outCh)
+model = unet_model(im_shape, nFeature=args.nFeature, outCh=outCh)
 
-y_conv = unet_model(x, nFeature=args.nFeature, outCh=outCh)
+numGPU = len(args.gpu_id.split(','))
+if numGPU > 1:
+    model = multi_gpu_model(model, gpus=numGPU)
 
-if im_shape[0] == 1:  # 2D
-    labels, logits = y_, y_conv
-else:  # 3D
-    mid_z = (im_shape[0]) // 2
-    labels, logits = y_[:, mid_z, ...], y_conv[:, mid_z, ...]
-accuracy, jaccard = accuracy(labels, logits)
-dice = dice_loss(labels, logits)
-smooth = smooth_loss(logits)
-cross_entropy = tf.reduce_mean(tf.nn.weighted_cross_entropy_with_logits(labels=labels, logits=logits, pos_weight=10))
-loss = loss_weight[0] * cross_entropy + loss_weight[1] * dice + loss_weight[2] * smooth
-
-global_step = tf.Variable(-1, trainable=False)
-lr = tf.train.exponential_decay(starter_learning_rate, global_step, args.lr_step, 0.1, staircase=True)
-train_step = tf.train.AdamOptimizer(lr).minimize(loss, global_step=global_step)
-
-sess.run(tf.global_variables_initializer())
-saver = tf.train.Saver()
+save_callback = ModelCheckpoint(save_file_name)
+model.compile(optimizer=Adam(lr=args.lr), loss=cross_entropy)
 print('Model is initialized.')
 
 im, label, train_data_id, test_data_id, valid_data_id = load_train_data(folder_path, im_shape)
 print('Data is loaded')
+train_data_gen = load_batch(im, train_data_id, nBatch, label, isAug=True)
+valid_data_gen = load_batch(im, valid_data_id, nBatch * args.logEpoch, label, isAug=False)
 
-
-if not os.path.exists('model/' + experiment_def):
-    os.makedirs('model/' + experiment_def)
-log_file = 'model/' + experiment_def + '/log.csv'
-with open(log_file, 'w') as f:
-    f.write('epoch, passed_time_hr, learning_rate, cross_entropy_loss, dice_loss, smooth_loss, Test_Loss,' +
-            ' Valid_Loss, ' + str(args) + '\n')
-start = time.time()
-for epoch in range(nEpoch):
-    x1, l1 = load_batch(im, train_data_id, nBatch, label, isAug=args.isAug)
-    train_step.run(feed_dict={x: x1, y_: l1})
-    if (epoch + 1) % args.logEpoch == 0:
-        test_loss, valid_loss = [], []
-        for i in range(np.ceil(len(train_data_id) / nBatch).astype('int')):
-            x1, l1 = load_batch(im, train_data_id, nBatch, label, iBatch=i)
-            test_loss.append(loss.eval(feed_dict={x: x1, y_: l1}))
-        for i in range(np.ceil(len(valid_data_id) / nBatch).astype('int')):
-            x1, l1 = load_batch(im, valid_data_id, nBatch, label, iBatch=i)
-            valid_loss.append(loss.eval(feed_dict={x: x1, y_: l1}))
-        x1, l1 = load_batch(im, train_data_id, nBatch, label, iBatch=0)
-        log_value = (epoch + 1, (nEpoch - epoch - 1) / (epoch + 1.0) * (time.time() - start) / 3600.0,
-                     lr.eval(), cross_entropy.eval(feed_dict={x: x1, y_: l1}),
-                     dice.eval(feed_dict={x: x1, y_: l1}), smooth.eval(feed_dict={x: x1, y_: l1}),
-                     np.mean(test_loss), np.mean(valid_loss))
-        print("epoch %d: %f hour to finish. Learning rate: %e. Cross entropy: %f. Dice loss: %f. Smooth_loss: %f. "
-              "Test Loss: %f. Valid Loss: %f." % log_value)
+for iEpoch in range(nEpoch):
+    x1, l1 = next(train_data_gen)
+    model.train_on_batch(x1, l1)
+    if (iEpoch + 1) % args.logEpoch == 0:
+        train_loss = model.evaluate(im[train_data_id, ...], label[train_data_id, ...], batch_size=nBatch, verbose=0)
+        valid_loss = model.evaluate(im[valid_data_id, ...], label[valid_data_id, ...], batch_size=nBatch, verbose=0)
+        print("Epoch:%d, Train Loss: %f, Test Loss: %f" % (iEpoch + 1, train_loss, valid_loss))
         with open(log_file, 'a') as f:
-            f.write("%d, %f, %e, %f, %f, %f, %f, %f \n" % log_value)
-    if (epoch + 1) % args.saveEpoch == 0:
-        save_path = saver.save(sess, 'model/' + experiment_def + '/model-epoch' + str(epoch + 1) + '.ckpt')
-        print("epoch %d, Model saved in file: %s" % (epoch + 1, save_path))
+            f.write("%d, %f, %f, \n" % (iEpoch + 1, train_loss, valid_loss))
+    if (iEpoch + 1) % args.saveEpoch == 0:
+        model.save(save_file_name%(iEpoch + 1))
+
+# model.fit_generator(train_data_gen, epochs=nEpoch, steps_per_epoch=args.l ogEpoch, max_queue_size=1,
+#                     validation_steps=args.logEpoch * 10,
+#                     validation_data=valid_data_gen, callbacks=[save_callback])
 
 label = np.argmax(label, -1)
-out = np.zeros_like(label)
-for i in range(im.shape[0] // nBatch + 1):
-    x1 = im[(i * nBatch):((i + 1) * nBatch), ...]
-    out[(i * nBatch):((i + 1) * nBatch), ...] = np.argmax(y_conv.eval(feed_dict={x: x1}), -1)
-
+out = model.predict(im, batch_size=nBatch)
+out = np.reshape(np.argmax(out, -1), im.shape)
 tifffile.imwrite('model/' + experiment_def + '/a-label.tif', label.astype(np.uint8))
 tifffile.imwrite('model/' + experiment_def + '/a-out.tif', out.astype(np.uint8))
 tifffile.imwrite('model/' + experiment_def + '/a-im.tif', (im * 255).astype(np.uint8).squeeze())
