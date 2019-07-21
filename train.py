@@ -28,10 +28,10 @@ from util.load_data import load_train_data
 # parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("-exp_def", type=str, default="test", help="experiment definition")
-parser.add_argument("-lr", type=float, help="learning rate", default=1e-4)
-parser.add_argument("-lr_step", type=float, help="learning rate step for decay", default=1000)
+parser.add_argument("-lr", type=float, default=1e-4, help="learning rate")
+parser.add_argument("-lr_step", type=float, default=1000, help="learning rate step for decay")
 parser.add_argument("-data_path", type=str, default="/home/ubuntu/PSTIFS/", help="data folder path")
-parser.add_argument("-nEpoch", type=int, default=3000, help="number of epochs")
+parser.add_argument("-nEpoch", type=int, default=2000, help="number of epochs")
 parser.add_argument("-nBatch", type=int, default=5, help="batch size")
 parser.add_argument("-outCh", type=int, default=2, help="size of output channel")
 parser.add_argument("-inCh", type=int, default=1, help="size of input channel")
@@ -62,9 +62,14 @@ with open(log_file, 'w') as f:
 
 model = unet_model(im_shape, nFeature=args.nFeature, outCh=outCh)
 
-numGPU = len(args.gpu_id.split(','))
+if '-' in args.gpu_id:
+    numGPU = args.gpu_id.split('-')
+    numGPU = int(numGPU[1]) - int(numGPU[0]) + 1
+else:
+    numGPU = len(args.gpu_id.split(','))
 if numGPU > 1:
     model = multi_gpu_model(model, gpus=numGPU)
+    nBatch *= numGPU
 
 save_callback = ModelCheckpoint(save_file_name)
 model.compile(optimizer=Adam(lr=args.lr), loss=cross_entropy)
@@ -73,7 +78,7 @@ print('Model is initialized.')
 im, label, train_data_id, test_data_id, valid_data_id = load_train_data(folder_path, im_shape)
 print('Data is loaded')
 train_data_gen = load_batch(im, train_data_id, nBatch, label, isAug=True)
-valid_data_gen = load_batch(im, valid_data_id, nBatch * args.logEpoch, label, isAug=False)
+valid_data_gen = load_batch(im, valid_data_id, nBatch, label, isAug=False)
 
 for iEpoch in range(nEpoch):
     x1, l1 = next(train_data_gen)
@@ -86,10 +91,6 @@ for iEpoch in range(nEpoch):
             f.write("%d, %f, %f, \n" % (iEpoch + 1, train_loss, valid_loss))
     if (iEpoch + 1) % args.saveEpoch == 0:
         model.save(save_file_name%(iEpoch + 1))
-
-# model.fit_generator(train_data_gen, epochs=nEpoch, steps_per_epoch=args.l ogEpoch, max_queue_size=1,
-#                     validation_steps=args.logEpoch * 10,
-#                     validation_data=valid_data_gen, callbacks=[save_callback])
 
 label = np.argmax(label, -1)
 out = model.predict(im, batch_size=nBatch)
