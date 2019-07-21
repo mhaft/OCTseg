@@ -8,56 +8,34 @@
 """CNN related operations"""
 
 import numpy as np
+import keras.layers as KL
 import tensorflow as tf
+# from keras.initializers import RandomNormal
 
 
-def weight_variable(shape):
-    initial = tf.random.truncated_normal(shape, stddev=0.1)
-    return tf.Variable(initial)
+def conv_layer(x, ChOut):
+    ndims = len(x.get_shape()) - 2
+    ConvND = getattr(KL, 'Conv%dD' % ndims)
+
+    out_conv1 = ConvND(ChOut, kernel_size=3, padding='same', kernel_initializer='RandomNormal')(x)
+    h_conv1 = KL.LeakyReLU()(out_conv1)
+    out_conv2 = ConvND(ChOut, kernel_size=3, padding='same', kernel_initializer='RandomNormal')(h_conv1)
+    h_conv2 = KL.LeakyReLU()(out_conv2)
+    return h_conv2
 
 
-def bias_variable(shape):
-    initial = tf.constant(0.0, shape=shape)
-    return tf.Variable(initial)
-
-
-def conv(x, W):
-    if len(x.get_shape()) == 4:  # 2D
-        return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
-    else:  # 3D
-        return tf.nn.conv3d(x, W, strides=[1, 1, 1, 1, 1], padding='SAME')
-
-
-def max_pool(x):
-    dim = len(x.get_shape()) - 2
-    if len(x.get_shape()) == 4:  # 2D
-        return tf.nn.max_pool2d(x, ksize=[1, 2, 2, 1],
-                            strides=[1, 2, 2, 1], padding='SAME')
-    else:  # 3D
-        return tf.nn.max_pool3d(x, ksize=[1, 1, 2, 2, 1],
-                            strides=[1, 1, 2, 2, 1], padding='SAME')
-
-
-def conv_bn_relu(x, ChIn, ChOut):
-    if len(x.get_shape()) == 4:  # 2D
-        W_conv = weight_variable([3, 3, ChIn, ChOut])
-    else:
-        W_conv = weight_variable([3, 3, 3, ChIn, ChOut])
-    b_conv = bias_variable([ChOut])
-    # h_conv = tf.nn.leaky_relu(tf.keras.layers.BatchNormalization()(conv2d(x, W_conv) + b_conv))
-    h_conv = tf.nn.leaky_relu(conv(x, W_conv) + b_conv)
-    return h_conv, W_conv, b_conv
+def MaxPoolingND(x):
+    ndims = len(x.get_shape()) - 2
+    MaxPoolingND = getattr(KL, 'MaxPooling%dD' % ndims)
+    return MaxPoolingND(pool_size=(1,) * (ndims == 3) + (2, 2))(x)
 
 
 def up_conv(x):
     x_shape = x.get_shape()
-    # w = weight_variable([2, 2, x_shape[3].value, x_shape[3].value])
-    # return tf.nn.conv2d_transpose(x, filter=w, output_shape=[2, 2 * x_shape[1].value,
-    #                                             2 * x_shape[2].value, x_shape[3].value], strides=2)
-    if len(x_shape) == 4:  # 2D
-        return tf.keras.layers.Conv2DTranspose(x_shape[-1].value, 2, 2)(x)
-    else:  # 3D
-        return tf.keras.layers.Conv3DTranspose(x_shape[-1].value, (1, 2, 2), (1, 2, 2))(x)
+    ndims = len(x_shape) - 2
+    ConvNDTranspose = getattr(KL, 'Conv%dDTranspose' % ndims)
+    return ConvNDTranspose(x_shape[-1].value, (1,) * (ndims == 3) + (3, 3), strides=(1,) * (ndims == 3) + (2, 2),
+                           padding='same',)(x)
 
 
 def img_aug(im, l):
@@ -114,17 +92,15 @@ def placeholder_inputs(im_shape, outCh):
     return image, label
 
 
-def load_batch(im, datasetID, nBatch, label=None, iBatch=None, isAug=False):
-    if iBatch is None:
+def load_batch(im, datasetID, nBatch, label=None, isAug=False):
+
+    while True:
         j = np.random.randint(0, len(datasetID), nBatch)
-        im = im[datasetID[j], ...]
+        im_ = im[datasetID[j], ...]
         if label is not None:
-            label = label[datasetID[j], ...]
-    else:
-        j1, j2 = (iBatch * nBatch), ((iBatch + 1) * nBatch)
-        im = im[datasetID[j1:j2], ...]
-        if label is not None:
-            label = label[datasetID[j1:j2], ...]
-    if isAug:
-        im, label = img_aug(im, label)
-    return im, label
+            label_ = label[datasetID[j], ...]
+        else:
+            label_ = None
+        if isAug:
+            im_, label_ = img_aug(im_, label_)
+        yield (im_, label_)
