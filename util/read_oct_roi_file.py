@@ -37,7 +37,7 @@ def lumen_iel_mask(obj_list, im_shape):
     """generate lumen or IEL mask based on the point list."""
     obj_list = np.array(obj_list) - 1 # match 1-index to 0-index
     x, idx, c = np.unique(obj_list[:, 1], return_index=True, return_counts=True)
-    obj_list = obj_list[idx[c < 2]]
+    obj_list = obj_list[idx[c < 2], ...]
     obj_list = np.concatenate((obj_list - [0, im_shape[-1], 0], obj_list, obj_list +
                                [0, im_shape[-1], 0]), axis=0)
     f = interp1d(obj_list[:, 1], obj_list[:, 0], kind='quadratic')
