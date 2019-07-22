@@ -35,15 +35,23 @@ def roi_file_parser(file_path):
 
 def lumen_iel_mask(obj_list, im_shape):
     """generate lumen or IEL mask based on the point list."""
-    obj_list = np.array(obj_list) - 1 # match 1-index to 0-index
-    x, idx, c = np.unique(obj_list[:, 1], return_index=True, return_counts=True)
-    obj_list = obj_list[idx[c < 2], ...]
+    out = np.zeros(im_shape[-2:], dtype='bool')
+    obj_list = np.array(obj_list) - 1  # match 1-index to 0-index
     obj_list = np.concatenate((obj_list - [0, im_shape[-1], 0], obj_list, obj_list +
                                [0, im_shape[-1], 0]), axis=0)
-    f = interp1d(obj_list[:, 1], obj_list[:, 0], kind='quadratic')
-    y_lim = np.tile(f(np.arange(im_shape[-1])).T, reps=(im_shape[-2], 1))
-    y = np.tile(np.arange(im_shape[-2]).T, reps=(im_shape[-1], 1)).T
-    return y <= y_lim
+    r, a = obj_list[:, 0],  obj_list[:, 1] * (2 * np.pi / im_shape[-1])
+    min_arc_dist = 1.0 / np.max((r[:-1] + r[1:]) / 2 * np.abs(a[:-1] - a[1:]) + 1)
+    x, y = r * np.cos(a), r * np.sin(a)
+    idx = np.arange(obj_list.shape[0]) - obj_list.shape[0] // 3
+    fx = interp1d(idx, x, kind='quadratic')
+    fy = interp1d(idx, y, kind='quadratic')
+    x_ = fx(np.arange(0, obj_list.shape[0] // 3 + 1, min_arc_dist))
+    y_ = fy(np.arange(0, obj_list.shape[0] // 3 + 1, min_arc_dist))
+    r_ = np.round(np.sqrt(x_ ** 2 + y_ ** 2)).clip(0, im_shape[-2] - 1).astype('int')
+    a_ = np.round((np.arctan2(- y_, - x_) / 2 / np.pi + 0.5) * im_shape[-1]).clip(0, im_shape[-1] - 1).astype('int')
+    for i in range(len(a_)):
+        out[:(r_[i] + 1), a_[i]] = True
+    return out
 
 
 def read_oct_roi_file(file_path, im_shape):
