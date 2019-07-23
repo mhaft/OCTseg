@@ -22,4 +22,4 @@ def test_read_oct_roi_file():
     im_shape = [5, 10, 10]
     out = read_oct_roi_file(file_path, im_shape)
     tifffile.imwrite(file_path[:-4] + '-out.tif', out)
-    np.testing.assert_array_equal(out[1, 2, 1:4], [2, 3, 1])
+    np.testing.assert_array_equal(out[1, 2, 1:4], [3, 2, 2])
