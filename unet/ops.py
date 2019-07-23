@@ -65,8 +65,8 @@ def img_aug(im, l):
         if np.random.rand() > p_lim:  # 3rd 90 degree rotation
             im_ = np.rot90(im_, k=1, axes=(-2, -3))
             l_ = np.rot90(l_, k=1, axes=(-2, -3))
-        # if np.random.rand() > p_lim:  # salt-and-pepper noise
-        #     im_ = im_ + 0.01 * (np.random.rand() - 0.5)
+        if np.random.rand() > p_lim:  # salt-and-pepper noise
+            im_ = im_ * (1 + 0.5 * (np.random.rand() - 0.5))
         im[i, ...], l[i, ...] = im_, l_
     return im, l
 
