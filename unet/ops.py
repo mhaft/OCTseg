@@ -10,7 +10,7 @@
 import numpy as np
 import keras.layers as KL
 import tensorflow as tf
-# from keras.initializers import RandomNormal
+from scipy.ndimage import zoom
 
 
 def conv_layer(x, ChOut):
@@ -38,8 +38,31 @@ def up_conv(x):
                            padding='same',)(x)
 
 
-def img_aug(im, l):
-    """Data augmentation"""
+def img_rand_scale(im, scale, order):
+    """scale one image batch"""
+    out = np.zeros_like(im)
+    new_shape = (len(im.shape) == 4) * (1,) + (scale, scale, 1)
+    tmp = zoom(im, new_shape, order=order, mode='reflect')
+    pad1, pad2 = (tmp.shape[-3] - im.shape[-3]) // 2, (tmp.shape[-2] - im.shape[-2]) // 2
+    if scale > 1:
+        i1, i2, j1, j2 = pad1, pad1 + im.shape[-3], pad2, pad2 + im.shape[-2]
+        out = tmp[..., i1:i2, j1:j2, :]
+    else:
+        i1, i2, j1, j2 = - pad1, - pad1 + tmp.shape[-3], - pad2, - pad2 + tmp.shape[-2]
+        out[..., i1:i2, j1:j2, :] = tmp
+    return out
+
+
+def img_aug(im, l, coord_sys):
+    assert coord_sys in ['carts', 'polar'], 'the coord_sys should be carts or polar. got %d' % coord_sys
+    if coord_sys == 'carts':
+        return img_aug_carts(im, l)
+    else:
+        return img_aug_polar(im, l)
+
+
+def img_aug_carts(im, l):
+    """Data augmentation in Cartesian"""
     dim = len(im.shape) - 2
     p_lim = 0.05
     for i in range(im.shape[0]):
@@ -65,8 +88,43 @@ def img_aug(im, l):
         if np.random.rand() > p_lim:  # 3rd 90 degree rotation
             im_ = np.rot90(im_, k=1, axes=(-2, -3))
             l_ = np.rot90(l_, k=1, axes=(-2, -3))
-        if np.random.rand() > p_lim:  # salt-and-pepper noise
-            im_ = im_ * (1 + 0.5 * (np.random.rand() - 0.5))
+        if np.random.rand() > p_lim:  # intensity scaling
+            im_ = np.clip(im_ * (1 + 0.5 * (np.random.rand() - 0.5)), 0, 1)
+        if np.random.rand() > p_lim:  # image scaling
+            scale = 1 + 0.25 * (np.random.rand() - 0.5)
+            im_ = img_rand_scale(im_, scale, 2)
+            l_ = img_rand_scale(l_, scale, 0)
+        im[i, ...], l[i, ...] = im_, l_
+    return im, l
+
+
+def img_aug_polar(im, l):
+    """Data augmentation in Polar coordinate"""
+    dim = len(im.shape) - 2
+    p_lim = 0.05
+    for i in range(im.shape[0]):
+        im_, l_ = im[i, ...], l[i, ...]
+        if np.random.rand() > p_lim:  # random rotation
+            j = np.floor(np.random.rand() * im_.shape[-2]).astype('int64')
+            im_ = np.concatenate((im_[..., j:, :], im_[..., :j, :]), axis=-2)
+            l_ = np.concatenate((l_[..., j:, :], l_[..., :j, :]), axis=-2)
+        if np.random.rand() > p_lim:  # intensity scaling
+            im_ = np.clip(im_ * (1 + 0.5 * (np.random.rand() - 0.5)), 0, 1)
+        if np.random.rand() > p_lim:  # image scaling
+            scale = 1 + 0.25 * (np.random.rand() - 0.5)
+            if scale > 1:
+                tmp = np.zeros_like(im_)
+                tmp = zoom(tmp, (dim == 3) * (1,) + (scale - 1, 1, 1))
+                im_ = np.concatenate((im_, tmp), axis=-3)
+                tmp = np.zeros_like(l_)
+                tmp = zoom(tmp, (dim == 3) * (1,) + (scale - 1, 1, 1))
+                l_ = np.concatenate((l_, tmp), axis=-3)
+            else:
+                j = np.ceil(im_.shape[-3] * scale).astype('int64')
+                im_ = im_[..., :j, :, :]
+                l_ = l_[..., :j, :, :]
+            im_ = zoom(im_, (dim == 3) * (1,) + (im.shape[-3] / im_.shape[-3], 1, 1), order=2, mode='reflect')
+            l_ = zoom(l_, (dim == 3) * (1,) + (l.shape[-3] / l_.shape[-3], 1, 1), order=0)
         im[i, ...], l[i, ...] = im_, l_
     return im, l
 
@@ -92,7 +150,7 @@ def placeholder_inputs(im_shape, outCh):
     return image, label
 
 
-def load_batch(im, datasetID, nBatch, label=None, isAug=False):
+def load_batch(im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts'):
 
     while True:
         j = np.random.randint(0, len(datasetID), nBatch)
@@ -102,5 +160,5 @@ def load_batch(im, datasetID, nBatch, label=None, isAug=False):
         else:
             label_ = None
         if isAug:
-            im_, label_ = img_aug(im_, label_)
+            im_, label_ = img_aug(im_, label_, coord_sys)
         yield (im_, label_)
