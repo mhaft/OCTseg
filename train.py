@@ -30,16 +30,18 @@ from util.load_data import load_train_data
 parser = argparse.ArgumentParser()
 parser.add_argument("-exp_def", type=str, default="test", help="experiment definition")
 parser.add_argument("-lr", type=float, default=1e-4, help="learning rate")
-parser.add_argument("-lr_step", type=int, default=1000, help="learning rate step for decay")
+parser.add_argument("-lr_decay", type=float, default=0.0, help="learning rate step for decay")
 parser.add_argument("-data_path", type=str, default="C:\\MachineLearning\\PSTIFS\\", help="data folder path")
 parser.add_argument("-nEpoch", type=int, default=2000, help="number of epochs")
 parser.add_argument("-nBatch", type=int, default=5, help="batch size")
 parser.add_argument("-outCh", type=int, default=2, help="size of output channel")
 parser.add_argument("-inCh", type=int, default=1, help="size of input channel")
 parser.add_argument("-nZ", type=int, default=1, help="size of input depth")
-parser.add_argument("-w", type=int, default=512, help="size of input width")
+parser.add_argument("-w", type=int, default=512, help="size of input width (# of columns)")
+parser.add_argument("-l", type=int, default=512, help="size of input Length (# of rows)")
 parser.add_argument("-loss_w", type=str, default="1, 100, 0", help="loss wights")
 parser.add_argument("-isAug", type=int, default=1, help="Is data augmentation")
+parser.add_argument("-isCarts", type=int, default=1, help="whether images should be converted into Cartesian")
 parser.add_argument("-saveEpoch", type=int, default=500, help="epoch interval to save the model")
 parser.add_argument("-logEpoch", type=int, default=100, help="epoch interval to save the log")
 parser.add_argument("-nFeature", type=int, default=32, help="number of features in the first layer")
@@ -50,9 +52,10 @@ experiment_def = args.exp_def
 folder_path = args.data_path
 nEpoch = args.nEpoch
 nBatch = args.nBatch
-im_shape = (args.nZ, args.w, args.w, args.inCh)
+im_shape = (args.nZ, args.l, args.w, args.inCh)
 outCh = args.outCh
 loss_weight = [float(i) for i in args.loss_w.split(',')]
+coord_sys = 'carts' if args.isCarts else 'polar'
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
 if not os.path.exists('model/' + experiment_def):
     os.makedirs('model/' + experiment_def)
@@ -76,22 +79,26 @@ save_callback = ModelCheckpoint(save_file_name)
 model.compile(optimizer=Adam(lr=args.lr), loss=cross_entropy)
 print('Model is initialized.')
 
-data_file = os.path.join(folder_path, 'dataset Z%d-W%d-L%d-C%d' % im_shape)
+data_file = os.path.join(folder_path, 'Dataset ' + coord_sys + ' Z%d-W%d-L%d-C%d.h5' % im_shape)
 if os.path.exists(data_file):
     with h5py.File(data_file, 'r') as f:
-        im, label, train_data_id, test_data_id, valid_data_id = np.array(f.get('/im')), np.array(f.get('/label')), \
-            np.array(f.get('/train_data_id')),np.array(f.get('/test_data_id')), np.array(f.get('/valid_data_id'))
+        im, label, train_data_id, test_data_id, valid_data_id, sample_caseID = np.array(f.get('/im')), \
+            np.array(f.get('/label')), np.array(f.get('/train_data_id')),  np.array(f.get('/test_data_id')), \
+            np.array(f.get('/valid_data_id')), np.array(f.get('/sample_caseID'))
 else:
-    im, label, train_data_id, test_data_id, valid_data_id = load_train_data(folder_path, im_shape)
+    im, label, train_data_id, test_data_id, valid_data_id, sample_caseID = load_train_data(folder_path, im_shape,
+                                                                                           coord_sys)
     with h5py.File(data_file, 'w') as f:
         f.create_dataset('im', data=im)
         f.create_dataset('label', data=label)
         f.create_dataset('train_data_id', data=train_data_id)
         f.create_dataset('test_data_id', data=test_data_id)
         f.create_dataset('valid_data_id', data=valid_data_id)
-train_data_gen = load_batch(im, train_data_id, nBatch, label, isAug=True)
-valid_data_gen = load_batch(im, valid_data_id, nBatch, label, isAug=False)
-print('Data is loaded. Training: %d, validation: %d' % (len(train_data_id), len(valid_data_id)))
+        f.create_dataset('sample_caseID', data=sample_caseID)
+train_data_gen = load_batch(im, train_data_id, nBatch, label, isAug=True, coord_sys=coord_sys)
+valid_data_gen = load_batch(im, valid_data_id, nBatch, label, isAug=False , coord_sys=coord_sys)
+print('Data is loaded. Training: %d, validation: %d' % (len(np.unique(sample_caseID[train_data_id])),
+                                                        len(np.unique(sample_caseID[valid_data_id]))))
 
 start = time.time()
 for iEpoch in range(nEpoch):
@@ -106,7 +113,7 @@ for iEpoch in range(nEpoch):
         with open(log_file, 'a') as f:
             f.write("%d, %.2f, %f, %f, \n" % (iEpoch + 1, (time.time() - start) / 3600.0, train_loss, valid_loss))
     if (iEpoch + 1) % args.saveEpoch == 0:
-        model.save(save_file_name%(iEpoch + 1))
+        model.save(save_file_name % (iEpoch + 1))
 
 label = np.argmax(label, -1)
 out = model.predict(im, batch_size=nBatch)

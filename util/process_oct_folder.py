@@ -13,16 +13,15 @@ from __future__ import absolute_import, division, print_function
 import glob
 import csv
 import tifffile
-import numpy as np
+from tqdm import tqdm
 
 from .polar2cartesian import polar2cartesian_large_3d_file
 from .read_oct_roi_file import read_oct_roi_file
 
 
-def process_oct_folder(folder_path, scale=0.25):
+def process_oct_folder(folder_path, scale=1):
     cases = glob.glob(folder_path + '*.pstif')
-    for case in cases:
-        print(case[len(folder_path):])
+    for case in tqdm(cases):
         with open(case[:-6] + 'ROI.ini', 'r') as f:
             reader = csv.reader(f, delimiter='\t')
             r0 = 1
@@ -36,7 +35,8 @@ def process_oct_folder(folder_path, scale=0.25):
         tifffile.imwrite(case[:-6] + '-im.tif', im)
 
         seg = read_oct_roi_file(case[:-6] + 'ROI.txt', (int(im_shape0[0] / 3),) + im_shape0[1:])
+        tifffile.imwrite(case[:-6] + '-SegP.tif', seg)
         seg = polar2cartesian_large_3d_file(seg, r0=r0, full=True, deg=0, scale=scale)
-        tifffile.imwrite(case[:-6] + '-Seg.tif', seg)
+        tifffile.imwrite(case[:-6] + '-SegC.tif', seg)
     return
 
