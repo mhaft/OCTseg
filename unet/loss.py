@@ -8,7 +8,6 @@
 """CNN related loss functions"""
 
 import tensorflow as tf
-from unet.ops import conv_layer
 
 
 def dice_loss(label, target):
@@ -21,3 +20,10 @@ def dice_loss(label, target):
 
 def cross_entropy(label, target):
     return tf.reduce_mean(tf.nn.weighted_cross_entropy_with_logits(labels=label, logits=target, pos_weight=10))
+
+
+def multi_loss_fun(loss_weight):
+    def multi_loss(label, target):
+        return loss_weight[0] * cross_entropy(label, target) + \
+                                 loss_weight[1] * dice_loss(label, target)
+    return multi_loss
