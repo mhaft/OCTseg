@@ -17,25 +17,31 @@ from scipy.interpolate import interp1d
 
 def roi_file_parser(file_path):
     """Parse roi file and output the lists of objects"""
-    obj_list, last_row, last_case = {'Lumen':[], 'IEL':[], 'GW':[]}, [''], ''
+    obj_list, last_row, last_case = {'lumen': [], 'iel': [], 'gw': [], 'noniel': []}, [''], ''
+    lumen_label = ['lumen', 'fibro-fatty', 'fibrous', 'fc', 'fibrous', 'fa', 'normal']
     with open(file_path, 'r') as f:
         reader = csv.reader(f, delimiter='\t')
         for row in reader:
-            case = row[0]
-            if case in ['ROIformat', 'closed']:
-                last_case = ''
-            if case in ['Snake', 'Angle']:
-                if case != last_row[0]:
+            if len(row) > 4 and row[-1] != '':
+                row[-1] = row[-1].lower()
+                if row[-1] in ['iel', 'gw', 'noniel']:
                     last_case = row[-1]
+                elif row[-1] in lumen_label:
+                    last_case = 'lumen'
+                else:
+                    last_case = ''
+                if last_case != '':
                     obj_list[last_case].append([])
+            if last_case != '' and len(row) > 3:
                 obj_list[last_case][-1].append([int(i) for i in row[1:4]])
-            last_row = row
     return obj_list
 
 
 def lumen_iel_mask(obj_list, im_shape):
     """generate lumen or IEL mask based on the point list."""
     out = np.zeros(im_shape[-2:], dtype='bool')
+    if len(obj_list) < 2:
+        return out
     obj_list = np.array(obj_list) - 1  # match 1-index to 0-index
     obj_list = np.concatenate((obj_list - [0, im_shape[-1], 0], obj_list, obj_list +
                                [0, im_shape[-1], 0]), axis=0)
@@ -57,15 +63,15 @@ def lumen_iel_mask(obj_list, im_shape):
 def read_oct_roi_file(file_path, im_shape):
     obj_list = roi_file_parser(file_path)
     out = np.zeros(im_shape, dtype='uint8')
-    for iel in obj_list['IEL']:
+    for iel in obj_list['iel']:
         tmp = out[iel[0][2] - 1, ...]
         tmp[lumen_iel_mask(iel, im_shape)] = 3
         out[iel[0][2] - 1, ...] = tmp
-    for lumen in obj_list['Lumen']:
+    for lumen in obj_list['lumen']:
         tmp = out[lumen[0][2] - 1, ...]
         tmp[lumen_iel_mask(lumen, im_shape)] = 2
         out[lumen[0][2] - 1, ...] = tmp
-    for gw in obj_list['GW']:
+    for gw in obj_list['gw'] + obj_list['noniel']:
         z = gw[1][2] - 1
         gw = np.array([gw[1][1], gw[2][1]])
         if gw[0] <= gw[1]:

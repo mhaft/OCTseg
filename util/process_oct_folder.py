@@ -19,7 +19,7 @@ from .polar2cartesian import polar2cartesian_large_3d_file
 from .read_oct_roi_file import read_oct_roi_file
 
 
-def process_oct_folder(folder_path, scale=1):
+def process_oct_folder(folder_path, scale=0.25):
     cases = glob.glob(folder_path + '*.pstif')
     for case in tqdm(cases):
         with open(case[:-6] + 'ROI.ini', 'r') as f:
