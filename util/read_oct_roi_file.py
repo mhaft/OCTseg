@@ -22,17 +22,17 @@ def roi_file_parser(file_path):
     with open(file_path, 'r') as f:
         reader = csv.reader(f, delimiter='\t')
         for row in reader:
-            if len(row) > 4 and row[-1] != '':
-                row[-1] = row[-1].lower()
-                if row[-1] in ['iel', 'gw', 'noniel']:
-                    last_case = row[-1]
+            if len(row) > 4 and row[4] != '':
+                row[4] = row[4].lower()
+                if row[4] in ['iel', 'gw', 'noniel']:
+                    last_case = row[4]
                 elif row[-1] in lumen_label:
                     last_case = 'lumen'
                 else:
                     last_case = ''
                 if last_case != '':
                     obj_list[last_case].append([])
-            if last_case != '' and len(row) > 3:
+            if last_case != '' and row[0] != 'closed':
                 obj_list[last_case][-1].append([int(i) for i in row[1:4]])
     return obj_list
 
