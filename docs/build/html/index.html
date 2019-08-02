@@ -1,0 +1,283 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Welcome to OCTseg’s documentation! &#8212; OCTseg  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-octseg-s-documentation">
+<h1>Welcome to OCTseg’s documentation!<a class="headerlink" href="#welcome-to-octseg-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="util">
+<h2>util<a class="headerlink" href="#util" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-util.load_data">
+<span id="load-data"></span><h3>load data<a class="headerlink" href="#module-util.load_data" title="Permalink to this headline">¶</a></h3>
+<p>Convert an 2D or 3D image from polar or cylindrical coordinate to the
+cartesian coordinate.</p>
+<dl class="function">
+<dt id="util.load_data.im_fix_width">
+<code class="sig-prename descclassname">util.load_data.</code><code class="sig-name descname">im_fix_width</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">w</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_data.im_fix_width" title="Permalink to this definition">¶</a></dt>
+<dd><p>pad or crop the 3D image to have width and length equal to the input width</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-util.polar2cartesian">
+<span id="polar-to-cartesian"></span><h3>polar to cartesian<a class="headerlink" href="#module-util.polar2cartesian" title="Permalink to this headline">¶</a></h3>
+<p>Convert an 2D or 3D image from polar or cylindrical coordinate to the
+cartesian coordinate.</p>
+</div>
+<div class="section" id="module-util.process_oct_folder">
+<span id="process-oct-folder"></span><h3>process oct folder<a class="headerlink" href="#module-util.process_oct_folder" title="Permalink to this headline">¶</a></h3>
+<p>process OCT folder to generate the segmentation labels of cases. Each case all three -.PSTIF, -.INI, and -ROI.txt
+files</p>
+</div>
+<div class="section" id="module-util.read_oct_roi_file">
+<span id="read-oct-roi-file"></span><h3>read oct roi file<a class="headerlink" href="#module-util.read_oct_roi_file" title="Permalink to this headline">¶</a></h3>
+<p>Read ROI file generated based on the and generate segmentation results.</p>
+<dl class="function">
+<dt id="util.read_oct_roi_file.lumen_iel_mask">
+<code class="sig-prename descclassname">util.read_oct_roi_file.</code><code class="sig-name descname">lumen_iel_mask</code><span class="sig-paren">(</span><em class="sig-param">obj_list</em>, <em class="sig-param">im_shape</em><span class="sig-paren">)</span><a class="headerlink" href="#util.read_oct_roi_file.lumen_iel_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate lumen or IEL mask based on the point list.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="util.read_oct_roi_file.roi_file_parser">
+<code class="sig-prename descclassname">util.read_oct_roi_file.</code><code class="sig-name descname">roi_file_parser</code><span class="sig-paren">(</span><em class="sig-param">file_path</em><span class="sig-paren">)</span><a class="headerlink" href="#util.read_oct_roi_file.roi_file_parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse roi file and output the lists of objects</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="unet">
+<h2>unet<a class="headerlink" href="#unet" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-unet.loss">
+<span id="loss"></span><h3>loss<a class="headerlink" href="#module-unet.loss" title="Permalink to this headline">¶</a></h3>
+<p>CNN related loss functions</p>
+<dl class="function">
+<dt id="unet.loss.dice_loss">
+<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">dice_loss</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.dice_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>soft Dice coefficient loss
+TP, FP, and FN are true positive, false positive, and false negative.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}dice  &amp;=  \frac{2 \times TP}{ 2 \times TP + FN + FP} \\
+dice  &amp;=  \frac{2 \times TP}{(TP + FN) + (TP + FP)}\end{split}\]</div>
+<p>objective is to maximize the dice, thus the loss is negate of dice for numerical stability (+1 in denominator)
+and fixing the loss range (+1 in numerator and +1 to the negated dice)
+The final Dice loss is formulated as</p>
+<div class="math notranslate nohighlight">
+\[dice \ loss = 1 - \frac{2 \times TP + 1}{(TP + FN) + (TP + FP ) + 1}\]</div>
+<p>it is soft as each components of the confusion matrix (TP, FP, and FN) are estimated by dot product of
+probability instead of hard classification</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label</strong> – 4D or 5D label tensor</p></li>
+<li><p><strong>target</strong> – 4D or 5d target tensor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dice loss</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="unet.loss.multi_loss_fun">
+<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">multi_loss_fun</code><span class="sig-paren">(</span><em class="sig-param">loss_weight</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.multi_loss_fun" title="Permalink to this definition">¶</a></dt>
+<dd><p>semantic loss function based on the weighted cross entropy and dice and wighted by the loss weights in the input
+argument</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>loss_weight</strong> – a list with two weights for weighted cross entropy and dice losses, respectively.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>return a function, which similar to <a class="reference internal" href="#unet.loss.weighted_cross_entropy" title="unet.loss.weighted_cross_entropy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></a> and <a class="reference internal" href="#unet.loss.dice_loss" title="unet.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a></dt><dd><p>has label and target arguments</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Seemore</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#unet.loss.weighted_cross_entropy" title="unet.loss.weighted_cross_entropy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></a>, <a class="reference internal" href="#unet.loss.dice_loss" title="unet.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a> :</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="unet.loss.weighted_cross_entropy">
+<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">weighted_cross_entropy</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.weighted_cross_entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>weighted cross entropy with foreground pixels having ten times higher weights</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label</strong> – 4D or 5D label tensor</p></li>
+<li><p><strong>target</strong> – 4D or 5d target tensor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>weighted cross entropy value</p>
+</dd>
+<dt class="field-odd">TODO</dt>
+<dd class="field-odd"><p>add positive weight as an argument</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-unet.ops">
+<span id="ops"></span><h3>ops<a class="headerlink" href="#module-unet.ops" title="Permalink to this headline">¶</a></h3>
+<p>CNN related operations</p>
+<dl class="function">
+<dt id="unet.ops.accuracy">
+<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">accuracy</code><span class="sig-paren">(</span><em class="sig-param">labels</em>, <em class="sig-param">logits</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.accuracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>measure accuracy metrics</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="unet.ops.img_aug_carts">
+<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">img_aug_carts</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">l</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.img_aug_carts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data augmentation in Cartesian</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="unet.ops.img_aug_polar">
+<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">img_aug_polar</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">l</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.img_aug_polar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data augmentation in Polar coordinate</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="unet.ops.img_rand_scale">
+<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">img_rand_scale</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">scale</em>, <em class="sig-param">order</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.img_rand_scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>scale one image batch</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="unet.ops.placeholder_inputs">
+<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">placeholder_inputs</code><span class="sig-paren">(</span><em class="sig-param">im_shape</em>, <em class="sig-param">outCh</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.placeholder_inputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate placeholder variables to represent the input tensors.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h3>unet<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-unet.unet"></span><p>Build unet model</p>
+<dl class="function">
+<dt id="unet.unet.unet_model">
+<code class="sig-prename descclassname">unet.unet.</code><code class="sig-name descname">unet_model</code><span class="sig-paren">(</span><em class="sig-param">im_shape</em>, <em class="sig-param">nFeature=32</em>, <em class="sig-param">outCh=2</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.unet.unet_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build U-Net model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – input placeholder</p></li>
+<li><p><strong>outCh</strong> – number of output channels</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>keras model</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">OCTseg</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Mohammad Haft-Javaherian.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
