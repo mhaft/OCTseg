@@ -5,16 +5,18 @@
 #                                       <7javaherian@gmail.com>.
 # ==============================================================================
 
-"""Convert an 2D or 3D image from polar or cylindrical coordinate to the
+"""Convert a 2D or 3D image from polar or cylindrical coordinate to the
     cartesian coordinate."""
 
 from __future__ import absolute_import, division, print_function
 
 import os
 import time
+import csv
+import glob
+import argparse
 
 import tifffile
-import argparse
 import h5py
 import numpy as np
 import tensorflow as tf
@@ -23,6 +25,7 @@ from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint
 from keras.backend.tensorflow_backend import set_session
 from keras.losses import get
+
 from unet.unet import unet_model
 from unet.ops import load_batch
 from unet.loss import multi_loss_fun
@@ -82,7 +85,7 @@ if not os.path.exists('model/' + experiment_def):
     os.makedirs('model/' + experiment_def)
 save_file_name = 'model/' + experiment_def + '/model-epoch%06d.h5'
 log_file = 'model/' + experiment_def + '/log-' + experiment_def + '.csv'
-if not isTest:
+if not isTest and not os.path.exists(log_file):
     with open(log_file, 'w') as f:
         f.write('epoch, Time (hr), Test_Loss, Valid_Loss, ' + str(args) + '\n')
 
@@ -96,7 +99,8 @@ if not isTest:
     model.compile(optimizer=Adam(lr=args.lr), loss=get(loss))
     print('Model is initialized.')
 else:
-    model.load_weights(save_file_name % args.testEpoch)
+    iEpoch = args.testEpoch
+    model.load_weights(save_file_name % iEpoch)
     print('model at epoch %d is loaded.' % args.testEpoch)
 
 # load data
@@ -117,38 +121,60 @@ else:
         f.create_dataset('valid_data_id', data=valid_data_id)
         f.create_dataset('sample_caseID', data=sample_caseID)
 if not isTest:
-    train_data_gen = load_batch(im, train_data_id, nBatch, label, isAug=True, coord_sys=coord_sys)
+    train_data_gen = load_batch(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys)
     valid_data_gen = load_batch(im, valid_data_id, nBatch, label, isAug=False, coord_sys=coord_sys)
     print('Data is loaded. Training: %d, validation: %d' % (len(np.unique(sample_caseID[train_data_id])),
                                                             len(np.unique(sample_caseID[valid_data_id]))))
 
 # testing
 if not isTest:
-    start = time.time()
-    for iEpoch in range(nEpoch):
+    f = glob.glob('model/' + experiment_def + '/model-epoch*.h5')
+    f.sort()
+    if len(f):
+        iEpochStart = int(f[-1][-9:-3])
+        model.load_weights(save_file_name % iEpochStart)
+        print('model at epoch %d is loaded.' % iEpochStart)
+        with open(log_file, 'r') as f:
+            reader = csv.DictReader(f, delimiter=',', skipinitialspace=True)
+            for row in reader:
+                if int(row['epoch']) == iEpochStart:
+                    start = time.time() - float(row['Time (hr)']) * 3600
+        iEpochStart += 1
+    else:
+        iEpochStart = 1
+        start = time.time()
+
+    for iEpoch in range(iEpochStart, nEpoch + 1):
         x1, l1 = next(train_data_gen)
         model.train_on_batch(x1, l1)
-        if (iEpoch + 1) % args.logEpoch == 0:
+        if iEpoch % args.logEpoch == 0:
             train_loss = model.evaluate(im[train_data_id, ...], label[train_data_id, ...], batch_size=nBatch, verbose=0)
             valid_loss = model.evaluate(im[valid_data_id, ...], label[valid_data_id, ...], batch_size=nBatch, verbose=0)
-            rem_time = (nEpoch - iEpoch - 1) / (iEpoch + 1.0) * (time.time() - start) / 3600.0
-            print("Epoch:%d, %.2f hr to finish, Train Loss: %f, Test Loss: %f" % (iEpoch + 1, rem_time,
+            rem_time = (nEpoch - iEpoch) / iEpoch * (time.time() - start) / 3600.0
+            print("Epoch:%d, %.2f hr to finish, Train Loss: %f, Test Loss: %f" % (iEpoch, rem_time,
                                                                                   train_loss, valid_loss))
             with open(log_file, 'a') as f:
-                f.write("%d, %.2f, %f, %f, \n" % (iEpoch + 1, (time.time() - start) / 3600.0, train_loss, valid_loss))
-        if (iEpoch + 1) % args.saveEpoch == 0:
-            model.save(save_file_name % (iEpoch + 1))
+                f.write("%d, %.2f, %f, %f, \n" % (iEpoch, (time.time() - start) / 3600.0, train_loss, valid_loss))
+        if iEpoch % args.saveEpoch == 0:
+            model.save(save_file_name % iEpoch)
 
 # feed forward
 label = np.argmax(label, -1)
 train_valid_data_id = np.union1d(train_data_id, valid_data_id)
+out = model.predict(im, batch_size=nBatch, verbose=1)
+out = np.argmax(out, -1)
+if len(out.shape) > 3:
+    i = int(out.shape[1] // 2)
+    label, out, im = label[:, i, ...].squeeze(), out[:, i, ...].squeeze(), im[:, i, ...].squeeze()
+# add T label to the training slices
 label[train_data_id, -15:, -10:-5] = 1
 label[train_data_id, -20:-15, -15:] = 1
-out = model.predict(im, batch_size=nBatch, verbose=1)
-out = np.reshape(np.argmax(out, -1), im.shape[:-1])
+# write files
 tifffile.imwrite('model/' + experiment_def + '/a-label.tif', label[train_valid_data_id, ...].astype(np.uint8))
-tifffile.imwrite('model/' + experiment_def + '/a-out.tif', out[train_valid_data_id, ...].astype(np.uint8))
-tifffile.imwrite('model/' + experiment_def + '/a-im.tif', (im[train_valid_data_id, ...] * 255).astype(np.uint8).squeeze())
+tifffile.imwrite('model/' + experiment_def + '/a-out-epoch%06d.tif' % iEpoch,
+                 out[train_valid_data_id, ...].astype(np.uint8))
+tifffile.imwrite('model/' + experiment_def + '/a-im.tif',
+                 (im[train_valid_data_id, ...] * 255).astype(np.uint8).squeeze())
 
 
 # if __name__ == '__main__':
