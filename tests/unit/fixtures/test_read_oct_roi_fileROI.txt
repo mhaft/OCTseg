@@ -1,0 +1,22 @@
+ROIformat
+Snake	3	7	1	Lumen
+Snake	4	9	1	
+Snake	2	2	1	
+Snake	5	4	1	
+closed
+Snake	7	6	1	IEL
+Snake	5	10	1	
+Snake	6	3	1	
+Snake	9	5	1	
+closed
+Angle	1	5	1	GW
+Angle	9	4	1	
+Angle	8	6	1
+Snake	10	1	2	IEL
+Snake	10	5	2	
+closed	
+Angle	2	1	2	GW
+Angle	8	9	1	
+Angle	9	2	2
+Snake	9	5	2	Calcium
+closed
