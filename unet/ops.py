@@ -64,7 +64,7 @@ def img_aug(im, l, coord_sys):
 def img_aug_carts(im, l):
     """Data augmentation in Cartesian"""
     dim = len(im.shape) - 2
-    p_lim = 0.05
+    p_lim = 0.9
     for i in range(im.shape[0]):
         im_, l_ = im[i, ...], l[i, ...]
         if np.random.rand() > p_lim:  # y=x mirror
@@ -101,7 +101,7 @@ def img_aug_carts(im, l):
 def img_aug_polar(im, l):
     """Data augmentation in Polar coordinate"""
     dim = len(im.shape) - 2
-    p_lim = 0.05
+    p_lim = 0.9
     for i in range(im.shape[0]):
         im_, l_ = im[i, ...], l[i, ...]
         if np.random.rand() > p_lim:  # random rotation

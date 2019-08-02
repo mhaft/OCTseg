@@ -17,12 +17,13 @@ from unet.ops import conv_layer, up_conv, MaxPoolingND
 def unet_model(im_shape, nFeature=32, outCh=2):
     """ Build U-Net model.
 
-    args:
-        x: input placeholder
-        outCh: number of output channels
+        Arguments:
+            x: input placeholder
+            outCh: number of output channels
 
-    Returns:
-        y: output tensor
+        Returns:
+            keras model
+
     """
     if im_shape[0] == 1:
         im_shape = im_shape[1:]
