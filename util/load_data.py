@@ -32,18 +32,18 @@ def im_fix_width(im, w):
 
 def make_dataset(folder_path, im_shape, coord_sys, carts_w=512):
     assert len(im_shape) == 4, 'im_shape should have 4 element. got %d' % len(im_shape)
+    assert coord_sys.lower() in ['polar', 'carts'], 'Coordinate system should be polar or carts. got %s' % coord_sys
     tmp_im = np.zeros((1,) + tuple(im_shape), dtype='uint8')
     tmp_label = np.zeros((1,) + tuple(im_shape[:-1]) + (1,), dtype='uint8')
     im = np.zeros((0,) + tuple(im_shape), dtype='uint8')
     label = np.zeros((0,) + tuple(im_shape[:-1]) + (1,), dtype='uint8')
-    if coord_sys == 'carts':
+    if coord_sys.lower() == 'carts':
         cases = glob.glob(folder_path + '*-SegC.tif')
-    elif coord_sys == 'polar':
+    elif coord_sys.lower() == 'polar':
         cases = glob.glob(folder_path + '*-SegP.tif')
     z_pad = (im_shape[0] - 1) // 2
     sample_caseID = []
     for i_case in tqdm(range(len(cases))):
-
         case = cases[i_case]
         tmp = tifffile.imread(case)
         if coord_sys == 'carts':
