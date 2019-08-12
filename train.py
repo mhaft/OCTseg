@@ -1,7 +1,7 @@
 # Copyright (C) 2019 Harvard University. All Rights Reserved. Unauthorized
 # copying of this file, via any medium is strictly prohibited Proprietary and
 # confidential
-# Developed by Mohammad Haft-Javaherian <mhaft_javaherian@mgh.harvard.edu>,
+# Developed by Mohammad Haft-Javaherian <mhaft-javaherian@mgh.harvard.edu>,
 #                                       <7javaherian@gmail.com>.
 # ==============================================================================
 
@@ -52,6 +52,7 @@ parser.add_argument("-testEpoch", type=int, default=0, help="epoch of the saved 
 parser.add_argument("-saveEpoch", type=int, default=500, help="epoch interval to save the model")
 parser.add_argument("-logEpoch", type=int, default=100, help="epoch interval to save the log")
 parser.add_argument("-nFeature", type=int, default=32, help="number of features in the first layer")
+parser.add_argument("-nLayer", type=int, default=3, help="number of layers in the U-Nnet model")
 parser.add_argument("-gpu_id", type=str, default="0,1", help="ID of GPUs to be used")
 
 args = parser.parse_args()
@@ -90,7 +91,7 @@ if not isTest and not os.path.exists(log_file):
         f.write('epoch, Time (hr), Test_Loss, Valid_Loss, ' + str(args) + '\n')
 
 # build the model
-model = unet_model(im_shape, nFeature=args.nFeature, outCh=outCh)
+model = unet_model(im_shape, nFeature=args.nFeature, outCh=outCh, nLayer=args.nLayer)
 loss = multi_loss_fun(loss_weight)
 if numGPU > 1:
     model = multi_gpu_model(model, gpus=numGPU)
@@ -111,8 +112,8 @@ if os.path.exists(data_file):
             np.array(f.get('/label')), np.array(f.get('/train_data_id')),  np.array(f.get('/test_data_id')), \
             np.array(f.get('/valid_data_id')), np.array(f.get('/sample_caseID'))
 else:
-    im, label, train_data_id, test_data_id, valid_data_id, sample_caseID = load_train_data(folder_path, im_shape,
-                                                                                           coord_sys)
+    im, label, train_data_id, test_data_id, valid_data_id, sample_caseID = \
+        load_train_data(folder_path, im_shape, coord_sys)
     with h5py.File(data_file, 'w') as f:
         f.create_dataset('im', data=im)
         f.create_dataset('label', data=label)
@@ -120,14 +121,37 @@ else:
         f.create_dataset('test_data_id', data=test_data_id)
         f.create_dataset('valid_data_id', data=valid_data_id)
         f.create_dataset('sample_caseID', data=sample_caseID)
+
+
+loss_mask_classes = [0, 1]
+classes = [
+    [[0, 1, 2], [3]],
+    [[3], []],
+]
+
+label_9class = label
+if loss_mask_classes:
+    loss_mask = np.any(label_9class[..., loss_mask_classes], -1)
+else:
+    loss_mask = np.ones(label_9class.shape[:-1])
+label = np.zeros_like(label[..., :len(classes)])
+label[..., 0] = np.all(np.logical_not(label_9class), axis=-1)
+for i in range(len(classes)):
+    tmp = label[..., i]
+    for j in range(len(classes[i][0])):
+        tmp = np.logical_or(tmp, label_9class[..., classes[i][0][j]])
+    for j in range(len(classes[i][1])):
+        tmp = np.logical_and(tmp, np.logical_not(label_9class[..., classes[i][1][j]]))
+    label[..., i] = tmp
+
+
+# training
 if not isTest:
-    train_data_gen = load_batch(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys)
-    valid_data_gen = load_batch(im, valid_data_id, nBatch, label, isAug=False, coord_sys=coord_sys)
+    train_data_gen = load_batch_parallel(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys)
+    valid_data_gen = load_batch_parallel(im, valid_data_id, nBatch, label, isAug=False, coord_sys=coord_sys)
     print('Data is loaded. Training: %d, validation: %d' % (len(np.unique(sample_caseID[train_data_id])),
                                                             len(np.unique(sample_caseID[valid_data_id]))))
 
-# testing
-if not isTest:
     f = glob.glob('model/' + experiment_def + '/model-epoch*.h5')
     f.sort()
     if len(f):
@@ -166,9 +190,8 @@ out = np.argmax(out, -1)
 if len(out.shape) > 3:
     i = int(out.shape[1] // 2)
     label, out, im = label[:, i, ...].squeeze(), out[:, i, ...].squeeze(), im[:, i, ...].squeeze()
-# add T label to the training slices
-label[train_data_id, -15:, -10:-5] = 1
-label[train_data_id, -20:-15, -15:] = 1
+# double the label intensity of the training slices
+label[train_data_id, ...] *= 2
 # write files
 tifffile.imwrite('model/' + experiment_def + '/a-label.tif', label[train_valid_data_id, ...].astype(np.uint8))
 tifffile.imwrite('model/' + experiment_def + '/a-out-epoch%06d.tif' % iEpoch,
