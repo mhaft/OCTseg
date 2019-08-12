@@ -8,7 +8,7 @@
     
     
     <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
-    <title>Coverage for util\load_data.py: 100%</title>
+    <title>Coverage for C:\Users\Mohammad\PycharmProjects\OCTseg\util\load_data.py: 100%</title>
     <link rel="stylesheet" href="style.css" type="text/css">
     
     <script type="text/javascript" src="jquery.min.js"></script>
@@ -23,15 +23,15 @@
 
 <div id="header">
     <div class="content">
-        <h1>Coverage for <b>util\load_data.py</b> :
+        <h1>Coverage for <b>C:\Users\Mohammad\PycharmProjects\OCTseg\util\load_data.py</b> :
             <span class="pc_cov">100%</span>
         </h1>
 
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
 
         <h2 class="stats">
-            67 statements &nbsp;
-            <span class="run hide_run shortkey_r button_toggle_run">67 run</span>
+            64 statements &nbsp;
+            <span class="run hide_run shortkey_r button_toggle_run">64 run</span>
             <span class="mis shortkey_m button_toggle_mis">0 missing</span>
             <span class="exc shortkey_x button_toggle_exc">0 excluded</span>
 
@@ -142,28 +142,23 @@
 <p id="n73" class="pln"><a href="#n73">73</a></p>
 <p id="n74" class="pln"><a href="#n74">74</a></p>
 <p id="n75" class="stm run hide_run"><a href="#n75">75</a></p>
-<p id="n76" class="pln"><a href="#n76">76</a></p>
+<p id="n76" class="stm run hide_run"><a href="#n76">76</a></p>
 <p id="n77" class="stm run hide_run"><a href="#n77">77</a></p>
 <p id="n78" class="stm run hide_run"><a href="#n78">78</a></p>
 <p id="n79" class="stm run hide_run"><a href="#n79">79</a></p>
-<p id="n80" class="pln"><a href="#n80">80</a></p>
+<p id="n80" class="stm run hide_run"><a href="#n80">80</a></p>
 <p id="n81" class="stm run hide_run"><a href="#n81">81</a></p>
 <p id="n82" class="stm run hide_run"><a href="#n82">82</a></p>
 <p id="n83" class="stm run hide_run"><a href="#n83">83</a></p>
 <p id="n84" class="stm run hide_run"><a href="#n84">84</a></p>
 <p id="n85" class="stm run hide_run"><a href="#n85">85</a></p>
-<p id="n86" class="stm run hide_run"><a href="#n86">86</a></p>
-<p id="n87" class="stm run hide_run"><a href="#n87">87</a></p>
-<p id="n88" class="stm run hide_run"><a href="#n88">88</a></p>
-<p id="n89" class="stm run hide_run"><a href="#n89">89</a></p>
-<p id="n90" class="stm run hide_run"><a href="#n90">90</a></p>
 
             </td>
             <td class="text">
 <p id="t1" class="pln"><span class="com"># Copyright (C) 2019 Harvard University. All Rights Reserved. Unauthorized</span><span class="strut">&nbsp;</span></p>
 <p id="t2" class="pln"><span class="com"># copying of this file, via any medium is strictly prohibited Proprietary and</span><span class="strut">&nbsp;</span></p>
 <p id="t3" class="pln"><span class="com"># confidential</span><span class="strut">&nbsp;</span></p>
-<p id="t4" class="pln"><span class="com"># Developed by Mohammad Haft-Javaherian &lt;mhaft_javaherian@mgh.harvard.edu>,</span><span class="strut">&nbsp;</span></p>
+<p id="t4" class="pln"><span class="com"># Developed by Mohammad Haft-Javaherian &lt;mhaft-javaherian@mgh.harvard.edu>,</span><span class="strut">&nbsp;</span></p>
 <p id="t5" class="pln"><span class="com">#                                       &lt;7javaherian@gmail.com>.</span><span class="strut">&nbsp;</span></p>
 <p id="t6" class="pln"><span class="com"># ==============================================================================</span><span class="strut">&nbsp;</span></p>
 <p id="t7" class="pln"><span class="strut">&nbsp;</span></p>
@@ -235,21 +230,16 @@
 <p id="t73" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t74" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t75" class="stm run hide_run"><span class="key">def</span> <span class="nam">load_train_data</span><span class="op">(</span><span class="nam">folder_path</span><span class="op">,</span> <span class="nam">im_shape</span><span class="op">,</span> <span class="nam">coord_sys</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
-<p id="t76" class="pln">    <span class="com"># TODO: remove the hardcoded num_class</span><span class="strut">&nbsp;</span></p>
-<p id="t77" class="stm run hide_run">    <span class="nam">num_class</span> <span class="op">=</span> <span class="num">2</span><span class="strut">&nbsp;</span></p>
-<p id="t78" class="stm run hide_run">    <span class="nam">im</span><span class="op">,</span> <span class="nam">label</span><span class="op">,</span> <span class="nam">sample_caseID</span> <span class="op">=</span> <span class="nam">make_dataset</span><span class="op">(</span><span class="nam">folder_path</span><span class="op">,</span> <span class="nam">im_shape</span><span class="op">,</span> <span class="nam">coord_sys</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t79" class="stm run hide_run">    <span class="key">assert</span> <span class="nam">im</span><span class="op">.</span><span class="nam">size</span> <span class="op">></span> <span class="num">0</span><span class="op">,</span> <span class="str">"The data folder is empty: %s"</span> <span class="op">%</span> <span class="nam">folder_path</span><span class="strut">&nbsp;</span></p>
-<p id="t80" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t81" class="stm run hide_run">    <span class="nam">im</span> <span class="op">=</span> <span class="nam">im</span><span class="op">.</span><span class="nam">astype</span><span class="op">(</span><span class="nam">np</span><span class="op">.</span><span class="nam">float32</span><span class="op">)</span> <span class="op">/</span> <span class="num">255</span><span class="strut">&nbsp;</span></p>
-<p id="t82" class="stm run hide_run">    <span class="nam">label</span> <span class="op">=</span> <span class="op">(</span><span class="nam">label</span> <span class="op">==</span> <span class="num">3</span><span class="op">)</span><span class="op">.</span><span class="nam">astype</span><span class="op">(</span><span class="nam">np</span><span class="op">.</span><span class="nam">uint8</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t83" class="stm run hide_run">    <span class="nam">label</span> <span class="op">=</span> <span class="nam">np</span><span class="op">.</span><span class="nam">squeeze</span><span class="op">(</span><span class="nam">label</span><span class="op">,</span> <span class="nam">axis</span><span class="op">=</span><span class="op">-</span><span class="num">1</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t84" class="stm run hide_run">    <span class="key">if</span> <span class="nam">im_shape</span><span class="op">[</span><span class="num">0</span><span class="op">]</span> <span class="op">==</span> <span class="num">1</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
-<p id="t85" class="stm run hide_run">        <span class="nam">im</span><span class="op">,</span> <span class="nam">label</span> <span class="op">=</span> <span class="nam">np</span><span class="op">.</span><span class="nam">squeeze</span><span class="op">(</span><span class="nam">im</span><span class="op">,</span> <span class="nam">axis</span><span class="op">=</span><span class="num">1</span><span class="op">)</span><span class="op">,</span> <span class="nam">np</span><span class="op">.</span><span class="nam">squeeze</span><span class="op">(</span><span class="nam">label</span><span class="op">,</span> <span class="nam">axis</span><span class="op">=</span><span class="num">1</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t86" class="stm run hide_run">    <span class="nam">label</span> <span class="op">=</span> <span class="nam">np</span><span class="op">.</span><span class="nam">reshape</span><span class="op">(</span><span class="nam">np</span><span class="op">.</span><span class="nam">squeeze</span><span class="op">(</span><span class="nam">np</span><span class="op">.</span><span class="nam">eye</span><span class="op">(</span><span class="nam">num_class</span><span class="op">)</span><span class="op">[</span><span class="nam">label</span><span class="op">.</span><span class="nam">reshape</span><span class="op">(</span><span class="op">-</span><span class="num">1</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">,</span> <span class="nam">label</span><span class="op">.</span><span class="nam">shape</span> <span class="op">+</span> <span class="op">(</span><span class="nam">num_class</span><span class="op">,</span> <span class="op">)</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t87" class="stm run hide_run">    <span class="nam">train_data_id</span> <span class="op">=</span> <span class="nam">np</span><span class="op">.</span><span class="nam">nonzero</span><span class="op">(</span><span class="nam">np</span><span class="op">.</span><span class="nam">mod</span><span class="op">(</span><span class="nam">sample_caseID</span><span class="op">,</span> <span class="num">2</span><span class="op">)</span> <span class="op">==</span> <span class="num">1</span><span class="op">)</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
-<p id="t88" class="stm run hide_run">    <span class="nam">test_data_id</span> <span class="op">=</span> <span class="nam">np</span><span class="op">.</span><span class="nam">nonzero</span><span class="op">(</span><span class="nam">np</span><span class="op">.</span><span class="nam">mod</span><span class="op">(</span><span class="nam">sample_caseID</span><span class="op">,</span> <span class="num">4</span><span class="op">)</span> <span class="op">==</span> <span class="num">2</span><span class="op">)</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
-<p id="t89" class="stm run hide_run">    <span class="nam">valid_data_id</span> <span class="op">=</span> <span class="nam">np</span><span class="op">.</span><span class="nam">nonzero</span><span class="op">(</span><span class="nam">np</span><span class="op">.</span><span class="nam">mod</span><span class="op">(</span><span class="nam">sample_caseID</span><span class="op">,</span> <span class="num">4</span><span class="op">)</span> <span class="op">==</span> <span class="num">0</span><span class="op">)</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
-<p id="t90" class="stm run hide_run">    <span class="key">return</span> <span class="nam">im</span><span class="op">,</span> <span class="nam">label</span><span class="op">,</span> <span class="nam">train_data_id</span><span class="op">,</span> <span class="nam">test_data_id</span><span class="op">,</span> <span class="nam">valid_data_id</span><span class="op">,</span> <span class="nam">sample_caseID</span><span class="strut">&nbsp;</span></p>
+<p id="t76" class="stm run hide_run">    <span class="nam">im</span><span class="op">,</span> <span class="nam">label</span><span class="op">,</span> <span class="nam">sample_caseID</span> <span class="op">=</span> <span class="nam">make_dataset</span><span class="op">(</span><span class="nam">folder_path</span><span class="op">,</span> <span class="nam">im_shape</span><span class="op">,</span> <span class="nam">coord_sys</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t77" class="stm run hide_run">    <span class="key">assert</span> <span class="nam">im</span><span class="op">.</span><span class="nam">size</span> <span class="op">></span> <span class="num">0</span><span class="op">,</span> <span class="str">"The data folder is empty: %s"</span> <span class="op">%</span> <span class="nam">folder_path</span><span class="strut">&nbsp;</span></p>
+<p id="t78" class="stm run hide_run">    <span class="nam">im</span> <span class="op">=</span> <span class="nam">im</span><span class="op">.</span><span class="nam">astype</span><span class="op">(</span><span class="nam">np</span><span class="op">.</span><span class="nam">float32</span><span class="op">)</span> <span class="op">/</span> <span class="num">255</span><span class="strut">&nbsp;</span></p>
+<p id="t79" class="stm run hide_run">    <span class="nam">label</span> <span class="op">=</span> <span class="nam">np</span><span class="op">.</span><span class="nam">unpackbits</span><span class="op">(</span><span class="nam">label</span><span class="op">.</span><span class="nam">astype</span><span class="op">(</span><span class="nam">np</span><span class="op">.</span><span class="nam">uint8</span><span class="op">)</span><span class="op">,</span> <span class="nam">axis</span><span class="op">=</span><span class="op">-</span><span class="num">1</span><span class="op">)</span><span class="op">[</span><span class="op">...</span><span class="op">,</span> <span class="op">:</span><span class="op">:</span><span class="op">-</span><span class="num">1</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
+<p id="t80" class="stm run hide_run">    <span class="key">if</span> <span class="nam">im_shape</span><span class="op">[</span><span class="num">0</span><span class="op">]</span> <span class="op">==</span> <span class="num">1</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t81" class="stm run hide_run">        <span class="nam">im</span><span class="op">,</span> <span class="nam">label</span> <span class="op">=</span> <span class="nam">np</span><span class="op">.</span><span class="nam">squeeze</span><span class="op">(</span><span class="nam">im</span><span class="op">,</span> <span class="nam">axis</span><span class="op">=</span><span class="num">1</span><span class="op">)</span><span class="op">,</span> <span class="nam">np</span><span class="op">.</span><span class="nam">squeeze</span><span class="op">(</span><span class="nam">label</span><span class="op">,</span> <span class="nam">axis</span><span class="op">=</span><span class="num">1</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t82" class="stm run hide_run">    <span class="nam">train_data_id</span> <span class="op">=</span> <span class="nam">np</span><span class="op">.</span><span class="nam">nonzero</span><span class="op">(</span><span class="nam">np</span><span class="op">.</span><span class="nam">mod</span><span class="op">(</span><span class="nam">sample_caseID</span><span class="op">,</span> <span class="num">2</span><span class="op">)</span> <span class="op">==</span> <span class="num">1</span><span class="op">)</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
+<p id="t83" class="stm run hide_run">    <span class="nam">test_data_id</span> <span class="op">=</span> <span class="nam">np</span><span class="op">.</span><span class="nam">nonzero</span><span class="op">(</span><span class="nam">np</span><span class="op">.</span><span class="nam">mod</span><span class="op">(</span><span class="nam">sample_caseID</span><span class="op">,</span> <span class="num">4</span><span class="op">)</span> <span class="op">==</span> <span class="num">2</span><span class="op">)</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
+<p id="t84" class="stm run hide_run">    <span class="nam">valid_data_id</span> <span class="op">=</span> <span class="nam">np</span><span class="op">.</span><span class="nam">nonzero</span><span class="op">(</span><span class="nam">np</span><span class="op">.</span><span class="nam">mod</span><span class="op">(</span><span class="nam">sample_caseID</span><span class="op">,</span> <span class="num">4</span><span class="op">)</span> <span class="op">==</span> <span class="num">0</span><span class="op">)</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
+<p id="t85" class="stm run hide_run">    <span class="key">return</span> <span class="nam">im</span><span class="op">,</span> <span class="nam">label</span><span class="op">,</span> <span class="nam">train_data_id</span><span class="op">,</span> <span class="nam">test_data_id</span><span class="op">,</span> <span class="nam">valid_data_id</span><span class="op">,</span> <span class="nam">sample_caseID</span><span class="strut">&nbsp;</span></p>
 
             </td>
         </tr>
@@ -260,7 +250,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
-            created at 2019-08-01 16:36
+            created at 2019-08-12 16:15
         </p>
     </div>
 </div>
