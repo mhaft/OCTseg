@@ -1,7 +1,7 @@
 # Copyright (C) 2019 Harvard University. All Rights Reserved. Unauthorized
 # copying of this file, via any medium is strictly prohibited Proprietary and
 # confidential
-# Developed by Mohammad Haft-Javaherian <mhaft_javaherian@mgh.harvard.edu>,
+# Developed by Mohammad Haft-Javaherian <mhaft-javaherian@mgh.harvard.edu>,
 #                                       <7javaherian@gmail.com>.
 # ==============================================================================
 
@@ -22,7 +22,7 @@ def test_read_oct_roi_file():
     im_shape = [5, 10, 10]
     out = read_oct_roi_file(file_path, im_shape)
     tifffile.imwrite(file_path[:-4] + '-out.tif', out)
-    np.testing.assert_array_equal(out[1, 2, 1:4], [3, 3, 3])
+    np.testing.assert_array_equal(out[1, 2, 1:4], [8, 8, 8])
 
 
 def test_small_obj_list():
