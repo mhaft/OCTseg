@@ -1,7 +1,7 @@
 # Copyright (C) 2019 Harvard University. All Rights Reserved. Unauthorized
 # copying of this file, via any medium is strictly prohibited Proprietary and
 # confidential
-# Developed by Mohammad Haft-Javaherian <mhaft_javaherian@mgh.harvard.edu>,
+# Developed by Mohammad Haft-Javaherian <mhaft-javaherian@mgh.harvard.edu>,
 #                                       <7javaherian@gmail.com>.
 # ==============================================================================
 
@@ -62,22 +62,25 @@ def lumen_iel_mask(obj_list, im_shape):
 
 def read_oct_roi_file(file_path, im_shape):
     obj_list = roi_file_parser(file_path)
-    out = np.zeros(im_shape, dtype='uint8')
+    out = np.zeros(im_shape, dtype=np.uint8)
     for iel in obj_list['iel']:
         tmp = out[iel[0][2] - 1, ...]
-        tmp[lumen_iel_mask(iel, im_shape)] = 3
+        tmp[lumen_iel_mask(iel, im_shape)] += 2 ** 3
         out[iel[0][2] - 1, ...] = tmp
     for lumen in obj_list['lumen']:
         tmp = out[lumen[0][2] - 1, ...]
-        tmp[lumen_iel_mask(lumen, im_shape)] = 2
+        tmp[lumen_iel_mask(lumen, im_shape)] += 2 ** 2
+        tmp[np.right_shift(tmp, 2) % 4 == 3] -= 2 ** 3
         out[lumen[0][2] - 1, ...] = tmp
-    for gw in obj_list['gw'] + obj_list['noniel']:
+    for i, gw in enumerate(obj_list['gw'] + obj_list['noniel'], 1):
         z = gw[1][2] - 1
+        # val is 1 and 2 for GW and NonIEL, respectively
+        val = 2 ** (i > len(obj_list['gw']))
         gw = np.array([gw[1][1], gw[2][1]])
         if gw[0] <= gw[1]:
-            out[z, :, gw[0]:(gw[1] + 1)] = 1
+            out[z, :, gw[0]:(gw[1] + 1)] += val
         else:
-            out[z, :, gw[0]:] = 1
-            out[z, :, :(gw[1] + 1)] = 1
+            out[z, :, gw[0]:] += val
+            out[z, :, :(gw[1] + 1)] += val
     return out
 
