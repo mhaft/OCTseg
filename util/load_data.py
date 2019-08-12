@@ -1,7 +1,7 @@
 # Copyright (C) 2019 Harvard University. All Rights Reserved. Unauthorized
 # copying of this file, via any medium is strictly prohibited Proprietary and
 # confidential
-# Developed by Mohammad Haft-Javaherian <mhaft_javaherian@mgh.harvard.edu>,
+# Developed by Mohammad Haft-Javaherian <mhaft-javaherian@mgh.harvard.edu>,
 #                                       <7javaherian@gmail.com>.
 # ==============================================================================
 
@@ -73,17 +73,12 @@ def make_dataset(folder_path, im_shape, coord_sys, carts_w=512):
 
 
 def load_train_data(folder_path, im_shape, coord_sys):
-    # TODO: remove the hardcoded num_class
-    num_class = 2
     im, label, sample_caseID = make_dataset(folder_path, im_shape, coord_sys)
     assert im.size > 0, "The data folder is empty: %s" % folder_path
-
     im = im.astype(np.float32) / 255
-    label = (label == 3).astype(np.uint8)
-    label = np.squeeze(label, axis=-1)
+    label = np.unpackbits(label.astype(np.uint8), axis=-1)[..., ::-1]
     if im_shape[0] == 1:
         im, label = np.squeeze(im, axis=1), np.squeeze(label, axis=1)
-    label = np.reshape(np.squeeze(np.eye(num_class)[label.reshape(-1)]), label.shape + (num_class, ))
     train_data_id = np.nonzero(np.mod(sample_caseID, 2) == 1)[0]
     test_data_id = np.nonzero(np.mod(sample_caseID, 4) == 2)[0]
     valid_data_id = np.nonzero(np.mod(sample_caseID, 4) == 0)[0]
