@@ -69,11 +69,10 @@ coord_sys = 'carts' if args.isCarts else 'polar'
 
 # GPU settings
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
-config = tf.ConfigProto()
+gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.975)
+config = tf.ConfigProto(gpu_options=gpu_options)
 config.gpu_options.allow_growth = True
 config.allow_soft_placement = True
-gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.95)
-config = tf.ConfigProto(gpu_options=gpu_options)
 set_session(tf.Session(config=config))
 if '-' in args.gpu_id:
     numGPU = args.gpu_id.split('-')
