@@ -80,6 +80,11 @@ def multi_loss_fun(loss_weight):
         if len(shape) == 5 and shape[1].value is not None:
             i = shape[1].value // 2
             label, target = label[:, i, ...], target[:, i, ...]
-        return loss_weight[0] * weighted_cross_entropy(label, target) + \
-               loss_weight[1] * dice_loss(label, target)
+        if loss_weight[0] == 0:
+            return dice_loss(label, target)
+        elif loss_weight[1] == 0:
+            return weighted_cross_entropy(label, target)
+        else:
+            return loss_weight[0] * weighted_cross_entropy(label, target) + \
+                   loss_weight[1] * dice_loss(label, target)
     return multi_loss
