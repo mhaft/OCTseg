@@ -5,7 +5,14 @@
 #                                       <7javaherian@gmail.com>.
 # ==============================================================================
 
-"""plot the log file within the save model folders."""
+"""plot the log file within the save model folder.
+
+    plots the train and validation loss values over last 100 recorded performance evaluations and update the
+    plot every 5 second.
+
+    :param exp_def: the experiment definition used for saving the model.
+    :return: the pyplot figure
+    """
 
 import argparse
 
@@ -13,15 +20,6 @@ import csv
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-
-parser = argparse.ArgumentParser()
-parser.add_argument("-exp_def", type=str, default="test", help="experiment definition")
-args = parser.parse_args()
-log_file = '../model/' + args.exp_def + '/log-' + args.exp_def + '.csv'
-
-
-fig = plt.figure()
-ax1 = fig.add_subplot(1, 1, 1)
 
 
 def animate(i):
@@ -43,6 +41,16 @@ def animate(i):
         pass
 
 
-ani = animation.FuncAnimation(fig, animate, interval=5000)
-plt.show()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-exp_def", type=str, default="test", help="experiment definition")
+    args = parser.parse_args()
+    log_file = '../model/' + args.exp_def + '/log-' + args.exp_def + '.csv'
+
+    fig = plt.figure()
+    ax1 = fig.add_subplot(1, 1, 1)
+
+    ani = animation.FuncAnimation(fig, animate, interval=5000)
+    plt.show()
+
 

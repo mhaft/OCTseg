@@ -5,10 +5,9 @@
 #                                       <7javaherian@gmail.com>.
 # ==============================================================================
 
-"""load a batch of data.
+"""Load a batch of data.
 
     Creates batches of data randomly in serial or multi-thread parallel fashion.
-
 """
 
 from multiprocessing import cpu_count
@@ -19,7 +18,16 @@ from scipy.ndimage import zoom
 
 
 def img_rand_scale(im, scale, order):
-    """scale one image batch"""
+    """Scale one image or label batch in Cartesian coordinate system.
+
+    scale the image based on the input scale value and interpolation order followed by cropping or padding to
+    maintain the original image shape.  For interpolation close to the boundaries,  the reflection mode is used.
+
+    :param im: 3D or 4D image or label tensor
+    :param scale: scalar scale values for x and y direction
+    :param order: interpolation order
+    :return: same size image with the scale image in the center of it.
+    """
     out = np.zeros_like(im)
     new_shape = (len(im.shape) == 4) * (1,) + (scale, scale, 1)
     tmp = zoom(im, new_shape, order=order, mode='reflect')
@@ -34,6 +42,18 @@ def img_rand_scale(im, scale, order):
 
 
 def img_aug(im, l, coord_sys, p_lim=0.5):
+    """Image augmentation manager.
+
+    Based on the coordinate system (*Polar* vs.  *Cartesian*),  it selects the corresponding method.
+
+    :param im: input image 4D or 5D tensor
+    :param l: input label 4D or 5D tensor
+    :param coord_sys: coordinate system.  'polar' or 'carts' for Polar and Cartesian,  respectively.
+    :param p_lim: probability limit for applying each augmentation case.
+    :return: augmented im and l
+
+    :seemore: :meth:`img_aug_carts`, :meth:`img_aug_polar`
+    """
     assert coord_sys in ['carts', 'polar'], 'the coord_sys should be carts or polar. got %d' % coord_sys
     if coord_sys == 'carts':
         return img_aug_carts(im, l, p_lim)
@@ -42,9 +62,33 @@ def img_aug(im, l, coord_sys, p_lim=0.5):
 
 
 def img_aug_carts(im, l, p_lim=0.5):
-    """Data augmentation in Cartesian"""
+    """Data augmentation in Cartesian coordinate system.
+
+    Applies different image augmentation procedures:
+        *  mirroring the image along 45 degree (y=x line)
+
+        *  mirroring the image along the x axis
+
+        *  mirroring the image along the y axis
+
+        * mirroring the image along the z axis for 3D images
+
+        * multiple 90 degree rotations
+
+        * image intensity scaling by multplying the intensity values with close to one scale value
+
+        * image scaling.  See :meth:`img_rand_scale`
+
+    based on the input probability limit probabilistically applies different augmentation cases.
+
+    :param im: input image 4D or 5D tensor
+    :param l: input label 4D or 5D tensor
+    :param p_lim: probability limit for applying each augmentation case.
+    :return: augmented im and l
+
+    :seemore: :meth:`img_aug`
+    """
     dim = len(im.shape) - 2
-    p_lim = 0.9
     for i in range(im.shape[0]):
         im_, l_ = im[i, ...], l[i, ...]
         if np.random.rand() > p_lim:  # y=x mirror
@@ -79,9 +123,25 @@ def img_aug_carts(im, l, p_lim=0.5):
 
 
 def img_aug_polar(im, l, p_lim=0.5):
-    """Data augmentation in Polar coordinate"""
+    """Data augmentation in Polar coordinate.
+
+    Applies different image augmentation procedures:
+        * random rotations
+
+        * image intensity scaling by multplying the intensity valuse with close to one scale value
+
+        * image scaling, which randomly crops or add pads and scale the image to the original size
+
+    based on the input probability limit probabilistically applies different augmentation cases.
+
+    :param im: input image 4D or 5D tensor
+    :param l: input label 4D or 5D tensor
+    :param p_lim: probability limit for applying each augmentation case.
+    :return: augmented im and l
+
+    :seemore: :meth:`img_aug`
+    """
     dim = len(im.shape) - 2
-    p_lim = 0.9
     for i in range(im.shape[0]):
         im_, l_ = im[i, ...], l[i, ...]
         if np.random.rand() > p_lim:  # random rotation
@@ -110,6 +170,20 @@ def img_aug_polar(im, l, p_lim=0.5):
 
 
 def load_batch(im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts'):
+    """ load a batch of data from im and/or label based on dataset (e.g. test).
+
+    This function handel different coordinate system and image augmentation.
+
+    :param im: 4D or 5D image tensor
+    :param datasetID: index of images in im and/or label along the first axis, which belong to this dataset (e.g.  test)
+    :param nBatch: batch size
+    :param label: 4D or 5D label tensor
+    :param isAug: whether to apply data augmentation. See :meth:`img_aug`
+    :param coord_sys: coordinate system {'polar' or 'carts}
+    :return: a batch of data as tuple of (image, label)
+
+    :seemore: :meth:`load_batch_parallel`
+    """
 
     while True:
         j = np.random.randint(0, len(datasetID), nBatch)
@@ -124,6 +198,20 @@ def load_batch(im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts'
 
 
 def load_batch_parallel(im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts'):
+    """ load a batch of data from im and/or label based on dataset (e.g. test) using multi-thread.
+
+    This function handel different coordinate system and image augmentation.
+
+    :param im: 4D or 5D image tensor
+    :param datasetID: index of images in im and/or label along the first axis, which belong to this dataset (e.g.  test)
+    :param nBatch: batch size
+    :param label: 4D or 5D label tensor
+    :param isAug: whether to apply data augmentation. See :meth:`img_aug`
+    :param coord_sys: coordinate system {'polar' or 'carts}
+    :return: a batch of data as tuple of (image, label)
+
+    :seemore: :meth:`load_batch`
+    """
 
     while True:
         j = np.random.randint(0, len(datasetID), nBatch)
