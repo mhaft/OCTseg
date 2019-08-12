@@ -72,7 +72,7 @@
 
 
 \title{OCTseg}
-\date{Aug 02, 2019}
+\date{Aug 12, 2019}
 \release{}
 \author{Mohammad Haft-Javaherian}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -103,8 +103,396 @@
 \end{itemize}
 
 
-\chapter{util}
-\label{\detokenize{index:util}}
+\chapter{Training and Testing}
+\label{\detokenize{index:training-and-testing}}
+
+\chapter{U-Net}
+\label{\detokenize{index:u-net}}
+
+\section{loss}
+\label{\detokenize{index:module-unet.loss}}\label{\detokenize{index:loss}}\index{unet.loss (module)@\spxentry{unet.loss}\spxextra{module}}
+CNN related loss functions
+\index{dice\_loss() (in module unet.loss)@\spxentry{dice\_loss()}\spxextra{in module unet.loss}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:unet.loss.dice_loss}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{dice\_loss}}}{\emph{label}, \emph{target}}{}
+Soft Dice coefficient loss
+
+TP, FP, and FN are true positive, false positive, and false negative.
+\begin{equation*}
+\begin{split}dice  &=  \frac{2 \times TP}{ 2 \times TP + FN + FP} \\
+dice  &=  \frac{2 \times TP}{(TP + FN) + (TP + FP)}\end{split}
+\end{equation*}
+objective is to maximize the dice, thus the loss is negate of dice for numerical stability (+1 in denominator)
+and fixing the loss range (+1 in numerator and +1 to the negated dice).
+
+The final Dice loss is formulated as
+\begin{equation*}
+\begin{split}dice \ loss = 1 - \frac{2 \times TP + 1}{(TP + FN) + (TP + FP ) + 1}\end{split}
+\end{equation*}
+it is soft as each components of the confusion matrix (TP, FP, and FN) are estimated by dot product of
+probability instead of hard classification
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{label}} \textendash{} 4D or 5D label tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{target}} \textendash{} 4D or 5d target tensor
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+dice loss
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{multi\_loss\_fun() (in module unet.loss)@\spxentry{multi\_loss\_fun()}\spxextra{in module unet.loss}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:unet.loss.multi_loss_fun}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{multi\_loss\_fun}}}{\emph{loss\_weight}}{}
+Semantic loss function based on the weighted cross entropy and dice and wighted by the loss weights in the input
+argument
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\sphinxstyleliteralstrong{\sphinxupquote{loss\_weight}} \textendash{} a list with two weights for weighted cross entropy and dice losses, respectively.
+
+\item[{Returns}] \leavevmode
+return a function, which similar to {\hyperref[\detokenize{index:unet.loss.weighted_cross_entropy}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{weighted\_cross\_entropy()}}}}} and {\hyperref[\detokenize{index:unet.loss.dice_loss}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{dice\_loss()}}}}}
+has label and target arguments
+
+\item[{Seemore}] \leavevmode
+{\hyperref[\detokenize{index:unet.loss.weighted_cross_entropy}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{weighted\_cross\_entropy()}}}}}, {\hyperref[\detokenize{index:unet.loss.dice_loss}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{dice\_loss()}}}}}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{weighted\_cross\_entropy() (in module unet.loss)@\spxentry{weighted\_cross\_entropy()}\spxextra{in module unet.loss}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:unet.loss.weighted_cross_entropy}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{weighted\_cross\_entropy}}}{\emph{label}, \emph{target}}{}
+Weighted cross entropy with foreground pixels having ten times higher weights
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{label}} \textendash{} 4D or 5D label tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{target}} \textendash{} 4D or 5d target tensor
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+weighted cross entropy value
+
+\item[{TODO}] \leavevmode
+add positive weight as an argument
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+
+
+\section{ops}
+\label{\detokenize{index:module-unet.ops}}\label{\detokenize{index:ops}}\index{unet.ops (module)@\spxentry{unet.ops}\spxextra{module}}
+CNN related operations
+\index{accuracy() (in module unet.ops)@\spxentry{accuracy()}\spxextra{in module unet.ops}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:unet.ops.accuracy}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{accuracy}}}{\emph{labels}, \emph{logits}}{}
+measure accuracy metrics
+
+\end{fulllineitems}
+
+\index{placeholder\_inputs() (in module unet.ops)@\spxentry{placeholder\_inputs()}\spxextra{in module unet.ops}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:unet.ops.placeholder_inputs}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{placeholder\_inputs}}}{\emph{im\_shape}, \emph{outCh}}{}
+Generate placeholder variables to represent the input tensors.
+
+\end{fulllineitems}
+
+
+
+\section{unet}
+\label{\detokenize{index:module-unet.unet}}\label{\detokenize{index:unet}}\index{unet.unet (module)@\spxentry{unet.unet}\spxextra{module}}
+Build unet model
+\index{unet\_model() (in module unet.unet)@\spxentry{unet\_model()}\spxextra{in module unet.unet}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:unet.unet.unet_model}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.unet.}}\sphinxbfcode{\sphinxupquote{unet\_model}}}{\emph{im\_shape}, \emph{nFeature=32}, \emph{outCh=2}, \emph{nLayer=3}}{}
+Build U-Net model.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{x}} \textendash{} input placeholder
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{outCh}} \textendash{} number of output channels
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+keras model
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+
+
+\chapter{Utility}
+\label{\detokenize{index:utility}}
+
+\section{load batch}
+\label{\detokenize{index:module-util.load_batch}}\label{\detokenize{index:load-batch}}\index{util.load\_batch (module)@\spxentry{util.load\_batch}\spxextra{module}}
+Load a batch of data.
+
+Creates batches of data randomly in serial or multi-thread parallel fashion.
+\index{img\_aug() (in module util.load\_batch)@\spxentry{img\_aug()}\spxextra{in module util.load\_batch}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:util.load_batch.img_aug}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{img\_aug}}}{\emph{im}, \emph{l}, \emph{coord\_sys}, \emph{p\_lim=0.5}}{}
+Image augmentation manager.
+
+Based on the coordinate system (\sphinxstyleemphasis{Polar} vs.  \sphinxstyleemphasis{Cartesian}),  it selects the corresponding method.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{im}} \textendash{} input image 4D or 5D tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{l}} \textendash{} input label 4D or 5D tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{coord\_sys}} \textendash{} coordinate system.  ‘polar’ or ‘carts’ for Polar and Cartesian,  respectively.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{p\_lim}} \textendash{} probability limit for applying each augmentation case.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+augmented im and l
+
+\item[{Seemore}] \leavevmode
+{\hyperref[\detokenize{index:util.load_batch.img_aug_carts}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug\_carts()}}}}}, {\hyperref[\detokenize{index:util.load_batch.img_aug_polar}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug\_polar()}}}}}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{img\_aug\_carts() (in module util.load\_batch)@\spxentry{img\_aug\_carts()}\spxextra{in module util.load\_batch}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:util.load_batch.img_aug_carts}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{img\_aug\_carts}}}{\emph{im}, \emph{l}, \emph{p\_lim=0.5}}{}
+Data augmentation in Cartesian coordinate system.
+\begin{description}
+\item[{Applies different image augmentation procedures:}] \leavevmode\begin{itemize}
+\item {} 
+mirroring the image along 45 degree (y=x line)
+
+\item {} 
+mirroring the image along the x axis
+
+\item {} 
+mirroring the image along the y axis
+
+\item {} 
+mirroring the image along the z axis for 3D images
+
+\item {} 
+multiple 90 degree rotations
+
+\item {} 
+image intensity scaling by multplying the intensity values with close to one scale value
+
+\item {} 
+image scaling.  See {\hyperref[\detokenize{index:util.load_batch.img_rand_scale}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_rand\_scale()}}}}}
+
+\end{itemize}
+
+\end{description}
+
+based on the input probability limit probabilistically applies different augmentation cases.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{im}} \textendash{} input image 4D or 5D tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{l}} \textendash{} input label 4D or 5D tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{p\_lim}} \textendash{} probability limit for applying each augmentation case.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+augmented im and l
+
+\item[{Seemore}] \leavevmode
+{\hyperref[\detokenize{index:util.load_batch.img_aug}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug()}}}}}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{img\_aug\_polar() (in module util.load\_batch)@\spxentry{img\_aug\_polar()}\spxextra{in module util.load\_batch}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:util.load_batch.img_aug_polar}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{img\_aug\_polar}}}{\emph{im}, \emph{l}, \emph{p\_lim=0.5}}{}
+Data augmentation in Polar coordinate.
+\begin{description}
+\item[{Applies different image augmentation procedures:}] \leavevmode\begin{itemize}
+\item {} 
+random rotations
+
+\item {} 
+image intensity scaling by multplying the intensity valuse with close to one scale value
+
+\item {} 
+image scaling, which randomly crops or add pads and scale the image to the original size
+
+\end{itemize}
+
+\end{description}
+
+based on the input probability limit probabilistically applies different augmentation cases.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{im}} \textendash{} input image 4D or 5D tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{l}} \textendash{} input label 4D or 5D tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{p\_lim}} \textendash{} probability limit for applying each augmentation case.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+augmented im and l
+
+\item[{Seemore}] \leavevmode
+{\hyperref[\detokenize{index:util.load_batch.img_aug}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug()}}}}}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{img\_rand\_scale() (in module util.load\_batch)@\spxentry{img\_rand\_scale()}\spxextra{in module util.load\_batch}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:util.load_batch.img_rand_scale}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{img\_rand\_scale}}}{\emph{im}, \emph{scale}, \emph{order}}{}
+Scale one image or label batch in Cartesian coordinate system.
+
+scale the image based on the input scale value and interpolation order followed by cropping or padding to
+maintain the original image shape.  For interpolation close to the boundaries,  the reflection mode is used.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{im}} \textendash{} 3D or 4D image or label tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{scale}} \textendash{} scalar scale values for x and y direction
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{order}} \textendash{} interpolation order
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+same size image with the scale image in the center of it.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{load\_batch() (in module util.load\_batch)@\spxentry{load\_batch()}\spxextra{in module util.load\_batch}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:util.load_batch.load_batch}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{load\_batch}}}{\emph{im}, \emph{datasetID}, \emph{nBatch}, \emph{label=None}, \emph{isAug=False}, \emph{coord\_sys='carts'}}{}
+load a batch of data from im and/or label based on dataset (e.g. test).
+
+This function handel different coordinate system and image augmentation.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{im}} \textendash{} 4D or 5D image tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{datasetID}} \textendash{} index of images in im and/or label along the first axis, which belong to this dataset (e.g.  test)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{nBatch}} \textendash{} batch size
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{label}} \textendash{} 4D or 5D label tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{isAug}} \textendash{} whether to apply data augmentation. See {\hyperref[\detokenize{index:util.load_batch.img_aug}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug()}}}}}
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{coord\_sys}} \textendash{} coordinate system \{‘polar’ or ‘carts\}
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+a batch of data as tuple of (image, label)
+
+\item[{Seemore}] \leavevmode
+{\hyperref[\detokenize{index:util.load_batch.load_batch_parallel}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{load\_batch\_parallel()}}}}}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{load\_batch\_parallel() (in module util.load\_batch)@\spxentry{load\_batch\_parallel()}\spxextra{in module util.load\_batch}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:util.load_batch.load_batch_parallel}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{load\_batch\_parallel}}}{\emph{im}, \emph{datasetID}, \emph{nBatch}, \emph{label=None}, \emph{isAug=False}, \emph{coord\_sys='carts'}}{}
+load a batch of data from im and/or label based on dataset (e.g. test) using multi-thread.
+
+This function handel different coordinate system and image augmentation.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{im}} \textendash{} 4D or 5D image tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{datasetID}} \textendash{} index of images in im and/or label along the first axis, which belong to this dataset (e.g.  test)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{nBatch}} \textendash{} batch size
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{label}} \textendash{} 4D or 5D label tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{isAug}} \textendash{} whether to apply data augmentation. See {\hyperref[\detokenize{index:util.load_batch.img_aug}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug()}}}}}
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{coord\_sys}} \textendash{} coordinate system \{‘polar’ or ‘carts\}
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+a batch of data as tuple of (image, label)
+
+\item[{Seemore}] \leavevmode
+{\hyperref[\detokenize{index:util.load_batch.load_batch}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{load\_batch()}}}}}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+
 
 \section{load data}
 \label{\detokenize{index:module-util.load_data}}\label{\detokenize{index:load-data}}\index{util.load\_data (module)@\spxentry{util.load\_data}\spxextra{module}}
@@ -118,6 +506,11 @@ pad or crop the 3D image to have width and length equal to the input width
 
 \end{fulllineitems}
 
+
+
+\section{plot log file}
+\label{\detokenize{index:module-util.plot_log_file}}\label{\detokenize{index:plot-log-file}}\index{util.plot\_log\_file (module)@\spxentry{util.plot\_log\_file}\spxextra{module}}
+plot the log file within the save model folders.
 
 
 \section{polar to cartesian}
@@ -153,171 +546,6 @@ Parse roi file and output the lists of objects
 
 
 
-\chapter{unet}
-\label{\detokenize{index:unet}}
-
-\section{loss}
-\label{\detokenize{index:module-unet.loss}}\label{\detokenize{index:loss}}\index{unet.loss (module)@\spxentry{unet.loss}\spxextra{module}}
-CNN related loss functions
-\index{dice\_loss() (in module unet.loss)@\spxentry{dice\_loss()}\spxextra{in module unet.loss}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.loss.dice_loss}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{dice\_loss}}}{\emph{label}, \emph{target}}{}
-soft Dice coefficient loss
-TP, FP, and FN are true positive, false positive, and false negative.
-\begin{equation*}
-\begin{split}dice  &=  \frac{2 \times TP}{ 2 \times TP + FN + FP} \\
-dice  &=  \frac{2 \times TP}{(TP + FN) + (TP + FP)}\end{split}
-\end{equation*}
-objective is to maximize the dice, thus the loss is negate of dice for numerical stability (+1 in denominator)
-and fixing the loss range (+1 in numerator and +1 to the negated dice)
-The final Dice loss is formulated as
-\begin{equation*}
-\begin{split}dice \ loss = 1 - \frac{2 \times TP + 1}{(TP + FN) + (TP + FP ) + 1}\end{split}
-\end{equation*}
-it is soft as each components of the confusion matrix (TP, FP, and FN) are estimated by dot product of
-probability instead of hard classification
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{label}} \textendash{} 4D or 5D label tensor
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{target}} \textendash{} 4D or 5d target tensor
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-dice loss
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{multi\_loss\_fun() (in module unet.loss)@\spxentry{multi\_loss\_fun()}\spxextra{in module unet.loss}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.loss.multi_loss_fun}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{multi\_loss\_fun}}}{\emph{loss\_weight}}{}
-semantic loss function based on the weighted cross entropy and dice and wighted by the loss weights in the input
-argument
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\sphinxstyleliteralstrong{\sphinxupquote{loss\_weight}} \textendash{} a list with two weights for weighted cross entropy and dice losses, respectively.
-
-\item[{Returns}] \leavevmode
-\begin{description}
-\item[{return a function, which similar to {\hyperref[\detokenize{index:unet.loss.weighted_cross_entropy}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{weighted\_cross\_entropy()}}}}} and {\hyperref[\detokenize{index:unet.loss.dice_loss}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{dice\_loss()}}}}}}] \leavevmode
-has label and target arguments
-
-\end{description}
-
-
-\item[{Seemore}] \leavevmode
-{\hyperref[\detokenize{index:unet.loss.weighted_cross_entropy}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{weighted\_cross\_entropy()}}}}}, {\hyperref[\detokenize{index:unet.loss.dice_loss}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{dice\_loss()}}}}} :
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{weighted\_cross\_entropy() (in module unet.loss)@\spxentry{weighted\_cross\_entropy()}\spxextra{in module unet.loss}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.loss.weighted_cross_entropy}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{weighted\_cross\_entropy}}}{\emph{label}, \emph{target}}{}
-weighted cross entropy with foreground pixels having ten times higher weights
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{label}} \textendash{} 4D or 5D label tensor
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{target}} \textendash{} 4D or 5d target tensor
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-weighted cross entropy value
-
-\item[{TODO}] \leavevmode
-add positive weight as an argument
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-
-
-\section{ops}
-\label{\detokenize{index:module-unet.ops}}\label{\detokenize{index:ops}}\index{unet.ops (module)@\spxentry{unet.ops}\spxextra{module}}
-CNN related operations
-\index{accuracy() (in module unet.ops)@\spxentry{accuracy()}\spxextra{in module unet.ops}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.ops.accuracy}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{accuracy}}}{\emph{labels}, \emph{logits}}{}
-measure accuracy metrics
-
-\end{fulllineitems}
-
-\index{img\_aug\_carts() (in module unet.ops)@\spxentry{img\_aug\_carts()}\spxextra{in module unet.ops}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.ops.img_aug_carts}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{img\_aug\_carts}}}{\emph{im}, \emph{l}}{}
-Data augmentation in Cartesian
-
-\end{fulllineitems}
-
-\index{img\_aug\_polar() (in module unet.ops)@\spxentry{img\_aug\_polar()}\spxextra{in module unet.ops}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.ops.img_aug_polar}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{img\_aug\_polar}}}{\emph{im}, \emph{l}}{}
-Data augmentation in Polar coordinate
-
-\end{fulllineitems}
-
-\index{img\_rand\_scale() (in module unet.ops)@\spxentry{img\_rand\_scale()}\spxextra{in module unet.ops}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.ops.img_rand_scale}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{img\_rand\_scale}}}{\emph{im}, \emph{scale}, \emph{order}}{}
-scale one image batch
-
-\end{fulllineitems}
-
-\index{placeholder\_inputs() (in module unet.ops)@\spxentry{placeholder\_inputs()}\spxextra{in module unet.ops}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.ops.placeholder_inputs}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{placeholder\_inputs}}}{\emph{im\_shape}, \emph{outCh}}{}
-Generate placeholder variables to represent the input tensors.
-
-\end{fulllineitems}
-
-
-
-\section{unet}
-\label{\detokenize{index:id1}}\phantomsection\label{\detokenize{index:module-unet.unet}}\index{unet.unet (module)@\spxentry{unet.unet}\spxextra{module}}
-Build unet model
-\index{unet\_model() (in module unet.unet)@\spxentry{unet\_model()}\spxextra{in module unet.unet}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.unet.unet_model}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.unet.}}\sphinxbfcode{\sphinxupquote{unet\_model}}}{\emph{im\_shape}, \emph{nFeature=32}, \emph{outCh=2}}{}
-Build U-Net model.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{x}} \textendash{} input placeholder
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{outCh}} \textendash{} number of output channels
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-keras model
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-
-
 \renewcommand{\indexname}{Python Module Index}
 \begin{sphinxtheindex}
 \let\bigletter\sphinxstyleindexlettergroup
@@ -325,7 +553,9 @@ keras model
 \item\relax\sphinxstyleindexentry{unet.loss}\sphinxstyleindexpageref{index:\detokenize{module-unet.loss}}
 \item\relax\sphinxstyleindexentry{unet.ops}\sphinxstyleindexpageref{index:\detokenize{module-unet.ops}}
 \item\relax\sphinxstyleindexentry{unet.unet}\sphinxstyleindexpageref{index:\detokenize{module-unet.unet}}
+\item\relax\sphinxstyleindexentry{util.load\_batch}\sphinxstyleindexpageref{index:\detokenize{module-util.load_batch}}
 \item\relax\sphinxstyleindexentry{util.load\_data}\sphinxstyleindexpageref{index:\detokenize{module-util.load_data}}
+\item\relax\sphinxstyleindexentry{util.plot\_log\_file}\sphinxstyleindexpageref{index:\detokenize{module-util.plot_log_file}}
 \item\relax\sphinxstyleindexentry{util.polar2cartesian}\sphinxstyleindexpageref{index:\detokenize{module-util.polar2cartesian}}
 \item\relax\sphinxstyleindexentry{util.process\_oct\_folder}\sphinxstyleindexpageref{index:\detokenize{module-util.process_oct_folder}}
 \item\relax\sphinxstyleindexentry{util.read\_oct\_roi\_file}\sphinxstyleindexpageref{index:\detokenize{module-util.read_oct_roi_file}}

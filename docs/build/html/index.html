@@ -43,62 +43,25 @@
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 </div>
-<div class="section" id="util">
-<h2>util<a class="headerlink" href="#util" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="module-util.load_data">
-<span id="load-data"></span><h3>load data<a class="headerlink" href="#module-util.load_data" title="Permalink to this headline">¶</a></h3>
-<p>Convert an 2D or 3D image from polar or cylindrical coordinate to the
-cartesian coordinate.</p>
-<dl class="function">
-<dt id="util.load_data.im_fix_width">
-<code class="sig-prename descclassname">util.load_data.</code><code class="sig-name descname">im_fix_width</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">w</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_data.im_fix_width" title="Permalink to this definition">¶</a></dt>
-<dd><p>pad or crop the 3D image to have width and length equal to the input width</p>
-</dd></dl>
-
+<div class="section" id="training-and-testing">
+<h2>Training and Testing<a class="headerlink" href="#training-and-testing" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-util.polar2cartesian">
-<span id="polar-to-cartesian"></span><h3>polar to cartesian<a class="headerlink" href="#module-util.polar2cartesian" title="Permalink to this headline">¶</a></h3>
-<p>Convert an 2D or 3D image from polar or cylindrical coordinate to the
-cartesian coordinate.</p>
-</div>
-<div class="section" id="module-util.process_oct_folder">
-<span id="process-oct-folder"></span><h3>process oct folder<a class="headerlink" href="#module-util.process_oct_folder" title="Permalink to this headline">¶</a></h3>
-<p>process OCT folder to generate the segmentation labels of cases. Each case all three -.PSTIF, -.INI, and -ROI.txt
-files</p>
-</div>
-<div class="section" id="module-util.read_oct_roi_file">
-<span id="read-oct-roi-file"></span><h3>read oct roi file<a class="headerlink" href="#module-util.read_oct_roi_file" title="Permalink to this headline">¶</a></h3>
-<p>Read ROI file generated based on the and generate segmentation results.</p>
-<dl class="function">
-<dt id="util.read_oct_roi_file.lumen_iel_mask">
-<code class="sig-prename descclassname">util.read_oct_roi_file.</code><code class="sig-name descname">lumen_iel_mask</code><span class="sig-paren">(</span><em class="sig-param">obj_list</em>, <em class="sig-param">im_shape</em><span class="sig-paren">)</span><a class="headerlink" href="#util.read_oct_roi_file.lumen_iel_mask" title="Permalink to this definition">¶</a></dt>
-<dd><p>generate lumen or IEL mask based on the point list.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="util.read_oct_roi_file.roi_file_parser">
-<code class="sig-prename descclassname">util.read_oct_roi_file.</code><code class="sig-name descname">roi_file_parser</code><span class="sig-paren">(</span><em class="sig-param">file_path</em><span class="sig-paren">)</span><a class="headerlink" href="#util.read_oct_roi_file.roi_file_parser" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parse roi file and output the lists of objects</p>
-</dd></dl>
-
-</div>
-</div>
-<div class="section" id="unet">
-<h2>unet<a class="headerlink" href="#unet" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="u-net">
+<h2>U-Net<a class="headerlink" href="#u-net" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="module-unet.loss">
 <span id="loss"></span><h3>loss<a class="headerlink" href="#module-unet.loss" title="Permalink to this headline">¶</a></h3>
 <p>CNN related loss functions</p>
 <dl class="function">
 <dt id="unet.loss.dice_loss">
 <code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">dice_loss</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.dice_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>soft Dice coefficient loss
-TP, FP, and FN are true positive, false positive, and false negative.</p>
+<dd><p>Soft Dice coefficient loss</p>
+<p>TP, FP, and FN are true positive, false positive, and false negative.</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}dice  &amp;=  \frac{2 \times TP}{ 2 \times TP + FN + FP} \\
 dice  &amp;=  \frac{2 \times TP}{(TP + FN) + (TP + FP)}\end{split}\]</div>
 <p>objective is to maximize the dice, thus the loss is negate of dice for numerical stability (+1 in denominator)
-and fixing the loss range (+1 in numerator and +1 to the negated dice)
-The final Dice loss is formulated as</p>
+and fixing the loss range (+1 in numerator and +1 to the negated dice).</p>
+<p>The final Dice loss is formulated as</p>
 <div class="math notranslate nohighlight">
 \[dice \ loss = 1 - \frac{2 \times TP + 1}{(TP + FN) + (TP + FP ) + 1}\]</div>
 <p>it is soft as each components of the confusion matrix (TP, FP, and FN) are estimated by dot product of
@@ -119,21 +82,18 @@ probability instead of hard classification</p>
 <dl class="function">
 <dt id="unet.loss.multi_loss_fun">
 <code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">multi_loss_fun</code><span class="sig-paren">(</span><em class="sig-param">loss_weight</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.multi_loss_fun" title="Permalink to this definition">¶</a></dt>
-<dd><p>semantic loss function based on the weighted cross entropy and dice and wighted by the loss weights in the input
+<dd><p>Semantic loss function based on the weighted cross entropy and dice and wighted by the loss weights in the input
 argument</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>loss_weight</strong> – a list with two weights for weighted cross entropy and dice losses, respectively.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><dl class="simple">
-<dt>return a function, which similar to <a class="reference internal" href="#unet.loss.weighted_cross_entropy" title="unet.loss.weighted_cross_entropy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></a> and <a class="reference internal" href="#unet.loss.dice_loss" title="unet.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a></dt><dd><p>has label and target arguments</p>
-</dd>
-</dl>
-</p>
+<dd class="field-even"><p>return a function, which similar to <a class="reference internal" href="#unet.loss.weighted_cross_entropy" title="unet.loss.weighted_cross_entropy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></a> and <a class="reference internal" href="#unet.loss.dice_loss" title="unet.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a>
+has label and target arguments</p>
 </dd>
 <dt class="field-odd">Seemore</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#unet.loss.weighted_cross_entropy" title="unet.loss.weighted_cross_entropy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></a>, <a class="reference internal" href="#unet.loss.dice_loss" title="unet.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a> :</p>
+<dd class="field-odd"><p><a class="reference internal" href="#unet.loss.weighted_cross_entropy" title="unet.loss.weighted_cross_entropy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></a>, <a class="reference internal" href="#unet.loss.dice_loss" title="unet.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -141,7 +101,7 @@ argument</p>
 <dl class="function">
 <dt id="unet.loss.weighted_cross_entropy">
 <code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">weighted_cross_entropy</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.weighted_cross_entropy" title="Permalink to this definition">¶</a></dt>
-<dd><p>weighted cross entropy with foreground pixels having ten times higher weights</p>
+<dd><p>Weighted cross entropy with foreground pixels having ten times higher weights</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -169,36 +129,18 @@ argument</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="unet.ops.img_aug_carts">
-<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">img_aug_carts</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">l</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.img_aug_carts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Data augmentation in Cartesian</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="unet.ops.img_aug_polar">
-<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">img_aug_polar</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">l</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.img_aug_polar" title="Permalink to this definition">¶</a></dt>
-<dd><p>Data augmentation in Polar coordinate</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="unet.ops.img_rand_scale">
-<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">img_rand_scale</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">scale</em>, <em class="sig-param">order</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.img_rand_scale" title="Permalink to this definition">¶</a></dt>
-<dd><p>scale one image batch</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="unet.ops.placeholder_inputs">
 <code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">placeholder_inputs</code><span class="sig-paren">(</span><em class="sig-param">im_shape</em>, <em class="sig-param">outCh</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.placeholder_inputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate placeholder variables to represent the input tensors.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="id1">
-<h3>unet<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
-<span class="target" id="module-unet.unet"></span><p>Build unet model</p>
+<div class="section" id="module-unet.unet">
+<span id="unet"></span><h3>unet<a class="headerlink" href="#module-unet.unet" title="Permalink to this headline">¶</a></h3>
+<p>Build unet model</p>
 <dl class="function">
 <dt id="unet.unet.unet_model">
-<code class="sig-prename descclassname">unet.unet.</code><code class="sig-name descname">unet_model</code><span class="sig-paren">(</span><em class="sig-param">im_shape</em>, <em class="sig-param">nFeature=32</em>, <em class="sig-param">outCh=2</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.unet.unet_model" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">unet.unet.</code><code class="sig-name descname">unet_model</code><span class="sig-paren">(</span><em class="sig-param">im_shape</em>, <em class="sig-param">nFeature=32</em>, <em class="sig-param">outCh=2</em>, <em class="sig-param">nLayer=3</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.unet.unet_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Build U-Net model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -211,6 +153,212 @@ argument</p>
 <dd class="field-even"><p>keras model</p>
 </dd>
 </dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="utility">
+<h2>Utility<a class="headerlink" href="#utility" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-util.load_batch">
+<span id="load-batch"></span><h3>load batch<a class="headerlink" href="#module-util.load_batch" title="Permalink to this headline">¶</a></h3>
+<p>Load a batch of data.</p>
+<p>Creates batches of data randomly in serial or multi-thread parallel fashion.</p>
+<dl class="function">
+<dt id="util.load_batch.img_aug">
+<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">img_aug</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">l</em>, <em class="sig-param">coord_sys</em>, <em class="sig-param">p_lim=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.img_aug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Image augmentation manager.</p>
+<p>Based on the coordinate system (<em>Polar</em> vs.  <em>Cartesian</em>),  it selects the corresponding method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>im</strong> – input image 4D or 5D tensor</p></li>
+<li><p><strong>l</strong> – input label 4D or 5D tensor</p></li>
+<li><p><strong>coord_sys</strong> – coordinate system.  ‘polar’ or ‘carts’ for Polar and Cartesian,  respectively.</p></li>
+<li><p><strong>p_lim</strong> – probability limit for applying each augmentation case.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>augmented im and l</p>
+</dd>
+<dt class="field-odd">Seemore</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#util.load_batch.img_aug_carts" title="util.load_batch.img_aug_carts"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug_carts()</span></code></a>, <a class="reference internal" href="#util.load_batch.img_aug_polar" title="util.load_batch.img_aug_polar"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug_polar()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="util.load_batch.img_aug_carts">
+<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">img_aug_carts</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">l</em>, <em class="sig-param">p_lim=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.img_aug_carts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data augmentation in Cartesian coordinate system.</p>
+<dl class="simple">
+<dt>Applies different image augmentation procedures:</dt><dd><ul class="simple">
+<li><p>mirroring the image along 45 degree (y=x line)</p></li>
+<li><p>mirroring the image along the x axis</p></li>
+<li><p>mirroring the image along the y axis</p></li>
+<li><p>mirroring the image along the z axis for 3D images</p></li>
+<li><p>multiple 90 degree rotations</p></li>
+<li><p>image intensity scaling by multplying the intensity values with close to one scale value</p></li>
+<li><p>image scaling.  See <a class="reference internal" href="#util.load_batch.img_rand_scale" title="util.load_batch.img_rand_scale"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_rand_scale()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<p>based on the input probability limit probabilistically applies different augmentation cases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>im</strong> – input image 4D or 5D tensor</p></li>
+<li><p><strong>l</strong> – input label 4D or 5D tensor</p></li>
+<li><p><strong>p_lim</strong> – probability limit for applying each augmentation case.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>augmented im and l</p>
+</dd>
+<dt class="field-odd">Seemore</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#util.load_batch.img_aug" title="util.load_batch.img_aug"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="util.load_batch.img_aug_polar">
+<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">img_aug_polar</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">l</em>, <em class="sig-param">p_lim=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.img_aug_polar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data augmentation in Polar coordinate.</p>
+<dl class="simple">
+<dt>Applies different image augmentation procedures:</dt><dd><ul class="simple">
+<li><p>random rotations</p></li>
+<li><p>image intensity scaling by multplying the intensity valuse with close to one scale value</p></li>
+<li><p>image scaling, which randomly crops or add pads and scale the image to the original size</p></li>
+</ul>
+</dd>
+</dl>
+<p>based on the input probability limit probabilistically applies different augmentation cases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>im</strong> – input image 4D or 5D tensor</p></li>
+<li><p><strong>l</strong> – input label 4D or 5D tensor</p></li>
+<li><p><strong>p_lim</strong> – probability limit for applying each augmentation case.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>augmented im and l</p>
+</dd>
+<dt class="field-odd">Seemore</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#util.load_batch.img_aug" title="util.load_batch.img_aug"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="util.load_batch.img_rand_scale">
+<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">img_rand_scale</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">scale</em>, <em class="sig-param">order</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.img_rand_scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scale one image or label batch in Cartesian coordinate system.</p>
+<p>scale the image based on the input scale value and interpolation order followed by cropping or padding to
+maintain the original image shape.  For interpolation close to the boundaries,  the reflection mode is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>im</strong> – 3D or 4D image or label tensor</p></li>
+<li><p><strong>scale</strong> – scalar scale values for x and y direction</p></li>
+<li><p><strong>order</strong> – interpolation order</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>same size image with the scale image in the center of it.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="util.load_batch.load_batch">
+<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">load_batch</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">datasetID</em>, <em class="sig-param">nBatch</em>, <em class="sig-param">label=None</em>, <em class="sig-param">isAug=False</em>, <em class="sig-param">coord_sys='carts'</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.load_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>load a batch of data from im and/or label based on dataset (e.g. test).</p>
+<p>This function handel different coordinate system and image augmentation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>im</strong> – 4D or 5D image tensor</p></li>
+<li><p><strong>datasetID</strong> – index of images in im and/or label along the first axis, which belong to this dataset (e.g.  test)</p></li>
+<li><p><strong>nBatch</strong> – batch size</p></li>
+<li><p><strong>label</strong> – 4D or 5D label tensor</p></li>
+<li><p><strong>isAug</strong> – whether to apply data augmentation. See <a class="reference internal" href="#util.load_batch.img_aug" title="util.load_batch.img_aug"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug()</span></code></a></p></li>
+<li><p><strong>coord_sys</strong> – coordinate system {‘polar’ or ‘carts}</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a batch of data as tuple of (image, label)</p>
+</dd>
+<dt class="field-odd">Seemore</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#util.load_batch.load_batch_parallel" title="util.load_batch.load_batch_parallel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_batch_parallel()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="util.load_batch.load_batch_parallel">
+<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">load_batch_parallel</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">datasetID</em>, <em class="sig-param">nBatch</em>, <em class="sig-param">label=None</em>, <em class="sig-param">isAug=False</em>, <em class="sig-param">coord_sys='carts'</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.load_batch_parallel" title="Permalink to this definition">¶</a></dt>
+<dd><p>load a batch of data from im and/or label based on dataset (e.g. test) using multi-thread.</p>
+<p>This function handel different coordinate system and image augmentation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>im</strong> – 4D or 5D image tensor</p></li>
+<li><p><strong>datasetID</strong> – index of images in im and/or label along the first axis, which belong to this dataset (e.g.  test)</p></li>
+<li><p><strong>nBatch</strong> – batch size</p></li>
+<li><p><strong>label</strong> – 4D or 5D label tensor</p></li>
+<li><p><strong>isAug</strong> – whether to apply data augmentation. See <a class="reference internal" href="#util.load_batch.img_aug" title="util.load_batch.img_aug"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug()</span></code></a></p></li>
+<li><p><strong>coord_sys</strong> – coordinate system {‘polar’ or ‘carts}</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a batch of data as tuple of (image, label)</p>
+</dd>
+<dt class="field-odd">Seemore</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#util.load_batch.load_batch" title="util.load_batch.load_batch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_batch()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-util.load_data">
+<span id="load-data"></span><h3>load data<a class="headerlink" href="#module-util.load_data" title="Permalink to this headline">¶</a></h3>
+<p>Convert an 2D or 3D image from polar or cylindrical coordinate to the
+cartesian coordinate.</p>
+<dl class="function">
+<dt id="util.load_data.im_fix_width">
+<code class="sig-prename descclassname">util.load_data.</code><code class="sig-name descname">im_fix_width</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">w</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_data.im_fix_width" title="Permalink to this definition">¶</a></dt>
+<dd><p>pad or crop the 3D image to have width and length equal to the input width</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-util.plot_log_file">
+<span id="plot-log-file"></span><h3>plot log file<a class="headerlink" href="#module-util.plot_log_file" title="Permalink to this headline">¶</a></h3>
+<p>plot the log file within the save model folders.</p>
+</div>
+<div class="section" id="module-util.polar2cartesian">
+<span id="polar-to-cartesian"></span><h3>polar to cartesian<a class="headerlink" href="#module-util.polar2cartesian" title="Permalink to this headline">¶</a></h3>
+<p>Convert an 2D or 3D image from polar or cylindrical coordinate to the
+cartesian coordinate.</p>
+</div>
+<div class="section" id="module-util.process_oct_folder">
+<span id="process-oct-folder"></span><h3>process oct folder<a class="headerlink" href="#module-util.process_oct_folder" title="Permalink to this headline">¶</a></h3>
+<p>process OCT folder to generate the segmentation labels of cases. Each case all three -.PSTIF, -.INI, and -ROI.txt
+files</p>
+</div>
+<div class="section" id="module-util.read_oct_roi_file">
+<span id="read-oct-roi-file"></span><h3>read oct roi file<a class="headerlink" href="#module-util.read_oct_roi_file" title="Permalink to this headline">¶</a></h3>
+<p>Read ROI file generated based on the and generate segmentation results.</p>
+<dl class="function">
+<dt id="util.read_oct_roi_file.lumen_iel_mask">
+<code class="sig-prename descclassname">util.read_oct_roi_file.</code><code class="sig-name descname">lumen_iel_mask</code><span class="sig-paren">(</span><em class="sig-param">obj_list</em>, <em class="sig-param">im_shape</em><span class="sig-paren">)</span><a class="headerlink" href="#util.read_oct_roi_file.lumen_iel_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate lumen or IEL mask based on the point list.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="util.read_oct_roi_file.roi_file_parser">
+<code class="sig-prename descclassname">util.read_oct_roi_file.</code><code class="sig-name descname">roi_file_parser</code><span class="sig-paren">(</span><em class="sig-param">file_path</em><span class="sig-paren">)</span><a class="headerlink" href="#util.read_oct_roi_file.roi_file_parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse roi file and output the lists of objects</p>
 </dd></dl>
 
 </div>

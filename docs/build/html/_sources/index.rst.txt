@@ -21,32 +21,15 @@ Indices and tables
 * :ref:`search`
 
 
-====
-util
-====
-
-load data
----------
-.. automodule:: util.load_data
-	:members:
-	
-polar to cartesian
-------------------
-.. automodule:: util.polar2cartesian
-
-process oct folder
-------------------
-.. automodule:: util.process_oct_folder
-	
-read oct roi file 
------------------
-.. automodule:: util.read_oct_roi_file 
-	:members:
+====================
+Training and Testing
+====================
+.. automodule: train
 
 
-====
-unet
-====
+=====
+U-Net
+=====
 
 loss
 ----
@@ -63,3 +46,37 @@ unet
 .. automodule:: unet.unet
 	:members:
 	
+
+=======
+Utility
+=======
+
+load batch
+----------
+.. automodule:: util.load_batch
+	:members:
+
+load data
+---------
+.. automodule:: util.load_data
+	:members:
+	
+plot log file
+-------------
+.. automodule:: util.plot_log_file
+
+polar to cartesian
+------------------
+.. automodule:: util.polar2cartesian
+	:members:
+
+process oct folder
+------------------
+.. automodule:: util.process_oct_folder
+	:members:
+	
+read oct roi file 
+-----------------
+.. automodule:: util.read_oct_roi_file 
+	:members:
+
