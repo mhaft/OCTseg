@@ -21,15 +21,15 @@ import h5py
 import numpy as np
 import tensorflow as tf
 from keras.utils import multi_gpu_model
-from keras.optimizers import Adam
+from keras import optimizers
 from keras.callbacks import ModelCheckpoint
 from keras.backend.tensorflow_backend import set_session
 from keras.losses import get
 
 from unet.unet import unet_model
-from unet.ops import load_batch
 from unet.loss import multi_loss_fun
 from util.load_data import load_train_data
+from util.load_batch import load_batch, load_batch_parallel
 
 # parse arguments
 parser = argparse.ArgumentParser()
@@ -97,7 +97,7 @@ if numGPU > 1:
     model = multi_gpu_model(model, gpus=numGPU)
 if not isTest:
     save_callback = ModelCheckpoint(save_file_name)
-    model.compile(optimizer=Adam(lr=args.lr), loss=get(loss))
+    model.compile(optimizer=optimizers.RMSprop(lr=args.lr), loss=get(loss))
     print('Model is initialized.')
 else:
     iEpoch = args.testEpoch
