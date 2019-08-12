@@ -1,7 +1,7 @@
 # Copyright (C) 2019 Harvard University. All Rights Reserved. Unauthorized
 # copying of this file, via any medium is strictly prohibited Proprietary and
 # confidential
-# Developed by Mohammad Haft-Javaherian <mhaft_javaherian@mgh.harvard.edu>,
+# Developed by Mohammad Haft-Javaherian <mhaft-javaherian@mgh.harvard.edu>,
 #                                       <7javaherian@gmail.com>.
 # ==============================================================================
 
@@ -14,12 +14,13 @@ import tensorflow as tf
 def conv_layer(x, ChOut):
     ndims = len(x.get_shape()) - 2
     ConvND = getattr(KL, 'Conv%dD' % ndims)
-
     out_conv1 = ConvND(ChOut, kernel_size=3, padding='same', kernel_initializer='RandomNormal')(x)
     h_conv1 = KL.LeakyReLU()(out_conv1)
     out_conv2 = ConvND(ChOut, kernel_size=3, padding='same', kernel_initializer='RandomNormal')(h_conv1)
     h_conv2 = KL.LeakyReLU()(out_conv2)
-    return h_conv2
+    out_conv3 = ConvND(ChOut, kernel_size=3, padding='same', kernel_initializer='RandomNormal')(h_conv2)
+    h_conv3 = KL.LeakyReLU()(out_conv3)
+    return h_conv3
 
 
 def MaxPoolingND(x):
