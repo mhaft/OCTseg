@@ -29,9 +29,13 @@ def dice_loss(label, target):
     it is soft as each components of the confusion matrix (TP, FP, and FN) are estimated by dot product of
     probability instead of hard classification
 
-    :param label: 4D or 5D label tensor
-    :param target: 4D or 5d target tensor
-    :return: dice loss
+    Args:
+        label: 4D or 5D label tensor
+        target: 4D or 5d target tensor
+
+    Returns:
+         dice loss
+
     """
     target = tf.nn.softmax(target)
     target, label = target[..., 1:], label[..., 1:]
@@ -45,13 +49,15 @@ def dice_loss(label, target):
 def weighted_cross_entropy(label, target):
     """Weighted cross entropy with foreground pixels having ten times higher weights
 
-    :param label: 4D or 5D label tensor
-    :param target: 4D or 5d target tensor
-    :return: weighted cross entropy value
+    Args:
+        label: 4D or 5D label tensor
+        target: 4D or 5d target tensor
 
-    :TODO: add positive weight as an argument
+    returns:
+        weighted cross entropy value
+
     """
-
+    # Todo: add positive weight as an argument
     return tf.reduce_mean(tf.nn.weighted_cross_entropy_with_logits(labels=label, logits=target, pos_weight=10))
 
 
@@ -59,12 +65,19 @@ def multi_loss_fun(loss_weight):
     """Semantic loss function based on the weighted cross entropy and dice and wighted by the loss weights in the input
     argument
 
-    :param loss_weight: a list with two weights for weighted cross entropy and dice losses, respectively.
-    :return: return a function, which similar to :meth:`weighted_cross_entropy` and :meth:`dice_loss`
+    Args:
+        loss_weight: a list with two weights for weighted cross entropy and dice losses, respectively.
+
+    Returns:
+         function, which similar to :meth:`weighted_cross_entropy` and :meth:`dice_loss`
                 has label and target arguments
 
-    :seemore: :meth:`weighted_cross_entropy`, :meth:`dice_loss`
+    See Also:
+        * :meth:`weighted_cross_entropy`
+        * :meth:`dice_loss`
+
     """
+
     def multi_loss(label, target):
         shape = label.get_shape()
         if len(shape) == 5 and shape[1].value is not None:
@@ -77,4 +90,5 @@ def multi_loss_fun(loss_weight):
         else:
             return loss_weight[0] * weighted_cross_entropy(label, target) + \
                    loss_weight[1] * dice_loss(label, target)
+
     return multi_loss
