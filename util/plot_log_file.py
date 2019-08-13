@@ -5,13 +5,25 @@
 #                                       <7javaherian@gmail.com>.
 # ==============================================================================
 
-"""plot the log file within the save model folder.
+"""plot the log file within the save model folder. 111
 
     plots the train and validation loss values over last 100 recorded performance evaluations and update the
-    plot every 5 second.
+    plot every 5 second.  The figure has two subplots: top one has all the results and bottom one has last 100 log
+    records.
 
-    :param exp_def: the experiment definition used for saving the model.
-    :return: the pyplot figure
+    Notes:
+        Arguments are bash arguments.
+
+    Args:
+        exp_def: the experiment definition used for saving the model.
+        models_path: the path that model folder for `exp_def`
+
+    Returns:
+        PyPlot figure with two subplots.
+
+    See Also:
+        * :meth:`train`
+
     """
 
 import argparse
@@ -22,33 +34,66 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
+def smooth(x):
+    """Smoothing 1D using box filter with kernel size = 5
+
+    Args:
+        x: input 1D vector
+
+    Returns:
+        smoothed 1D vector
+
+    """
+    x[4:] = (x[4:] + x[3:-1] + x[2:-2] + x[1:-3] + x[:-4]) / 5
+    return x
+
+
 def animate(i):
+    """ a handle function to update at each ste
+
+    Args:
+        i: animation frame.  The argument will be used by :meth: animation.FuncAnimation
+
+    Returns:
+        updated axes within the figure, which all are defined in the outer scope.
+
+    See Also:
+        * :meth: animation.FuncAnimation
+
+    """
     try:
         with open(log_file, 'r') as f:
             reader = csv.DictReader(f, delimiter=',', skipinitialspace=True)
             data = []
-            next(reader)
             for row in reader:
                 data.append([int(row['epoch']), float(row['Time (hr)']), float(row['Test_Loss']), float(row['Valid_Loss'])])
         ax1.clear()
+        ax2.clear()
         data = np.array(data)
-        ax1.plot(data[-100:, 0], data[-100:, 2])
-        ax1.plot(data[-100:, 0], data[-100:, 3])
-        ax1.legend(['Test_Loss', 'Valid_Loss'])
-        ax1.set_xlabel('Epoch')
+        iStart = 0
+        ax1.plot(data[iStart:, 0], smooth(data[iStart:, 2]))
+        ax1.plot(data[iStart:, 0], smooth(data[iStart:, 3]))
+        ax1.legend(['Training Loss', 'Validation Loss'])
         ax1.set_ylabel('Loss')
-    finally:
+        iStart = -50
+        ax2.plot(data[iStart:, 0], data[iStart:, 2])
+        ax2.plot(data[iStart:, 0], data[iStart:, 3])
+        ax2.set_xlabel('Epoch')
+        ax2.set_ylabel('Loss')
+    except:
         pass
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-exp_def", type=str, default="test", help="experiment definition")
+    parser.add_argument("-models_path", type=str, default="../model/", help="path for saving models")
     args = parser.parse_args()
-    log_file = '../model/' + args.exp_def + '/log-' + args.exp_def + '.csv'
+    log_file = args.models_path + args.exp_def + '/log-' + args.exp_def + '.csv'
 
     fig = plt.figure()
-    ax1 = fig.add_subplot(1, 1, 1)
+    ax1 = fig.add_subplot(2, 1, 1)
+    ax2 = fig.add_subplot(2, 1, 2)
 
     ani = animation.FuncAnimation(fig, animate, interval=5000)
     plt.show()
