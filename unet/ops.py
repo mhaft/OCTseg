@@ -23,9 +23,9 @@ def conv_layer(x, ChOut):
         output of the final layer with same size as `x`
 
     See Also:
-        * :meth:`KL.LeakyReLU`
-        * :meth:`KL.Conv2D`
-        * :meth:`KL.Conv3D`
+        * :meth:`keras.layers.LeakyReLU`
+        * :meth:`keras.layers.Conv2D`
+        * :meth:`keras.layers.Conv3D`
 
     """
     ndims = len(x.get_shape()) - 2
@@ -49,9 +49,9 @@ def MaxPoolingND(x):
         downscaled of `x` in x and y direction
 
     See Also:
-        * :meth: `up_conv`
-        * :meth: `KL.MaxPooling2D`
-        * :meth: `KL.MaxPooling3D`
+        * :meth:`up_conv`
+        * :meth:`keras.layers.MaxPooling2D`
+        * :meth:`keras.layers.MaxPooling3D`
 
     """
     ndims = len(x.get_shape()) - 2
