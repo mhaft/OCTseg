@@ -72,7 +72,7 @@
 
 
 \title{OCTseg}
-\date{Aug 12, 2019}
+\date{Aug 13, 2019}
 \release{}
 \author{Mohammad Haft-Javaherian}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -160,13 +160,28 @@ argument
 \sphinxstyleliteralstrong{\sphinxupquote{loss\_weight}} \textendash{} a list with two weights for weighted cross entropy and dice losses, respectively.
 
 \item[{Returns}] \leavevmode
-return a function, which similar to {\hyperref[\detokenize{index:unet.loss.weighted_cross_entropy}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{weighted\_cross\_entropy()}}}}} and {\hyperref[\detokenize{index:unet.loss.dice_loss}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{dice\_loss()}}}}}
+\begin{description}
+\item[{function, which similar to {\hyperref[\detokenize{index:unet.loss.weighted_cross_entropy}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{weighted\_cross\_entropy()}}}}} and {\hyperref[\detokenize{index:unet.loss.dice_loss}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{dice\_loss()}}}}}}] \leavevmode
 has label and target arguments
 
-\item[{Seemore}] \leavevmode
-{\hyperref[\detokenize{index:unet.loss.weighted_cross_entropy}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{weighted\_cross\_entropy()}}}}}, {\hyperref[\detokenize{index:unet.loss.dice_loss}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{dice\_loss()}}}}}
+\end{description}
+
 
 \end{description}\end{quote}
+
+
+\sphinxstrong{See also:}
+
+\begin{itemize}
+\item {} 
+{\hyperref[\detokenize{index:unet.loss.weighted_cross_entropy}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{weighted\_cross\_entropy()}}}}}
+
+\item {} 
+{\hyperref[\detokenize{index:unet.loss.dice_loss}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{dice\_loss()}}}}}
+
+\end{itemize}
+
+
 
 \end{fulllineitems}
 
@@ -188,9 +203,6 @@ Weighted cross entropy with foreground pixels having ten times higher weights
 \item[{Returns}] \leavevmode
 weighted cross entropy value
 
-\item[{TODO}] \leavevmode
-add positive weight as an argument
-
 \end{description}\end{quote}
 
 \end{fulllineitems}
@@ -200,11 +212,115 @@ add positive weight as an argument
 \section{ops}
 \label{\detokenize{index:module-unet.ops}}\label{\detokenize{index:ops}}\index{unet.ops (module)@\spxentry{unet.ops}\spxextra{module}}
 CNN related operations
+\index{MaxPoolingND() (in module unet.ops)@\spxentry{MaxPoolingND()}\spxextra{in module unet.ops}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:unet.ops.MaxPoolingND}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{MaxPoolingND}}}{\emph{x}}{}
+Maxpooling in x and y direction for 2D and 3D inputs
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\sphinxstyleliteralstrong{\sphinxupquote{x}} \textendash{} input 4D or 5D tensor
+
+\item[{Returns}] \leavevmode
+downscaled of \sphinxtitleref{x} in x and y direction
+
+\end{description}\end{quote}
+
+
+\sphinxstrong{See also:}
+
+\begin{itemize}
+\item {} 
+{\hyperref[\detokenize{index:unet.ops.up_conv}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{up\_conv()}}}}}
+
+\item {} 
+\sphinxcode{\sphinxupquote{keras.layers.MaxPooling2D()}}
+
+\item {} 
+\sphinxcode{\sphinxupquote{keras.layers.MaxPooling3D()}}
+
+\end{itemize}
+
+
+
+\end{fulllineitems}
+
 \index{accuracy() (in module unet.ops)@\spxentry{accuracy()}\spxextra{in module unet.ops}}
 
 \begin{fulllineitems}
 \phantomsection\label{\detokenize{index:unet.ops.accuracy}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{accuracy}}}{\emph{labels}, \emph{logits}}{}
-measure accuracy metrics
+Measure accuracy metrics. The code calculate the prediction based on the input logits. Metrics are:
+\begin{itemize}
+\item {} 
+accuracy: The ratio of correctly labeled voxels to the total number of voxels.
+
+\item {} 
+Jaccard Index: ratio of number of foreground voxels in the intersection of \sphinxtitleref{labels} and \sphinxtitleref{logits} divided by
+total number of foreground voxels in the union of \sphinxtitleref{labels} and \sphinxtitleref{logits}
+
+\end{itemize}
+\begin{equation*}
+\begin{split}accuracy &= \frac{1}{N \times M \times L} \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} (
+    label_{i,j,k} == predict_{i,j,k}) \\
+Jaccard &= \frac{
+    \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} (label_{i,j,k} \  \&\& \  predict_{i,j,k})
+}{
+    \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} (label_{i,j,k} \  \| \  predict_{i,j,k})
+}\end{split}
+\end{equation*}\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{labels}} \textendash{} 4D or 5D tensor of labels
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{logits}} \textendash{} 4D or 5D tensor of prediction logits.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+accuracy and Jaccard Index
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{conv\_layer() (in module unet.ops)@\spxentry{conv\_layer()}\spxextra{in module unet.ops}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:unet.ops.conv_layer}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{conv\_layer}}}{\emph{x}, \emph{ChOut}}{}
+Multi-layer convolution operators consists of three convolutions (2D or 3D based on the input shape) followed by
+LeakyReLY.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{x}} \textendash{} input 4D or 5D tensor to the layers
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{ChOut}} \textendash{} number of features of outputs of all convolutions
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+output of the final layer with same size as \sphinxtitleref{x}
+
+\end{description}\end{quote}
+
+
+\sphinxstrong{See also:}
+
+\begin{itemize}
+\item {} 
+\sphinxcode{\sphinxupquote{keras.layers.LeakyReLU()}}
+
+\item {} 
+\sphinxcode{\sphinxupquote{keras.layers.Conv2D()}}
+
+\item {} 
+\sphinxcode{\sphinxupquote{keras.layers.Conv3D()}}
+
+\end{itemize}
+
+
 
 \end{fulllineitems}
 
@@ -213,6 +329,62 @@ measure accuracy metrics
 \begin{fulllineitems}
 \phantomsection\label{\detokenize{index:unet.ops.placeholder_inputs}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{placeholder\_inputs}}}{\emph{im\_shape}, \emph{outCh}}{}
 Generate placeholder variables to represent the input tensors.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{im\_shape}} \textendash{} shape of the input tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{outCh}} \textendash{} number of channels in the output
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+image and label placeholders
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{up\_conv() (in module unet.ops)@\spxentry{up\_conv()}\spxextra{in module unet.ops}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:unet.ops.up_conv}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{up\_conv}}}{\emph{x}}{}
+upscaling of input tensor in x and y direction using transpose convolution in 2D or 3D.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\sphinxstyleliteralstrong{\sphinxupquote{x}} \textendash{} input 4D or 5D tensor
+
+\item[{Returns}] \leavevmode
+unscaled of \sphinxtitleref{x} in x and y direction
+
+\end{description}\end{quote}
+
+
+\sphinxstrong{See also:}
+
+\begin{itemize}
+\item {} \begin{quote}\begin{description}
+\item[{meth}] \leavevmode
+\sphinxtitleref{MaxPoolingND}
+
+\end{description}\end{quote}
+
+\item {} \begin{quote}\begin{description}
+\item[{meth}] \leavevmode
+\sphinxtitleref{KL.Conv2DTranspose}
+
+\end{description}\end{quote}
+
+\item {} \begin{quote}\begin{description}
+\item[{meth}] \leavevmode
+\sphinxtitleref{KL.Conv3DTranspose}
+
+\end{description}\end{quote}
+
+\end{itemize}
+
+
 
 \end{fulllineitems}
 
@@ -220,7 +392,7 @@ Generate placeholder variables to represent the input tensors.
 
 \section{unet}
 \label{\detokenize{index:module-unet.unet}}\label{\detokenize{index:unet}}\index{unet.unet (module)@\spxentry{unet.unet}\spxextra{module}}
-Build unet model
+Build U-Net model
 \index{unet\_model() (in module unet.unet)@\spxentry{unet\_model()}\spxextra{in module unet.unet}}
 
 \begin{fulllineitems}
@@ -247,6 +419,60 @@ keras model
 
 \chapter{Utility}
 \label{\detokenize{index:utility}}
+
+\section{confusion matrix}
+\label{\detokenize{index:module-util.confusion_matrix}}\label{\detokenize{index:confusion-matrix}}\index{util.confusion\_matrix (module)@\spxentry{util.confusion\_matrix}\spxextra{module}}
+calculate confusion matrix. Confusion matrix contains
+\begin{itemize}
+\item {} 
+TP: True positive
+
+\item {} 
+TN: True negative
+
+\item {} 
+FP: False positive
+
+\item {} 
+FN: False Negative
+
+\item {} 
+TPR: True positive ratio or sensitivity
+
+\item {} 
+TNR: True Negative ratio or specificity
+
+\item {} 
+Dice Index
+
+\end{itemize}
+\begin{equation*}
+\begin{split}Dice = \frac{
+        2 \times \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} (label_{i,j,k} \  \&\& \  predict_{i,j,k})
+    }{
+        \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} label_{i,j,k} \ +              \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} predict_{i,j,k}
+    }\end{split}
+\end{equation*}\subsubsection*{Notes}
+
+Arguments are bash arguments.
+\begin{quote}\begin{description}
+\item[{param exp\_def}] \leavevmode
+experiment definition
+
+\item[{param models\_path}] \leavevmode
+experiment definition
+
+\item[{param epoch}] \leavevmode
+model saved at this epoch
+
+\item[{param useMask}] \leavevmode
+use guide wire and nonIEL masks
+
+\item[{returns}] \leavevmode
+add a line to the \sphinxtitleref{../model/confusion\_matrix.csv} file, which contains confusion matrix of testing and vali
+
+\end{description}\end{quote}
+
 
 \section{load batch}
 \label{\detokenize{index:module-util.load_batch}}\label{\detokenize{index:load-batch}}\index{util.load\_batch (module)@\spxentry{util.load\_batch}\spxextra{module}}
@@ -279,20 +505,33 @@ Based on the coordinate system (\sphinxstyleemphasis{Polar} vs.  \sphinxstyleemp
 \item[{Returns}] \leavevmode
 augmented im and l
 
-\item[{Seemore}] \leavevmode
-{\hyperref[\detokenize{index:util.load_batch.img_aug_carts}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug\_carts()}}}}}, {\hyperref[\detokenize{index:util.load_batch.img_aug_polar}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug\_polar()}}}}}
-
 \end{description}\end{quote}
+
+
+\sphinxstrong{See also:}
+
+\begin{itemize}
+\item {} 
+{\hyperref[\detokenize{index:util.load_batch.img_aug_carts}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug\_carts()}}}}}
+
+\item {} 
+{\hyperref[\detokenize{index:util.load_batch.img_aug_polar}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug\_polar()}}}}}
+
+\end{itemize}
+
+
 
 \end{fulllineitems}
 
 \index{img\_aug\_carts() (in module util.load\_batch)@\spxentry{img\_aug\_carts()}\spxextra{in module util.load\_batch}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:util.load_batch.img_aug_carts}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{img\_aug\_carts}}}{\emph{im}, \emph{l}, \emph{p\_lim=0.5}}{}
+\phantomsection\label{\detokenize{index:util.load_batch.img_aug_carts}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{img\_aug\_carts}}}{\emph{image}, \emph{L}, \emph{prob\_lim=0.5}}{}
 Data augmentation in Cartesian coordinate system.
-\begin{description}
-\item[{Applies different image augmentation procedures:}] \leavevmode\begin{itemize}
+
+Applies different image augmentation procedures:
+\begin{quote}
+\begin{itemize}
 \item {} 
 mirroring the image along 45 degree (y=x line)
 
@@ -316,39 +555,47 @@ image scaling.  See {\hyperref[\detokenize{index:util.load_batch.img_rand_scale}
 
 \end{itemize}
 
-\end{description}
-
 based on the input probability limit probabilistically applies different augmentation cases.
+\end{quote}
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{im}} \textendash{} input image 4D or 5D tensor
+\sphinxstyleliteralstrong{\sphinxupquote{image}} \textendash{} input image 4D or 5D tensor
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{l}} \textendash{} input label 4D or 5D tensor
+\sphinxstyleliteralstrong{\sphinxupquote{L}} \textendash{} input label 4D or 5D tensor
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{p\_lim}} \textendash{} probability limit for applying each augmentation case.
+\sphinxstyleliteralstrong{\sphinxupquote{prob\_lim}} \textendash{} probability limit for applying each augmentation case.
 
 \end{itemize}
 
 \item[{Returns}] \leavevmode
-augmented im and l
-
-\item[{Seemore}] \leavevmode
-{\hyperref[\detokenize{index:util.load_batch.img_aug}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug()}}}}}
+augmented image and L
 
 \end{description}\end{quote}
+
+
+\sphinxstrong{See also:}
+
+\begin{itemize}
+\item {} 
+{\hyperref[\detokenize{index:util.load_batch.img_aug}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug()}}}}}
+
+\end{itemize}
+
+
 
 \end{fulllineitems}
 
 \index{img\_aug\_polar() (in module util.load\_batch)@\spxentry{img\_aug\_polar()}\spxextra{in module util.load\_batch}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:util.load_batch.img_aug_polar}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{img\_aug\_polar}}}{\emph{im}, \emph{l}, \emph{p\_lim=0.5}}{}
+\phantomsection\label{\detokenize{index:util.load_batch.img_aug_polar}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{img\_aug\_polar}}}{\emph{image}, \emph{label}, \emph{prob\_lim=0.5}}{}
 Data augmentation in Polar coordinate.
-\begin{description}
-\item[{Applies different image augmentation procedures:}] \leavevmode\begin{itemize}
+
+Applies different image augmentation procedures:
+\begin{itemize}
 \item {} 
 random rotations
 
@@ -360,29 +607,30 @@ image scaling, which randomly crops or add pads and scale the image to the origi
 
 \end{itemize}
 
-\end{description}
-
 based on the input probability limit probabilistically applies different augmentation cases.
+\begin{description}
+\item[{Args;}] \leavevmode
+image: input image 4D or 5D tensor
+label: input label 4D or 5D tensor
+prob\_lim: probability limit for applying each augmentation case.
+
+\end{description}
 \begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{im}} \textendash{} input image 4D or 5D tensor
+\item[{Returns}] \leavevmode
+augmented image and l
 
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{l}} \textendash{} input label 4D or 5D tensor
+\end{description}\end{quote}
 
+
+\sphinxstrong{See also:}
+
+\begin{itemize}
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{p\_lim}} \textendash{} probability limit for applying each augmentation case.
+{\hyperref[\detokenize{index:util.load_batch.img_aug}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug()}}}}}
 
 \end{itemize}
 
-\item[{Returns}] \leavevmode
-augmented im and l
 
-\item[{Seemore}] \leavevmode
-{\hyperref[\detokenize{index:util.load_batch.img_aug}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug()}}}}}
-
-\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -446,10 +694,18 @@ This function handel different coordinate system and image augmentation.
 \item[{Returns}] \leavevmode
 a batch of data as tuple of (image, label)
 
-\item[{Seemore}] \leavevmode
+\end{description}\end{quote}
+
+
+\sphinxstrong{See also:}
+
+\begin{itemize}
+\item {} 
 {\hyperref[\detokenize{index:util.load_batch.load_batch_parallel}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{load\_batch\_parallel()}}}}}
 
-\end{description}\end{quote}
+\end{itemize}
+
+
 
 \end{fulllineitems}
 
@@ -461,34 +717,34 @@ load a batch of data from im and/or label based on dataset (e.g. test) using mul
 
 This function handel different coordinate system and image augmentation.
 \begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
+\item[{Parameters}] \leavevmode
 \sphinxstyleliteralstrong{\sphinxupquote{im}} \textendash{} 4D or 5D image tensor
 
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{datasetID}} \textendash{} index of images in im and/or label along the first axis, which belong to this dataset (e.g.  test)
+\end{description}\end{quote}
+\begin{description}
+\item[{datasetID: index of images in im and/or label along the first axis, which belong to this dataset (e.g.  test)}] \leavevmode
+nBatch: batch size
+label: 4D or 5D label tensor
+isAug: whether to apply data augmentation. See {\hyperref[\detokenize{index:util.load_batch.img_aug}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug()}}}}}
+coord\_sys: coordinate system \{‘polar’ or ‘carts\}
 
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{nBatch}} \textendash{} batch size
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{label}} \textendash{} 4D or 5D label tensor
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{isAug}} \textendash{} whether to apply data augmentation. See {\hyperref[\detokenize{index:util.load_batch.img_aug}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug()}}}}}
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{coord\_sys}} \textendash{} coordinate system \{‘polar’ or ‘carts\}
-
-\end{itemize}
-
+\end{description}
+\begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 a batch of data as tuple of (image, label)
 
-\item[{Seemore}] \leavevmode
+\end{description}\end{quote}
+
+
+\sphinxstrong{See also:}
+
+\begin{itemize}
+\item {} 
 {\hyperref[\detokenize{index:util.load_batch.load_batch}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{load\_batch()}}}}}
 
-\end{description}\end{quote}
+\end{itemize}
+
+
 
 \end{fulllineitems}
 
@@ -502,7 +758,113 @@ cartesian coordinate.
 
 \begin{fulllineitems}
 \phantomsection\label{\detokenize{index:util.load_data.im_fix_width}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_data.}}\sphinxbfcode{\sphinxupquote{im\_fix\_width}}}{\emph{im}, \emph{w}}{}
-pad or crop the 3D image to have width and length equal to the input width
+pad or crop the 3D image to have width and length equal to the input width in Cartesian coordinate system.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{im}} \textendash{} input image
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{w}} \textendash{} output width size
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+image with the \sphinxtitleref{w} width and length
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{load\_train\_data() (in module util.load\_data)@\spxentry{load\_train\_data()}\spxextra{in module util.load\_data}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:util.load_data.load_train_data}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_data.}}\sphinxbfcode{\sphinxupquote{load\_train\_data}}}{\emph{folder\_path}, \emph{im\_shape}, \emph{coord\_sys}}{}
+loading the training data.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{folder\_path}} \textendash{} the input folder path containing the data
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{im\_shape}} \textendash{} shape of the images in the dataset in (depth,width,length,channel) format
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{coord\_sys}} \textendash{} coordinate system (\sphinxtitleref{polar} or \sphinxtitleref{carts})
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+\begin{itemize}
+\item {} 
+\sphinxstylestrong{im}: image tensor of dataset with first row is sample ID,
+
+\item {} 
+\sphinxstylestrong{label}: label tensor similar to \sphinxtitleref{im},
+
+\item {} 
+\sphinxstylestrong{train\_data\_id}: row IDs of training samples,
+
+\item {} 
+\sphinxstylestrong{test\_data\_id}: row IDs of testing samples,
+
+\item {} 
+\sphinxstylestrong{valid\_data\_id}: row IDs of validation samples,
+
+\item {} 
+\sphinxstylestrong{sample\_caseID}: caseID of each row,
+
+\end{itemize}
+
+
+\end{description}\end{quote}
+
+
+\sphinxstrong{See also:}
+
+
+{\hyperref[\detokenize{index:util.load_data.make_dataset}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{make\_dataset()}}}}}
+
+
+
+\end{fulllineitems}
+
+\index{make\_dataset() (in module util.load\_data)@\spxentry{make\_dataset()}\spxextra{in module util.load\_data}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:util.load_data.make_dataset}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_data.}}\sphinxbfcode{\sphinxupquote{make\_dataset}}}{\emph{folder\_path}, \emph{im\_shape}, \emph{coord\_sys}, \emph{carts\_w=512}}{}
+Produce dataset based oon the results of {\hyperref[\detokenize{index:module-util.process_oct_folder}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{util.process\_oct\_folder()}}}}}
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{folder\_path}} \textendash{} the path to the folder that contains the images
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{im\_shape}} \textendash{} shape of the images in the dataset in (depth,width,length,channel) format
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{coord\_sys}} \textendash{} coordinate system (\sphinxtitleref{polar} or \sphinxtitleref{carts})
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{carts\_w}} \textendash{} width of the image in case \sphinxtitleref{coord\_sys == carts}
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+image and label as the 4D or 5D tensors.  sample\_caseID contains the case ID for each row of image and label
+
+\end{description}\end{quote}
+
+
+\sphinxstrong{See also:}
+
+\begin{itemize}
+\item {} 
+{\hyperref[\detokenize{index:module-util.process_oct_folder}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{util.process\_oct\_folder()}}}}}
+
+\end{itemize}
+
+
 
 \end{fulllineitems}
 
@@ -510,7 +872,36 @@ pad or crop the 3D image to have width and length equal to the input width
 
 \section{plot log file}
 \label{\detokenize{index:module-util.plot_log_file}}\label{\detokenize{index:plot-log-file}}\index{util.plot\_log\_file (module)@\spxentry{util.plot\_log\_file}\spxextra{module}}
-plot the log file within the save model folders.
+plot the log file within the save model folder. 111
+
+plots the train and validation loss values over last 100 recorded performance evaluations and update the
+plot every 5 second.  The figure has two subplots: top one has all the results and bottom one has last 100 log
+records.
+\subsubsection*{Notes}
+
+Arguments are bash arguments.
+\begin{quote}\begin{description}
+\item[{param exp\_def}] \leavevmode
+the experiment definition used for saving the model.
+
+\item[{param models\_path}] \leavevmode
+the path that model folder for \sphinxtitleref{exp\_def}
+
+\item[{returns}] \leavevmode
+PyPlot figure with two subplots.
+
+\end{description}\end{quote}
+
+
+\sphinxstrong{See also:}
+
+\begin{itemize}
+\item {} 
+\sphinxcode{\sphinxupquote{train()}}
+
+\end{itemize}
+
+
 
 
 \section{polar to cartesian}
@@ -553,6 +944,7 @@ Parse roi file and output the lists of objects
 \item\relax\sphinxstyleindexentry{unet.loss}\sphinxstyleindexpageref{index:\detokenize{module-unet.loss}}
 \item\relax\sphinxstyleindexentry{unet.ops}\sphinxstyleindexpageref{index:\detokenize{module-unet.ops}}
 \item\relax\sphinxstyleindexentry{unet.unet}\sphinxstyleindexpageref{index:\detokenize{module-unet.unet}}
+\item\relax\sphinxstyleindexentry{util.confusion\_matrix}\sphinxstyleindexpageref{index:\detokenize{module-util.confusion_matrix}}
 \item\relax\sphinxstyleindexentry{util.load\_batch}\sphinxstyleindexpageref{index:\detokenize{module-util.load_batch}}
 \item\relax\sphinxstyleindexentry{util.load\_data}\sphinxstyleindexpageref{index:\detokenize{module-util.load_data}}
 \item\relax\sphinxstyleindexentry{util.plot\_log\_file}\sphinxstyleindexpageref{index:\detokenize{module-util.plot_log_file}}

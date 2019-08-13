@@ -51,6 +51,11 @@ unet
 Utility
 =======
 
+confusion matrix
+----------------
+.. automodule:: util.confusion_matrix
+	:members:
+
 load batch
 ----------
 .. automodule:: util.load_batch

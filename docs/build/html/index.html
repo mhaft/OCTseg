@@ -89,13 +89,20 @@ argument</p>
 <dd class="field-odd"><p><strong>loss_weight</strong> – a list with two weights for weighted cross entropy and dice losses, respectively.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>return a function, which similar to <a class="reference internal" href="#unet.loss.weighted_cross_entropy" title="unet.loss.weighted_cross_entropy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></a> and <a class="reference internal" href="#unet.loss.dice_loss" title="unet.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a>
-has label and target arguments</p>
-</dd>
-<dt class="field-odd">Seemore</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#unet.loss.weighted_cross_entropy" title="unet.loss.weighted_cross_entropy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></a>, <a class="reference internal" href="#unet.loss.dice_loss" title="unet.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a></p>
+<dd class="field-even"><p><dl class="simple">
+<dt>function, which similar to <a class="reference internal" href="#unet.loss.weighted_cross_entropy" title="unet.loss.weighted_cross_entropy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></a> and <a class="reference internal" href="#unet.loss.dice_loss" title="unet.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a></dt><dd><p>has label and target arguments</p>
 </dd>
 </dl>
+</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#unet.loss.weighted_cross_entropy" title="unet.loss.weighted_cross_entropy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#unet.loss.dice_loss" title="unet.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a></p></li>
+</ul>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -112,9 +119,6 @@ has label and target arguments</p>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>weighted cross entropy value</p>
 </dd>
-<dt class="field-odd">TODO</dt>
-<dd class="field-odd"><p>add positive weight as an argument</p>
-</dd>
 </dl>
 </dd></dl>
 
@@ -123,21 +127,143 @@ has label and target arguments</p>
 <span id="ops"></span><h3>ops<a class="headerlink" href="#module-unet.ops" title="Permalink to this headline">¶</a></h3>
 <p>CNN related operations</p>
 <dl class="function">
+<dt id="unet.ops.MaxPoolingND">
+<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">MaxPoolingND</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.MaxPoolingND" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maxpooling in x and y direction for 2D and 3D inputs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – input 4D or 5D tensor</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>downscaled of <cite>x</cite> in x and y direction</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#unet.ops.up_conv" title="unet.ops.up_conv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">up_conv()</span></code></a></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.layers.MaxPooling2D()</span></code></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.layers.MaxPooling3D()</span></code></p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="function">
 <dt id="unet.ops.accuracy">
 <code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">accuracy</code><span class="sig-paren">(</span><em class="sig-param">labels</em>, <em class="sig-param">logits</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.accuracy" title="Permalink to this definition">¶</a></dt>
-<dd><p>measure accuracy metrics</p>
+<dd><p>Measure accuracy metrics. The code calculate the prediction based on the input logits. Metrics are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>accuracy: The ratio of correctly labeled voxels to the total number of voxels.</p></li>
+<li><p>Jaccard Index: ratio of number of foreground voxels in the intersection of <cite>labels</cite> and <cite>logits</cite> divided by
+total number of foreground voxels in the union of <cite>labels</cite> and <cite>logits</cite></p></li>
+</ul>
+</div></blockquote>
+<div class="math notranslate nohighlight">
+\[\begin{split}accuracy &amp;= \frac{1}{N \times M \times L} \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} (
+    label_{i,j,k} == predict_{i,j,k}) \\
+Jaccard &amp;= \frac{
+    \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} (label_{i,j,k} \  \&amp;\&amp; \  predict_{i,j,k})
+}{
+    \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} (label_{i,j,k} \  \| \  predict_{i,j,k})
+}\end{split}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>labels</strong> – 4D or 5D tensor of labels</p></li>
+<li><p><strong>logits</strong> – 4D or 5D tensor of prediction logits.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>accuracy and Jaccard Index</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="unet.ops.conv_layer">
+<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">conv_layer</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">ChOut</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.conv_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multi-layer convolution operators consists of three convolutions (2D or 3D based on the input shape) followed by
+LeakyReLY.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – input 4D or 5D tensor to the layers</p></li>
+<li><p><strong>ChOut</strong> – number of features of outputs of all convolutions</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>output of the final layer with same size as <cite>x</cite></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.layers.LeakyReLU()</span></code></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.layers.Conv2D()</span></code></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.layers.Conv3D()</span></code></p></li>
+</ul>
+</div>
 </dd></dl>
 
 <dl class="function">
 <dt id="unet.ops.placeholder_inputs">
 <code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">placeholder_inputs</code><span class="sig-paren">(</span><em class="sig-param">im_shape</em>, <em class="sig-param">outCh</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.placeholder_inputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate placeholder variables to represent the input tensors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>im_shape</strong> – shape of the input tensor</p></li>
+<li><p><strong>outCh</strong> – number of channels in the output</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>image and label placeholders</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="unet.ops.up_conv">
+<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">up_conv</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.up_conv" title="Permalink to this definition">¶</a></dt>
+<dd><p>upscaling of input tensor in x and y direction using transpose convolution in 2D or 3D.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – input 4D or 5D tensor</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>unscaled of <cite>x</cite> in x and y direction</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><dl class="field-list simple">
+<dt class="field-odd">meth</dt>
+<dd class="field-odd"><p><cite>MaxPoolingND</cite></p>
+</dd>
+</dl>
+</li>
+<li><dl class="field-list simple">
+<dt class="field-odd">meth</dt>
+<dd class="field-odd"><p><cite>KL.Conv2DTranspose</cite></p>
+</dd>
+</dl>
+</li>
+<li><dl class="field-list simple">
+<dt class="field-odd">meth</dt>
+<dd class="field-odd"><p><cite>KL.Conv3DTranspose</cite></p>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
 </dd></dl>
 
 </div>
 <div class="section" id="module-unet.unet">
 <span id="unet"></span><h3>unet<a class="headerlink" href="#module-unet.unet" title="Permalink to this headline">¶</a></h3>
-<p>Build unet model</p>
+<p>Build U-Net model</p>
 <dl class="function">
 <dt id="unet.unet.unet_model">
 <code class="sig-prename descclassname">unet.unet.</code><code class="sig-name descname">unet_model</code><span class="sig-paren">(</span><em class="sig-param">im_shape</em>, <em class="sig-param">nFeature=32</em>, <em class="sig-param">outCh=2</em>, <em class="sig-param">nLayer=3</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.unet.unet_model" title="Permalink to this definition">¶</a></dt>
@@ -159,6 +285,46 @@ has label and target arguments</p>
 </div>
 <div class="section" id="utility">
 <h2>Utility<a class="headerlink" href="#utility" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-util.confusion_matrix">
+<span id="confusion-matrix"></span><h3>confusion matrix<a class="headerlink" href="#module-util.confusion_matrix" title="Permalink to this headline">¶</a></h3>
+<p>calculate confusion matrix. Confusion matrix contains</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>TP: True positive</p></li>
+<li><p>TN: True negative</p></li>
+<li><p>FP: False positive</p></li>
+<li><p>FN: False Negative</p></li>
+<li><p>TPR: True positive ratio or sensitivity</p></li>
+<li><p>TNR: True Negative ratio or specificity</p></li>
+<li><p>Dice Index</p></li>
+</ul>
+</div></blockquote>
+<div class="math notranslate nohighlight">
+\[Dice = \frac{
+        2 \times \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} (label_{i,j,k} \  \&amp;\&amp; \  predict_{i,j,k})
+    }{
+        \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} label_{i,j,k} \ +              \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} predict_{i,j,k}
+    }\]</div>
+<p class="rubric">Notes</p>
+<p>Arguments are bash arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param exp_def</dt>
+<dd class="field-odd"><p>experiment definition</p>
+</dd>
+<dt class="field-even">param models_path</dt>
+<dd class="field-even"><p>experiment definition</p>
+</dd>
+<dt class="field-odd">param epoch</dt>
+<dd class="field-odd"><p>model saved at this epoch</p>
+</dd>
+<dt class="field-even">param useMask</dt>
+<dd class="field-even"><p>use guide wire and nonIEL masks</p>
+</dd>
+<dt class="field-odd">returns</dt>
+<dd class="field-odd"><p>add a line to the <cite>../model/confusion_matrix.csv</cite> file, which contains confusion matrix of testing and vali</p>
+</dd>
+</dl>
+</div>
 <div class="section" id="module-util.load_batch">
 <span id="load-batch"></span><h3>load batch<a class="headerlink" href="#module-util.load_batch" title="Permalink to this headline">¶</a></h3>
 <p>Load a batch of data.</p>
@@ -180,18 +346,24 @@ has label and target arguments</p>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>augmented im and l</p>
 </dd>
-<dt class="field-odd">Seemore</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#util.load_batch.img_aug_carts" title="util.load_batch.img_aug_carts"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug_carts()</span></code></a>, <a class="reference internal" href="#util.load_batch.img_aug_polar" title="util.load_batch.img_aug_polar"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug_polar()</span></code></a></p>
-</dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#util.load_batch.img_aug_carts" title="util.load_batch.img_aug_carts"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug_carts()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#util.load_batch.img_aug_polar" title="util.load_batch.img_aug_polar"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug_polar()</span></code></a></p></li>
+</ul>
+</div>
 </dd></dl>
 
 <dl class="function">
 <dt id="util.load_batch.img_aug_carts">
-<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">img_aug_carts</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">l</em>, <em class="sig-param">p_lim=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.img_aug_carts" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">img_aug_carts</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">L</em>, <em class="sig-param">prob_lim=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.img_aug_carts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data augmentation in Cartesian coordinate system.</p>
-<dl class="simple">
-<dt>Applies different image augmentation procedures:</dt><dd><ul class="simple">
+<p>Applies different image augmentation procedures:</p>
+<blockquote>
+<div><blockquote>
+<div><ul class="simple">
 <li><p>mirroring the image along 45 degree (y=x line)</p></li>
 <li><p>mirroring the image along the x axis</p></li>
 <li><p>mirroring the image along the y axis</p></li>
@@ -200,54 +372,59 @@ has label and target arguments</p>
 <li><p>image intensity scaling by multplying the intensity values with close to one scale value</p></li>
 <li><p>image scaling.  See <a class="reference internal" href="#util.load_batch.img_rand_scale" title="util.load_batch.img_rand_scale"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_rand_scale()</span></code></a></p></li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 <p>based on the input probability limit probabilistically applies different augmentation cases.</p>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>im</strong> – input image 4D or 5D tensor</p></li>
-<li><p><strong>l</strong> – input label 4D or 5D tensor</p></li>
-<li><p><strong>p_lim</strong> – probability limit for applying each augmentation case.</p></li>
+<li><p><strong>image</strong> – input image 4D or 5D tensor</p></li>
+<li><p><strong>L</strong> – input label 4D or 5D tensor</p></li>
+<li><p><strong>prob_lim</strong> – probability limit for applying each augmentation case.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>augmented im and l</p>
-</dd>
-<dt class="field-odd">Seemore</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#util.load_batch.img_aug" title="util.load_batch.img_aug"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug()</span></code></a></p>
+<dd class="field-even"><p>augmented image and L</p>
 </dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#util.load_batch.img_aug" title="util.load_batch.img_aug"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug()</span></code></a></p></li>
+</ul>
+</div>
 </dd></dl>
 
 <dl class="function">
 <dt id="util.load_batch.img_aug_polar">
-<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">img_aug_polar</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">l</em>, <em class="sig-param">p_lim=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.img_aug_polar" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">img_aug_polar</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">label</em>, <em class="sig-param">prob_lim=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.img_aug_polar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data augmentation in Polar coordinate.</p>
-<dl class="simple">
-<dt>Applies different image augmentation procedures:</dt><dd><ul class="simple">
+<p>Applies different image augmentation procedures:</p>
+<blockquote>
+<div><ul class="simple">
 <li><p>random rotations</p></li>
 <li><p>image intensity scaling by multplying the intensity valuse with close to one scale value</p></li>
 <li><p>image scaling, which randomly crops or add pads and scale the image to the original size</p></li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 <p>based on the input probability limit probabilistically applies different augmentation cases.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>im</strong> – input image 4D or 5D tensor</p></li>
-<li><p><strong>l</strong> – input label 4D or 5D tensor</p></li>
-<li><p><strong>p_lim</strong> – probability limit for applying each augmentation case.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>augmented im and l</p>
-</dd>
-<dt class="field-odd">Seemore</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#util.load_batch.img_aug" title="util.load_batch.img_aug"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug()</span></code></a></p>
+<dl class="simple">
+<dt>Args;</dt><dd><p>image: input image 4D or 5D tensor
+label: input label 4D or 5D tensor
+prob_lim: probability limit for applying each augmentation case.</p>
 </dd>
 </dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>augmented image and l</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#util.load_batch.img_aug" title="util.load_batch.img_aug"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug()</span></code></a></p></li>
+</ul>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -289,10 +466,13 @@ maintain the original image shape.  For interpolation close to the boundaries,  
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>a batch of data as tuple of (image, label)</p>
 </dd>
-<dt class="field-odd">Seemore</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#util.load_batch.load_batch_parallel" title="util.load_batch.load_batch_parallel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_batch_parallel()</span></code></a></p>
-</dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#util.load_batch.load_batch_parallel" title="util.load_batch.load_batch_parallel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_batch_parallel()</span></code></a></p></li>
+</ul>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -302,22 +482,27 @@ maintain the original image shape.  For interpolation close to the boundaries,  
 <p>This function handel different coordinate system and image augmentation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>im</strong> – 4D or 5D image tensor</p></li>
-<li><p><strong>datasetID</strong> – index of images in im and/or label along the first axis, which belong to this dataset (e.g.  test)</p></li>
-<li><p><strong>nBatch</strong> – batch size</p></li>
-<li><p><strong>label</strong> – 4D or 5D label tensor</p></li>
-<li><p><strong>isAug</strong> – whether to apply data augmentation. See <a class="reference internal" href="#util.load_batch.img_aug" title="util.load_batch.img_aug"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug()</span></code></a></p></li>
-<li><p><strong>coord_sys</strong> – coordinate system {‘polar’ or ‘carts}</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>a batch of data as tuple of (image, label)</p>
-</dd>
-<dt class="field-odd">Seemore</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#util.load_batch.load_batch" title="util.load_batch.load_batch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_batch()</span></code></a></p>
+<dd class="field-odd"><p><strong>im</strong> – 4D or 5D image tensor</p>
 </dd>
 </dl>
+<dl class="simple">
+<dt>datasetID: index of images in im and/or label along the first axis, which belong to this dataset (e.g.  test)</dt><dd><p>nBatch: batch size
+label: 4D or 5D label tensor
+isAug: whether to apply data augmentation. See <a class="reference internal" href="#util.load_batch.img_aug" title="util.load_batch.img_aug"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug()</span></code></a>
+coord_sys: coordinate system {‘polar’ or ‘carts}</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a batch of data as tuple of (image, label)</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#util.load_batch.load_batch" title="util.load_batch.load_batch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_batch()</span></code></a></p></li>
+</ul>
+</div>
 </dd></dl>
 
 </div>
@@ -328,13 +513,101 @@ cartesian coordinate.</p>
 <dl class="function">
 <dt id="util.load_data.im_fix_width">
 <code class="sig-prename descclassname">util.load_data.</code><code class="sig-name descname">im_fix_width</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">w</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_data.im_fix_width" title="Permalink to this definition">¶</a></dt>
-<dd><p>pad or crop the 3D image to have width and length equal to the input width</p>
+<dd><p>pad or crop the 3D image to have width and length equal to the input width in Cartesian coordinate system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>im</strong> – input image</p></li>
+<li><p><strong>w</strong> – output width size</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>image with the <cite>w</cite> width and length</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="util.load_data.load_train_data">
+<code class="sig-prename descclassname">util.load_data.</code><code class="sig-name descname">load_train_data</code><span class="sig-paren">(</span><em class="sig-param">folder_path</em>, <em class="sig-param">im_shape</em>, <em class="sig-param">coord_sys</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_data.load_train_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>loading the training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>folder_path</strong> – </p></li>
+<li><p><strong>im_shape</strong> – </p></li>
+<li><p><strong>coord_sys</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>im</strong>: image tensor of dataset with first row is sample ID,</p></li>
+<li><p><cite>label</cite>: label tensor similar to <cite>im</cite>,</p></li>
+<li><p><cite>train_data_id</cite>: row IDs of training samples,</p></li>
+<li><p><cite>test_data_id</cite>: row IDs of testing samples,</p></li>
+<li><p><cite>valid_data_id</cite>: row IDs of validation samples,</p></li>
+<li><p><cite>sample_caseID</cite>: caseID of each row,</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#util.load_data.make_dataset" title="util.load_data.make_dataset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_dataset()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="util.load_data.make_dataset">
+<code class="sig-prename descclassname">util.load_data.</code><code class="sig-name descname">make_dataset</code><span class="sig-paren">(</span><em class="sig-param">folder_path</em>, <em class="sig-param">im_shape</em>, <em class="sig-param">coord_sys</em>, <em class="sig-param">carts_w=512</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_data.make_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produce dataset based oon the results of <a class="reference internal" href="#module-util.process_oct_folder" title="util.process_oct_folder"><code class="xref py py-meth docutils literal notranslate"><span class="pre">util.process_oct_folder()</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>folder_path</strong> – the path to the folder that contains the images</p></li>
+<li><p><strong>im_shape</strong> – shape of the images in the dataset in (depth,width,length,channel) format</p></li>
+<li><p><strong>coord_sys</strong> – coordinate system (<cite>polar</cite> or <cite>carts</cite>)</p></li>
+<li><p><strong>carts_w</strong> – width of the image in case <cite>coord_sys == carts</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>image and label as the 4D or 5D tensors.  sample_caseID contains the case ID for each row of image and label</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#module-util.process_oct_folder" title="util.process_oct_folder"><code class="xref py py-meth docutils literal notranslate"><span class="pre">util.process_oct_folder()</span></code></a></p></li>
+</ul>
+</div>
 </dd></dl>
 
 </div>
 <div class="section" id="module-util.plot_log_file">
 <span id="plot-log-file"></span><h3>plot log file<a class="headerlink" href="#module-util.plot_log_file" title="Permalink to this headline">¶</a></h3>
-<p>plot the log file within the save model folders.</p>
+<p>plot the log file within the save model folder. 111</p>
+<p>plots the train and validation loss values over last 100 recorded performance evaluations and update the
+plot every 5 second.  The figure has two subplots: top one has all the results and bottom one has last 100 log
+records.</p>
+<p class="rubric">Notes</p>
+<p>Arguments are bash arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param exp_def</dt>
+<dd class="field-odd"><p>the experiment definition used for saving the model.</p>
+</dd>
+<dt class="field-even">param models_path</dt>
+<dd class="field-even"><p>the path that model folder for <cite>exp_def</cite></p>
+</dd>
+<dt class="field-odd">returns</dt>
+<dd class="field-odd"><p>PyPlot figure with two subplots.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">train()</span></code></p></li>
+</ul>
+</div>
 </div>
 <div class="section" id="module-util.polar2cartesian">
 <span id="polar-to-cartesian"></span><h3>polar to cartesian<a class="headerlink" href="#module-util.polar2cartesian" title="Permalink to this headline">¶</a></h3>
