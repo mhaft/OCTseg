@@ -34,6 +34,7 @@ from util.load_batch import load_batch, load_batch_parallel
 # parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("-exp_def", type=str, default="test", help="experiment definition")
+parser.add_argument("-models_path", type=str, default="model/", help="path for saving models")
 parser.add_argument("-lr", type=float, default=1e-4, help="learning rate")
 parser.add_argument("-lr_decay", type=float, default=0.0, help="learning rate step for decay")
 parser.add_argument("-data_path", type=str, default="C:\\MachineLearning\\PSTIFS\\", help="data folder path")
@@ -63,6 +64,7 @@ nBatch = args.nBatch
 im_shape = (args.nZ, args.l, args.w, args.inCh)
 outCh = args.outCh
 isTest = args.isTest
+models_path = args.models_path
 loss_weight = np.array([float(i) for i in args.loss_w.split(',')])
 loss_weight = loss_weight / np.linalg.norm(loss_weight)
 coord_sys = 'carts' if args.isCarts else 'polar'
@@ -81,10 +83,10 @@ else:
     numGPU = len(args.gpu_id.split(','))
 
 # prepare a folder for the saved models and log file
-if not os.path.exists('model/' + experiment_def):
-    os.makedirs('model/' + experiment_def)
-save_file_name = 'model/' + experiment_def + '/model-epoch%06d.h5'
-log_file = 'model/' + experiment_def + '/log-' + experiment_def + '.csv'
+if not os.path.exists(models_path + experiment_def):
+    os.makedirs(models_path + experiment_def)
+save_file_name = models_path + experiment_def + '/model-epoch%06d.h5'
+log_file = models_path + experiment_def + '/log-' + experiment_def + '.csv'
 if not isTest and not os.path.exists(log_file):
     with open(log_file, 'w') as f:
         f.write('epoch, Time (hr), Test_Loss, Valid_Loss, ' + str(args) + '\n')
@@ -151,7 +153,7 @@ if not isTest:
     print('Data is loaded. Training: %d, validation: %d' % (len(np.unique(sample_caseID[train_data_id])),
                                                             len(np.unique(sample_caseID[valid_data_id]))))
 
-    f = glob.glob('model/' + experiment_def + '/model-epoch*.h5')
+    f = glob.glob(models_path + experiment_def + '/model-epoch*.h5')
     f.sort()
     if len(f):
         iEpochStart = int(f[-1][-9:-3])
@@ -192,10 +194,10 @@ if len(out.shape) > 3:
 # double the label intensity of the training slices
 label[train_data_id, ...] *= 2
 # write files
-tifffile.imwrite('model/' + experiment_def + '/a-label.tif', label[train_valid_data_id, ...].astype(np.uint8))
-tifffile.imwrite('model/' + experiment_def + '/a-out-epoch%06d.tif' % iEpoch,
+tifffile.imwrite(models_path + experiment_def + '/a-label.tif', label[train_valid_data_id, ...].astype(np.uint8))
+tifffile.imwrite(models_path + experiment_def + '/a-out-epoch%06d.tif' % iEpoch,
                  out[train_valid_data_id, ...].astype(np.uint8))
-tifffile.imwrite('model/' + experiment_def + '/a-im.tif',
+tifffile.imwrite(models_path + experiment_def + '/a-im.tif',
                  (im[train_valid_data_id, ...] * 255).astype(np.uint8).squeeze())
 
 
