@@ -5,10 +5,8 @@
 #                                       <7javaherian@gmail.com>.
 # ==============================================================================
 
-"""Build unet model"""
+"""Build U-Net model"""
 
-import numpy as np
-import tensorflow as tf
 import keras.layers as KL
 from keras.models import Model
 from unet.ops import conv_layer, up_conv, MaxPoolingND
@@ -17,7 +15,7 @@ from unet.ops import conv_layer, up_conv, MaxPoolingND
 def unet_model(im_shape, nFeature=32, outCh=2, nLayer=3):
     """ Build U-Net model.
 
-        Arguments:
+        Args:
             x: input placeholder
             outCh: number of output channels
 
