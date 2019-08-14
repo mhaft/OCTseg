@@ -1,3 +1,4 @@
+\indexentry{main() (in module train)@\spxentry{main()}\spxextra{in module train}|hyperpage}{3}
 \indexentry{unet.loss (module)@\spxentry{unet.loss}\spxextra{module}|hyperpage}{5}
 \indexentry{dice\_loss() (in module unet.loss)@\spxentry{dice\_loss()}\spxextra{in module unet.loss}|hyperpage}{5}
 \indexentry{multi\_loss\_fun() (in module unet.loss)@\spxentry{multi\_loss\_fun()}\spxextra{in module unet.loss}|hyperpage}{5}
@@ -24,7 +25,11 @@
 \indexentry{make\_dataset() (in module util.load\_data)@\spxentry{make\_dataset()}\spxextra{in module util.load\_data}|hyperpage}{12}
 \indexentry{util.plot\_log\_file (module)@\spxentry{util.plot\_log\_file}\spxextra{module}|hyperpage}{13}
 \indexentry{util.polar2cartesian (module)@\spxentry{util.polar2cartesian}\spxextra{module}|hyperpage}{13}
-\indexentry{util.process\_oct\_folder (module)@\spxentry{util.process\_oct\_folder}\spxextra{module}|hyperpage}{13}
-\indexentry{util.read\_oct\_roi\_file (module)@\spxentry{util.read\_oct\_roi\_file}\spxextra{module}|hyperpage}{13}
-\indexentry{lumen\_iel\_mask() (in module util.read\_oct\_roi\_file)@\spxentry{lumen\_iel\_mask()}\spxextra{in module util.read\_oct\_roi\_file}|hyperpage}{13}
-\indexentry{roi\_file\_parser() (in module util.read\_oct\_roi\_file)@\spxentry{roi\_file\_parser()}\spxextra{in module util.read\_oct\_roi\_file}|hyperpage}{13}
+\indexentry{polar2cartesian() (in module util.polar2cartesian)@\spxentry{polar2cartesian()}\spxextra{in module util.polar2cartesian}|hyperpage}{13}
+\indexentry{polar2cartesian\_large\_3d\_file() (in module util.polar2cartesian)@\spxentry{polar2cartesian\_large\_3d\_file()}\spxextra{in module util.polar2cartesian}|hyperpage}{14}
+\indexentry{util.process\_oct\_folder (module)@\spxentry{util.process\_oct\_folder}\spxextra{module}|hyperpage}{14}
+\indexentry{process\_oct\_folder() (in module util.process\_oct\_folder)@\spxentry{process\_oct\_folder()}\spxextra{in module util.process\_oct\_folder}|hyperpage}{14}
+\indexentry{util.read\_oct\_roi\_file (module)@\spxentry{util.read\_oct\_roi\_file}\spxextra{module}|hyperpage}{15}
+\indexentry{lumen\_iel\_mask() (in module util.read\_oct\_roi\_file)@\spxentry{lumen\_iel\_mask()}\spxextra{in module util.read\_oct\_roi\_file}|hyperpage}{15}
+\indexentry{read\_oct\_roi\_file() (in module util.read\_oct\_roi\_file)@\spxentry{read\_oct\_roi\_file()}\spxextra{in module util.read\_oct\_roi\_file}|hyperpage}{15}
+\indexentry{roi\_file\_parser() (in module util.read\_oct\_roi\_file)@\spxentry{roi\_file\_parser()}\spxextra{in module util.read\_oct\_roi\_file}|hyperpage}{15}

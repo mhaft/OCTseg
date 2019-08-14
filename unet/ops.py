@@ -69,9 +69,9 @@ def up_conv(x):
         unscaled of `x` in x and y direction
 
     See Also:
-        * :meth: `MaxPoolingND`
-        * :meth: `KL.Conv2DTranspose`
-        * :meth: `KL.Conv3DTranspose`
+        * :meth:`MaxPoolingND`
+        * :meth:`keras.layers..Conv2DTranspose`
+        * :meth:`keras.layers..Conv3DTranspose`
 
     """
     x_shape = x.get_shape()
@@ -123,6 +123,7 @@ def placeholder_inputs(im_shape, outCh):
 
     Returns:
         image and label placeholders
+
     """
     if im_shape[0] == 1:
         image = tf.placeholder(tf.float32, shape=[None, im_shape[1], im_shape[2], im_shape[3]])

@@ -11,7 +11,7 @@
 \contentsline {section}{\numberline {4.3}load data}{12}{section.4.3}% 
 \contentsline {section}{\numberline {4.4}plot log file}{13}{section.4.4}% 
 \contentsline {section}{\numberline {4.5}polar to cartesian}{13}{section.4.5}% 
-\contentsline {section}{\numberline {4.6}process oct folder}{13}{section.4.6}% 
-\contentsline {section}{\numberline {4.7}read oct roi file}{13}{section.4.7}% 
-\contentsline {chapter}{Python Module Index}{15}{section*.23}% 
-\contentsline {chapter}{Index}{17}{section*.24}% 
+\contentsline {section}{\numberline {4.6}process oct folder}{14}{section.4.6}% 
+\contentsline {section}{\numberline {4.7}read oct roi file}{15}{section.4.7}% 
+\contentsline {chapter}{Python Module Index}{17}{section*.28}% 
+\contentsline {chapter}{Index}{19}{section*.29}% 

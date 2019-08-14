@@ -104,7 +104,112 @@
 
 
 \chapter{Training and Testing}
-\label{\detokenize{index:training-and-testing}}
+\label{\detokenize{index:training-and-testing}}\index{main() (in module train)@\spxentry{main()}\spxextra{in module train}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:train.main}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{train.}}\sphinxbfcode{\sphinxupquote{main}}}{}{}
+Train or test a U-Net model to analyze OCT images.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{***Note**}} \textendash{} \sphinxstylestrong{All arguments are bash arguments}
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{exp\_def}} \textendash{} experiment definition
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{models\_path}} \textendash{} path for saving models
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{lr}} \textendash{} learning rate
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{lr\_decay}} \textendash{} learning rate step for decay
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{data\_pat}} \textendash{} data folder path
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{nEpoch}} \textendash{} number of epochs
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{nBatch}} \textendash{} batch size
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{outCh}} \textendash{} size of output channel
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{inCh}} \textendash{} size of input channel
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{nZ}} \textendash{} size of input depth
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{w}} \textendash{} size of input width (number of columns)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{l}} \textendash{} size of input Length (number of rows)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{loss\_w}} \textendash{} loss wights
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{isAug}} \textendash{} Is data augmentation
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{isCarts}} \textendash{} whether images should be converted into Cartesian
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{isTest}} \textendash{} Is test run instead of train
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{testEpoch}} \textendash{} epoch of the saved model for testing
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{saveEpoch}} \textendash{} epoch interval to save the model
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{logEpoch}} \textendash{} epoch interval to save the log”)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{nFeature}} \textendash{} number of features in the first layer
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{nLayer}} \textendash{} number of layers in the U-Nnet model
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{gpu\_id}} \textendash{} ID of GPUs to be used
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+
+\sphinxstrong{See also:}
+
+\begin{itemize}
+\item {} 
+{\hyperref[\detokenize{index:unet.unet.unet_model}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{unet.unet.unet\_model()}}}}}
+
+\item {} 
+{\hyperref[\detokenize{index:unet.loss.multi_loss_fun}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{unet.loss.multi\_loss\_fun()}}}}}
+
+\item {} 
+{\hyperref[\detokenize{index:util.load_data.load_train_data}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{util.load\_data.load\_train\_data()}}}}}
+
+\item {} 
+{\hyperref[\detokenize{index:util.load_batch.load_batch_parallel}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{util.load\_batch.load\_batch\_parallel()}}}}}
+
+\item {} 
+\sphinxcode{\sphinxupquote{keras.utils.multi\_gpu\_model()}}
+
+\end{itemize}
+
+
+
+\end{fulllineitems}
+
+
 
 \chapter{U-Net}
 \label{\detokenize{index:u-net}}
@@ -364,23 +469,14 @@ unscaled of \sphinxtitleref{x} in x and y direction
 \sphinxstrong{See also:}
 
 \begin{itemize}
-\item {} \begin{quote}\begin{description}
-\item[{meth}] \leavevmode
-\sphinxtitleref{MaxPoolingND}
+\item {} 
+{\hyperref[\detokenize{index:unet.ops.MaxPoolingND}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{MaxPoolingND()}}}}}
 
-\end{description}\end{quote}
+\item {} 
+\sphinxcode{\sphinxupquote{keras.layers..Conv2DTranspose()}}
 
-\item {} \begin{quote}\begin{description}
-\item[{meth}] \leavevmode
-\sphinxtitleref{KL.Conv2DTranspose}
-
-\end{description}\end{quote}
-
-\item {} \begin{quote}\begin{description}
-\item[{meth}] \leavevmode
-\sphinxtitleref{KL.Conv3DTranspose}
-
-\end{description}\end{quote}
+\item {} 
+\sphinxcode{\sphinxupquote{keras.layers..Conv3DTranspose()}}
 
 \end{itemize}
 
@@ -717,19 +813,27 @@ load a batch of data from im and/or label based on dataset (e.g. test) using mul
 
 This function handel different coordinate system and image augmentation.
 \begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{im}} \textendash{} 4D or 5D image tensor
 
-\end{description}\end{quote}
-\begin{description}
-\item[{datasetID: index of images in im and/or label along the first axis, which belong to this dataset (e.g.  test)}] \leavevmode
-nBatch: batch size
-label: 4D or 5D label tensor
-isAug: whether to apply data augmentation. See {\hyperref[\detokenize{index:util.load_batch.img_aug}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug()}}}}}
-coord\_sys: coordinate system \{‘polar’ or ‘carts\}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{datasetID}} \textendash{} index of images in im and/or label along the first axis, which belong to this dataset (e.g.  test)
 
-\end{description}
-\begin{quote}\begin{description}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{nBatch}} \textendash{} batch size
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{label}} \textendash{} 4D or 5D label tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{isAug}} \textendash{} whether to apply data augmentation. See {\hyperref[\detokenize{index:util.load_batch.img_aug}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{img\_aug()}}}}}
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{coord\_sys}} \textendash{} coordinate system \{‘polar’ or ‘carts\}
+
+\end{itemize}
+
 \item[{Returns}] \leavevmode
 a batch of data as tuple of (image, label)
 
@@ -797,22 +901,22 @@ loading the training data.
 \item[{Returns}] \leavevmode
 \begin{itemize}
 \item {} 
-\sphinxstylestrong{im}: image tensor of dataset with first row is sample ID,
+\sphinxstylestrong{im}: image tensor of dataset with first row is sample ID
 
 \item {} 
-\sphinxstylestrong{label}: label tensor similar to \sphinxtitleref{im},
+\sphinxstylestrong{label}: label tensor similar to \sphinxtitleref{im}
 
 \item {} 
-\sphinxstylestrong{train\_data\_id}: row IDs of training samples,
+\sphinxstylestrong{train\_data\_id}: row IDs of training samples
 
 \item {} 
-\sphinxstylestrong{test\_data\_id}: row IDs of testing samples,
+\sphinxstylestrong{test\_data\_id}: row IDs of testing samples
 
 \item {} 
-\sphinxstylestrong{valid\_data\_id}: row IDs of validation samples,
+\sphinxstylestrong{valid\_data\_id}: row IDs of validation samples
 
 \item {} 
-\sphinxstylestrong{sample\_caseID}: caseID of each row,
+\sphinxstylestrong{sample\_caseID}: caseID of each row
 
 \end{itemize}
 
@@ -908,12 +1012,155 @@ PyPlot figure with two subplots.
 \label{\detokenize{index:module-util.polar2cartesian}}\label{\detokenize{index:polar-to-cartesian}}\index{util.polar2cartesian (module)@\spxentry{util.polar2cartesian}\spxextra{module}}
 Convert an 2D or 3D image from polar or cylindrical coordinate to the
 cartesian coordinate.
+\index{polar2cartesian() (in module util.polar2cartesian)@\spxentry{polar2cartesian()}\spxextra{in module util.polar2cartesian}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:util.polar2cartesian.polar2cartesian}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.polar2cartesian.}}\sphinxbfcode{\sphinxupquote{polar2cartesian}}}{\emph{im}, \emph{r0=0}, \emph{full=True}, \emph{deg=1}, \emph{scale=1}}{}
+Convert the input image from polar to \sphinxstyleemphasis{Cartesian} coordinate system.
+
+A rectangle image in the Polar coordinate system is a circle in the Cartesian coordinate system.  The output
+rectangle frame can inscribe the circle or be inscribed by the circle.  The Radius dimension is along the rows and
+the zero radius can be the first row or can be a any other row, which crop the rows above that zero-radius row.
+The final image can be scale by a factor and the interpolation can be done in zero or one order.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{im}} \textendash{} input polar 2D or 3D image. The 3D is in cylindrical coordinate system.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{r0}} \textendash{} the row index of zero radius. The rows with lower index will be removed.  Default is 0.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{full}} \textendash{} True if the output boundary inscribes the resulted circular boundary or be inscribed by the circular
+boundary.  Default is True.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{deg}} \textendash{} degree of interpolation.  0 for nearest neighbor and 1 for linear interpolation.  Default is 1.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{scale}} \textendash{} the scaling ratio of the final result.  Default is 1.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+The converted version of im in Cartesian coordinate system.  The final size depends on all the arguments.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{polar2cartesian\_large\_3d\_file() (in module util.polar2cartesian)@\spxentry{polar2cartesian\_large\_3d\_file()}\spxextra{in module util.polar2cartesian}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:util.polar2cartesian.polar2cartesian_large_3d_file}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.polar2cartesian.}}\sphinxbfcode{\sphinxupquote{polar2cartesian\_large\_3d\_file}}}{\emph{im}, \emph{r0=0}, \emph{full=True}, \emph{deg=1}, \emph{scale=1}}{}
+polar to Cartesian conversion for big files.
+
+Similar to {\hyperref[\detokenize{index:util.polar2cartesian.polar2cartesian}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{polar2cartesian()}}}}} but convert chunk by chunk to handle very large images.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{im}} \textendash{} input polar 2D or 3D image. The 3D is in cylindrical coordinate system.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{r0}} \textendash{} the row index of zero radius. The rows with lower index will be removed.  Default is 0.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{full}} \textendash{} True if the output boundary inscribes the resulted circular boundary or be inscribed by the circular
+boundary.  Default is True.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{deg}} \textendash{} degree of interpolation.  0 for nearest neighbor and 1 for linear interpolation.  Default is 1.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{scale}} \textendash{} the scaling ratio of the final result.  Default is 1.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+The converted version of im in Cartesian coordinate system.  The final size depends on all the arguments.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 
 
 \section{process oct folder}
 \label{\detokenize{index:module-util.process_oct_folder}}\label{\detokenize{index:process-oct-folder}}\index{util.process\_oct\_folder (module)@\spxentry{util.process\_oct\_folder}\spxextra{module}}
-process OCT folder to generate the segmentation labels of cases. Each case all three -.PSTIF, -.INI, and -ROI.txt
-files
+process OCT folder to generate the segmentation labels of cases. Each case has all these three files
+\begin{itemize}
+\item {} 
+* .PSTIF
+
+\item {} 
+* .INI
+
+\item {} 
+* ROI.txt
+
+\end{itemize}
+\index{process\_oct\_folder() (in module util.process\_oct\_folder)@\spxentry{process\_oct\_folder()}\spxextra{in module util.process\_oct\_folder}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:util.process_oct_folder.process_oct_folder}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.process\_oct\_folder.}}\sphinxbfcode{\sphinxupquote{process\_oct\_folder}}}{\emph{folder\_path}, \emph{scale=0.25}}{}
+process OCT folder to generate the segmentation labels of cases.
+
+The \sphinxstyleemphasis{Cartesian} output file can be scale.  Each case should have all these three files
+\begin{itemize}
+\item {} 
+* .PSTIF
+
+\item {} 
+* .INI
+
+\item {} 
+* ROI.txt
+
+\end{itemize}
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{folder\_path}} \textendash{} 
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{scale}} \textendash{} 
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+
+It saves three files in the \sphinxtitleref{folder\_path} for each case with a suffix:
+\begin{itemize}
+\item {} 
+\sphinxstylestrong{-im.tif}: the image in cartesian, possibly scaled.
+
+\item {} 
+\sphinxstylestrong{-SegP.tif}: The segmentation results in polar coordinate system.
+
+\item {} 
+\sphinxstylestrong{-SegP.tif}: The segmentation results in \sphinxstyleemphasis{Cartesian} coordinate system.
+
+\end{itemize}
+
+
+\end{description}\end{quote}
+
+
+\sphinxstrong{See also:}
+
+\begin{itemize}
+\item {} 
+{\hyperref[\detokenize{index:util.polar2cartesian.polar2cartesian_large_3d_file}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{util.polar2cartesian.polar2cartesian\_large\_3d\_file()}}}}}
+
+\item {} 
+{\hyperref[\detokenize{index:util.read_oct_roi_file.read_oct_roi_file}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{util.read\_oct\_roi\_file.read\_oct\_roi\_file()}}}}}
+
+\end{itemize}
+
+
+
+\end{fulllineitems}
+
 
 
 \section{read oct roi file}
@@ -925,13 +1172,194 @@ Read ROI file generated based on the and generate segmentation results.
 \phantomsection\label{\detokenize{index:util.read_oct_roi_file.lumen_iel_mask}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.read\_oct\_roi\_file.}}\sphinxbfcode{\sphinxupquote{lumen\_iel\_mask}}}{\emph{obj\_list}, \emph{im\_shape}}{}
 generate lumen or IEL mask based on the point list.
 
+Based on the periodic nature of polar coordinate system, the boundary within {[}0, 2 pi{]} is copied to {[}- 2 pi, 0{]} and
+{[}2 pi, 4 pi{]}. The interpolation happened along the path for x and y independently. Number of points interpolated
+between each two consecutive points is based on the largest arc length between all pairs of consecutive points
+measured in the cartesian coordinate system.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{obj\_list}} \textendash{} list of a single boundary in a single plane
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{im\_shape}} \textendash{} the original image shape
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+A mask image based on the \sphinxtitleref{obj\_list} and size of \sphinxtitleref{im\_obj\_list}.
+
+\end{description}\end{quote}
+
+
+\sphinxstrong{See also:}
+
+\begin{itemize}
+\item {} 
+{\hyperref[\detokenize{index:util.read_oct_roi_file.read_oct_roi_file}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{read\_oct\_roi\_file()}}}}}
+
+\end{itemize}
+
+
+
+\end{fulllineitems}
+
+\index{read\_oct\_roi\_file() (in module util.read\_oct\_roi\_file)@\spxentry{read\_oct\_roi\_file()}\spxextra{in module util.read\_oct\_roi\_file}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:util.read_oct_roi_file.read_oct_roi_file}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.read\_oct\_roi\_file.}}\sphinxbfcode{\sphinxupquote{read\_oct\_roi\_file}}}{\emph{file\_path}, \emph{im\_shape}}{}
+generate a label tensor based on a \sphinxtitleref{*ROI.txt} file.  The label tensor is a 8-bit integer, which each bit
+encode one the classes:
+\begin{itemize}
+\item {} 
+bit 1 (2**0) encode \sphinxtitleref{gw} (Guide Wire, where guide wire has shadow)
+
+\item {} 
+bit 2 (2**1) encode \sphinxtitleref{noniel} (NonIEL, where IEL is not visible)
+
+\item {} 
+bit 2  (2**2) encode \sphinxtitleref{lumen} area
+
+\item {} 
+bit 3  (2**3) encode \sphinxtitleref{iel} area (the correct term is \sphinxstyleemphasis{intima} layer), which is the between \sphinxtitleref{lumen} and \sphinxtitleref{iel}
+boundaries.
+
+\item {} 
+other bits are not utilized and can be used for other classes in future.
+
+\end{itemize}
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{file\_path}} \textendash{} file path to \sphinxtitleref{*ROI.txt} file for a case
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{im\_shape}} \textendash{} the output image shape.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+the output label image
+
+\item[{Return type}] \leavevmode
+uint8
+
+\end{description}\end{quote}
+
+
+\sphinxstrong{See also:}
+
+\begin{itemize}
+\item {} 
+{\hyperref[\detokenize{index:util.read_oct_roi_file.lumen_iel_mask}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{lumen\_iel\_mask()}}}}}
+
+\item {} 
+{\hyperref[\detokenize{index:util.read_oct_roi_file.roi_file_parser}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{roi\_file\_parser()}}}}}
+
+\end{itemize}
+
+
+
 \end{fulllineitems}
 
 \index{roi\_file\_parser() (in module util.read\_oct\_roi\_file)@\spxentry{roi\_file\_parser()}\spxextra{in module util.read\_oct\_roi\_file}}
 
 \begin{fulllineitems}
 \phantomsection\label{\detokenize{index:util.read_oct_roi_file.roi_file_parser}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.read\_oct\_roi\_file.}}\sphinxbfcode{\sphinxupquote{roi\_file\_parser}}}{\emph{file\_path}}{}
-Parse roi file and output the lists of objects
+Parse roi file and output the lists of objects.
+
+The object list is a dictionary that has a list for each keys.  Each class of object has a key.  Keys are:
+\begin{itemize}
+\item {} 
+\sphinxstylestrong{lumen}: vessel lumen boundary
+
+\item {} 
+\sphinxstylestrong{iel}: IEL boundary
+
+\item {} 
+\sphinxstylestrong{gw}: guide wire arc defined by three points.
+
+\item {} 
+\sphinxstylestrong{noniel}: None IEL arc, which is the places that IEL is not visible, defined by three points
+
+\end{itemize}
+
+Each key’s value is a nested list, which first index represents a complete boundary or an arc whitin a plane.
+The second index represents a point within the boundary or arc.  The third index represnets the x, y, z
+coordinates of the point.
+\subsubsection*{Notes}
+\begin{description}
+\item[{In \sphinxtitleref{*ROI.txt} files:}] \leavevmode\begin{itemize}
+\item {} 
+Each file has a header line as \sphinxstyleemphasis{ROIformat}.
+
+\item {} 
+The first record of a boundary or an arc section has a final field that contain the classification label.
+
+\item {} 
+Each boundary record section finishes with the keyword \sphinxstyleemphasis{closed}.
+
+\item {} 
+Boundary records start with keyword \sphinxstyleemphasis{Snake}.
+
+\item {} 
+Arc records start with keyword \sphinxstyleemphasis{Angle}.
+
+\item {} \begin{description}
+\item[{Lumen class can have one of the following classification labels:}] \leavevmode\begin{enumerate}
+\def\theenumi{\arabic{enumi}}
+\def\labelenumi{\theenumi .}
+\makeatletter\def\p@enumii{\p@enumi \theenumi .}\makeatother
+\item {} 
+\sphinxstyleemphasis{lumen}
+
+\item {} 
+\sphinxstyleemphasis{fibro-fatty}
+
+\item {} 
+\sphinxstyleemphasis{fibrous}
+
+\item {} 
+\sphinxstyleemphasis{fc}
+
+\item {} 
+\sphinxstyleemphasis{fibrous}
+
+\item {} 
+\sphinxstyleemphasis{fa}
+
+\item {} 
+\sphinxstyleemphasis{normal}
+
+\end{enumerate}
+
+\end{description}
+
+\item {} 
+There are some classifications that are ignore in this function such as \sphinxstyleemphasis{calcification}
+
+\end{itemize}
+
+\end{description}
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\sphinxstyleliteralstrong{\sphinxupquote{file\_path}} \textendash{} the path to \sphinxtitleref{*ROI.txt} file
+
+\item[{Returns}] \leavevmode
+The object\_list dictionary.
+
+\end{description}\end{quote}
+
+
+\sphinxstrong{See also:}
+
+\begin{itemize}
+\item {} 
+{\hyperref[\detokenize{index:util.read_oct_roi_file.read_oct_roi_file}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{read\_oct\_roi\_file()}}}}}
+
+\end{itemize}
+
+
 
 \end{fulllineitems}
 

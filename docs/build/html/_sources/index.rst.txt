@@ -19,7 +19,7 @@ Indices and tables
 ====================
 Training and Testing
 ====================
-.. automodule: train
+.. autofunction:: train.main
 
 =====
 U-Net

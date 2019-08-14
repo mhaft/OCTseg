@@ -232,7 +232,7 @@ def load_batch_parallel(im, datasetID, nBatch, label=None, isAug=False, coord_sy
 
     Args:
         im: 4D or 5D image tensor
-    datasetID: index of images in im and/or label along the first axis, which belong to this dataset (e.g.  test)
+        datasetID: index of images in im and/or label along the first axis, which belong to this dataset (e.g.  test)
         nBatch: batch size
         label: 4D or 5D label tensor
         isAug: whether to apply data augmentation. See :meth:`img_aug`

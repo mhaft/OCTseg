@@ -45,6 +45,51 @@
 </div>
 <div class="section" id="training-and-testing">
 <h2>Training and Testing<a class="headerlink" href="#training-and-testing" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="train.main">
+<code class="sig-prename descclassname">train.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#train.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Train or test a U-Net model to analyze OCT images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>***Note**</strong> – <strong>All arguments are bash arguments</strong></p></li>
+<li><p><strong>exp_def</strong> – experiment definition</p></li>
+<li><p><strong>models_path</strong> – path for saving models</p></li>
+<li><p><strong>lr</strong> – learning rate</p></li>
+<li><p><strong>lr_decay</strong> – learning rate step for decay</p></li>
+<li><p><strong>data_pat</strong> – data folder path</p></li>
+<li><p><strong>nEpoch</strong> – number of epochs</p></li>
+<li><p><strong>nBatch</strong> – batch size</p></li>
+<li><p><strong>outCh</strong> – size of output channel</p></li>
+<li><p><strong>inCh</strong> – size of input channel</p></li>
+<li><p><strong>nZ</strong> – size of input depth</p></li>
+<li><p><strong>w</strong> – size of input width (number of columns)</p></li>
+<li><p><strong>l</strong> – size of input Length (number of rows)</p></li>
+<li><p><strong>loss_w</strong> – loss wights</p></li>
+<li><p><strong>isAug</strong> – Is data augmentation</p></li>
+<li><p><strong>isCarts</strong> – whether images should be converted into Cartesian</p></li>
+<li><p><strong>isTest</strong> – Is test run instead of train</p></li>
+<li><p><strong>testEpoch</strong> – epoch of the saved model for testing</p></li>
+<li><p><strong>saveEpoch</strong> – epoch interval to save the model</p></li>
+<li><p><strong>logEpoch</strong> – epoch interval to save the log”)</p></li>
+<li><p><strong>nFeature</strong> – number of features in the first layer</p></li>
+<li><p><strong>nLayer</strong> – number of layers in the U-Nnet model</p></li>
+<li><p><strong>gpu_id</strong> – ID of GPUs to be used</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#unet.unet.unet_model" title="unet.unet.unet_model"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unet.unet.unet_model()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#unet.loss.multi_loss_fun" title="unet.loss.multi_loss_fun"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unet.loss.multi_loss_fun()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#util.load_data.load_train_data" title="util.load_data.load_train_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">util.load_data.load_train_data()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#util.load_batch.load_batch_parallel" title="util.load_batch.load_batch_parallel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">util.load_batch.load_batch_parallel()</span></code></a></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.utils.multi_gpu_model()</span></code></p></li>
+</ul>
+</div>
+</dd></dl>
+
 </div>
 <div class="section" id="u-net">
 <h2>U-Net<a class="headerlink" href="#u-net" title="Permalink to this headline">¶</a></h2>
@@ -238,24 +283,9 @@ LeakyReLY.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <ul class="simple">
-<li><dl class="field-list simple">
-<dt class="field-odd">meth</dt>
-<dd class="field-odd"><p><cite>MaxPoolingND</cite></p>
-</dd>
-</dl>
-</li>
-<li><dl class="field-list simple">
-<dt class="field-odd">meth</dt>
-<dd class="field-odd"><p><cite>KL.Conv2DTranspose</cite></p>
-</dd>
-</dl>
-</li>
-<li><dl class="field-list simple">
-<dt class="field-odd">meth</dt>
-<dd class="field-odd"><p><cite>KL.Conv3DTranspose</cite></p>
-</dd>
-</dl>
-</li>
+<li><p><a class="reference internal" href="#unet.ops.MaxPoolingND" title="unet.ops.MaxPoolingND"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MaxPoolingND()</span></code></a></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.layers..Conv2DTranspose()</span></code></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.layers..Conv3DTranspose()</span></code></p></li>
 </ul>
 </div>
 </dd></dl>
@@ -482,19 +512,17 @@ maintain the original image shape.  For interpolation close to the boundaries,  
 <p>This function handel different coordinate system and image augmentation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>im</strong> – 4D or 5D image tensor</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>im</strong> – 4D or 5D image tensor</p></li>
+<li><p><strong>datasetID</strong> – index of images in im and/or label along the first axis, which belong to this dataset (e.g.  test)</p></li>
+<li><p><strong>nBatch</strong> – batch size</p></li>
+<li><p><strong>label</strong> – 4D or 5D label tensor</p></li>
+<li><p><strong>isAug</strong> – whether to apply data augmentation. See <a class="reference internal" href="#util.load_batch.img_aug" title="util.load_batch.img_aug"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug()</span></code></a></p></li>
+<li><p><strong>coord_sys</strong> – coordinate system {‘polar’ or ‘carts}</p></li>
+</ul>
 </dd>
-</dl>
-<dl class="simple">
-<dt>datasetID: index of images in im and/or label along the first axis, which belong to this dataset (e.g.  test)</dt><dd><p>nBatch: batch size
-label: 4D or 5D label tensor
-isAug: whether to apply data augmentation. See <a class="reference internal" href="#util.load_batch.img_aug" title="util.load_batch.img_aug"><code class="xref py py-meth docutils literal notranslate"><span class="pre">img_aug()</span></code></a>
-coord_sys: coordinate system {‘polar’ or ‘carts}</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>a batch of data as tuple of (image, label)</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a batch of data as tuple of (image, label)</p>
 </dd>
 </dl>
 <div class="admonition seealso">
@@ -541,12 +569,12 @@ cartesian coordinate.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><strong>im</strong>: image tensor of dataset with first row is sample ID,</p></li>
-<li><p><strong>label</strong>: label tensor similar to <cite>im</cite>,</p></li>
-<li><p><strong>train_data_id</strong>: row IDs of training samples,</p></li>
-<li><p><strong>test_data_id</strong>: row IDs of testing samples,</p></li>
-<li><p><strong>valid_data_id</strong>: row IDs of validation samples,</p></li>
-<li><p><strong>sample_caseID</strong>: caseID of each row,</p></li>
+<li><p><strong>im</strong>: image tensor of dataset with first row is sample ID</p></li>
+<li><p><strong>label</strong>: label tensor similar to <cite>im</cite></p></li>
+<li><p><strong>train_data_id</strong>: row IDs of training samples</p></li>
+<li><p><strong>test_data_id</strong>: row IDs of testing samples</p></li>
+<li><p><strong>valid_data_id</strong>: row IDs of validation samples</p></li>
+<li><p><strong>sample_caseID</strong>: caseID of each row</p></li>
 </ul>
 </p>
 </dd>
@@ -613,11 +641,100 @@ records.</p>
 <span id="polar-to-cartesian"></span><h3>polar to cartesian<a class="headerlink" href="#module-util.polar2cartesian" title="Permalink to this headline">¶</a></h3>
 <p>Convert an 2D or 3D image from polar or cylindrical coordinate to the
 cartesian coordinate.</p>
+<dl class="function">
+<dt id="util.polar2cartesian.polar2cartesian">
+<code class="sig-prename descclassname">util.polar2cartesian.</code><code class="sig-name descname">polar2cartesian</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">r0=0</em>, <em class="sig-param">full=True</em>, <em class="sig-param">deg=1</em>, <em class="sig-param">scale=1</em><span class="sig-paren">)</span><a class="headerlink" href="#util.polar2cartesian.polar2cartesian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the input image from polar to <em>Cartesian</em> coordinate system.</p>
+<p>A rectangle image in the Polar coordinate system is a circle in the Cartesian coordinate system.  The output
+rectangle frame can inscribe the circle or be inscribed by the circle.  The Radius dimension is along the rows and
+the zero radius can be the first row or can be a any other row, which crop the rows above that zero-radius row.
+The final image can be scale by a factor and the interpolation can be done in zero or one order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>im</strong> – input polar 2D or 3D image. The 3D is in cylindrical coordinate system.</p></li>
+<li><p><strong>r0</strong> – the row index of zero radius. The rows with lower index will be removed.  Default is 0.</p></li>
+<li><p><strong>full</strong> – True if the output boundary inscribes the resulted circular boundary or be inscribed by the circular
+boundary.  Default is True.</p></li>
+<li><p><strong>deg</strong> – degree of interpolation.  0 for nearest neighbor and 1 for linear interpolation.  Default is 1.</p></li>
+<li><p><strong>scale</strong> – the scaling ratio of the final result.  Default is 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The converted version of im in Cartesian coordinate system.  The final size depends on all the arguments.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="util.polar2cartesian.polar2cartesian_large_3d_file">
+<code class="sig-prename descclassname">util.polar2cartesian.</code><code class="sig-name descname">polar2cartesian_large_3d_file</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">r0=0</em>, <em class="sig-param">full=True</em>, <em class="sig-param">deg=1</em>, <em class="sig-param">scale=1</em><span class="sig-paren">)</span><a class="headerlink" href="#util.polar2cartesian.polar2cartesian_large_3d_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>polar to Cartesian conversion for big files.</p>
+<p>Similar to <a class="reference internal" href="#util.polar2cartesian.polar2cartesian" title="util.polar2cartesian.polar2cartesian"><code class="xref py py-meth docutils literal notranslate"><span class="pre">polar2cartesian()</span></code></a> but convert chunk by chunk to handle very large images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>im</strong> – input polar 2D or 3D image. The 3D is in cylindrical coordinate system.</p></li>
+<li><p><strong>r0</strong> – the row index of zero radius. The rows with lower index will be removed.  Default is 0.</p></li>
+<li><p><strong>full</strong> – True if the output boundary inscribes the resulted circular boundary or be inscribed by the circular
+boundary.  Default is True.</p></li>
+<li><p><strong>deg</strong> – degree of interpolation.  0 for nearest neighbor and 1 for linear interpolation.  Default is 1.</p></li>
+<li><p><strong>scale</strong> – the scaling ratio of the final result.  Default is 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The converted version of im in Cartesian coordinate system.  The final size depends on all the arguments.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="module-util.process_oct_folder">
 <span id="process-oct-folder"></span><h3>process oct folder<a class="headerlink" href="#module-util.process_oct_folder" title="Permalink to this headline">¶</a></h3>
-<p>process OCT folder to generate the segmentation labels of cases. Each case all three -.PSTIF, -.INI, and -ROI.txt
-files</p>
+<p>process OCT folder to generate the segmentation labels of cases. Each case has all these three files</p>
+<ul class="simple">
+<li><p>* .PSTIF</p></li>
+<li><p>* .INI</p></li>
+<li><p>* ROI.txt</p></li>
+</ul>
+<dl class="function">
+<dt id="util.process_oct_folder.process_oct_folder">
+<code class="sig-prename descclassname">util.process_oct_folder.</code><code class="sig-name descname">process_oct_folder</code><span class="sig-paren">(</span><em class="sig-param">folder_path</em>, <em class="sig-param">scale=0.25</em><span class="sig-paren">)</span><a class="headerlink" href="#util.process_oct_folder.process_oct_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>process OCT folder to generate the segmentation labels of cases.</p>
+<p>The <em>Cartesian</em> output file can be scale.  Each case should have all these three files</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>* .PSTIF</p></li>
+<li><p>* .INI</p></li>
+<li><p>* ROI.txt</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>folder_path</strong> – </p></li>
+<li><p><strong>scale</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>It saves three files in the <cite>folder_path</cite> for each case with a suffix:</p>
+<ul class="simple">
+<li><p><strong>-im.tif</strong>: the image in cartesian, possibly scaled.</p></li>
+<li><p><strong>-SegP.tif</strong>: The segmentation results in polar coordinate system.</p></li>
+<li><p><strong>-SegP.tif</strong>: The segmentation results in <em>Cartesian</em> coordinate system.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#util.polar2cartesian.polar2cartesian_large_3d_file" title="util.polar2cartesian.polar2cartesian_large_3d_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">util.polar2cartesian.polar2cartesian_large_3d_file()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#util.read_oct_roi_file.read_oct_roi_file" title="util.read_oct_roi_file.read_oct_roi_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">util.read_oct_roi_file.read_oct_roi_file()</span></code></a></p></li>
+</ul>
+</div>
+</dd></dl>
+
 </div>
 <div class="section" id="module-util.read_oct_roi_file">
 <span id="read-oct-roi-file"></span><h3>read oct roi file<a class="headerlink" href="#module-util.read_oct_roi_file" title="Permalink to this headline">¶</a></h3>
@@ -626,12 +743,120 @@ files</p>
 <dt id="util.read_oct_roi_file.lumen_iel_mask">
 <code class="sig-prename descclassname">util.read_oct_roi_file.</code><code class="sig-name descname">lumen_iel_mask</code><span class="sig-paren">(</span><em class="sig-param">obj_list</em>, <em class="sig-param">im_shape</em><span class="sig-paren">)</span><a class="headerlink" href="#util.read_oct_roi_file.lumen_iel_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>generate lumen or IEL mask based on the point list.</p>
+<p>Based on the periodic nature of polar coordinate system, the boundary within [0, 2 pi] is copied to [- 2 pi, 0] and
+[2 pi, 4 pi]. The interpolation happened along the path for x and y independently. Number of points interpolated
+between each two consecutive points is based on the largest arc length between all pairs of consecutive points
+measured in the cartesian coordinate system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj_list</strong> – list of a single boundary in a single plane</p></li>
+<li><p><strong>im_shape</strong> – the original image shape</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A mask image based on the <cite>obj_list</cite> and size of <cite>im_obj_list</cite>.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#util.read_oct_roi_file.read_oct_roi_file" title="util.read_oct_roi_file.read_oct_roi_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_oct_roi_file()</span></code></a></p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="util.read_oct_roi_file.read_oct_roi_file">
+<code class="sig-prename descclassname">util.read_oct_roi_file.</code><code class="sig-name descname">read_oct_roi_file</code><span class="sig-paren">(</span><em class="sig-param">file_path</em>, <em class="sig-param">im_shape</em><span class="sig-paren">)</span><a class="headerlink" href="#util.read_oct_roi_file.read_oct_roi_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate a label tensor based on a <cite>*ROI.txt</cite> file.  The label tensor is a 8-bit integer, which each bit
+encode one the classes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>bit 1 (2**0) encode <cite>gw</cite> (Guide Wire, where guide wire has shadow)</p></li>
+<li><p>bit 2 (2**1) encode <cite>noniel</cite> (NonIEL, where IEL is not visible)</p></li>
+<li><p>bit 2  (2**2) encode <cite>lumen</cite> area</p></li>
+<li><p>bit 3  (2**3) encode <cite>iel</cite> area (the correct term is <em>intima</em> layer), which is the between <cite>lumen</cite> and <cite>iel</cite>
+boundaries.</p></li>
+<li><p>other bits are not utilized and can be used for other classes in future.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> – file path to <cite>*ROI.txt</cite> file for a case</p></li>
+<li><p><strong>im_shape</strong> – the output image shape.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the output label image</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>uint8</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#util.read_oct_roi_file.lumen_iel_mask" title="util.read_oct_roi_file.lumen_iel_mask"><code class="xref py py-meth docutils literal notranslate"><span class="pre">lumen_iel_mask()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#util.read_oct_roi_file.roi_file_parser" title="util.read_oct_roi_file.roi_file_parser"><code class="xref py py-meth docutils literal notranslate"><span class="pre">roi_file_parser()</span></code></a></p></li>
+</ul>
+</div>
 </dd></dl>
 
 <dl class="function">
 <dt id="util.read_oct_roi_file.roi_file_parser">
 <code class="sig-prename descclassname">util.read_oct_roi_file.</code><code class="sig-name descname">roi_file_parser</code><span class="sig-paren">(</span><em class="sig-param">file_path</em><span class="sig-paren">)</span><a class="headerlink" href="#util.read_oct_roi_file.roi_file_parser" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parse roi file and output the lists of objects</p>
+<dd><p>Parse roi file and output the lists of objects.</p>
+<p>The object list is a dictionary that has a list for each keys.  Each class of object has a key.  Keys are:</p>
+<ul class="simple">
+<li><p><strong>lumen</strong>: vessel lumen boundary</p></li>
+<li><p><strong>iel</strong>: IEL boundary</p></li>
+<li><p><strong>gw</strong>: guide wire arc defined by three points.</p></li>
+<li><p><strong>noniel</strong>: None IEL arc, which is the places that IEL is not visible, defined by three points</p></li>
+</ul>
+<p>Each key’s value is a nested list, which first index represents a complete boundary or an arc whitin a plane.
+The second index represents a point within the boundary or arc.  The third index represnets the x, y, z
+coordinates of the point.</p>
+<p class="rubric">Notes</p>
+<dl class="simple">
+<dt>In <cite>*ROI.txt</cite> files:</dt><dd><ul class="simple">
+<li><p>Each file has a header line as <em>ROIformat</em>.</p></li>
+<li><p>The first record of a boundary or an arc section has a final field that contain the classification label.</p></li>
+<li><p>Each boundary record section finishes with the keyword <em>closed</em>.</p></li>
+<li><p>Boundary records start with keyword <em>Snake</em>.</p></li>
+<li><p>Arc records start with keyword <em>Angle</em>.</p></li>
+<li><dl class="simple">
+<dt>Lumen class can have one of the following classification labels:</dt><dd><ol class="arabic simple">
+<li><p><em>lumen</em></p></li>
+<li><p><em>fibro-fatty</em></p></li>
+<li><p><em>fibrous</em></p></li>
+<li><p><em>fc</em></p></li>
+<li><p><em>fibrous</em></p></li>
+<li><p><em>fa</em></p></li>
+<li><p><em>normal</em></p></li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><p>There are some classifications that are ignore in this function such as <em>calcification</em></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_path</strong> – the path to <cite>*ROI.txt</cite> file</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The object_list dictionary.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#util.read_oct_roi_file.read_oct_roi_file" title="util.read_oct_roi_file.read_oct_roi_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_oct_roi_file()</span></code></a></p></li>
+</ul>
+</div>
 </dd></dl>
 
 </div>

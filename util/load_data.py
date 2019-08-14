@@ -127,17 +127,17 @@ def load_train_data(folder_path, im_shape, coord_sys):
     Returns:
         :
 
-        * **im**: image tensor of dataset with first row is sample ID,
+        * **im**: image tensor of dataset with first row is sample ID
 
-        * **label**: label tensor similar to `im`,
+        * **label**: label tensor similar to `im`
 
-        * **train_data_id**: row IDs of training samples,
+        * **train_data_id**: row IDs of training samples
 
-        * **test_data_id**: row IDs of testing samples,
+        * **test_data_id**: row IDs of testing samples
 
-        * **valid_data_id**: row IDs of validation samples,
+        * **valid_data_id**: row IDs of validation samples
 
-        * **sample_caseID**: caseID of each row,
+        * **sample_caseID**: caseID of each row
 
 
     See Also:
