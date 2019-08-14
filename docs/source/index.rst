@@ -5,32 +5,25 @@
 
 Welcome to OCTseg's documentation!
 ==================================
-
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-
 ==================
 Indices and tables
 ==================
-
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
 
 ====================
 Training and Testing
 ====================
 .. automodule: train
 
-
 =====
 U-Net
 =====
-
 loss
 ----
 .. automodule:: unet.loss
@@ -46,11 +39,9 @@ unet
 .. automodule:: unet.unet
 	:members:
 	
-
 =======
 Utility
 =======
-
 confusion matrix
 ----------------
 .. automodule:: util.confusion_matrix
@@ -84,4 +75,3 @@ read oct roi file
 -----------------
 .. automodule:: util.read_oct_roi_file 
 	:members:
-

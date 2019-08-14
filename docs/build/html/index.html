@@ -534,19 +534,19 @@ cartesian coordinate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>folder_path</strong> – </p></li>
-<li><p><strong>im_shape</strong> – </p></li>
-<li><p><strong>coord_sys</strong> – </p></li>
+<li><p><strong>folder_path</strong> – the input folder path containing the data</p></li>
+<li><p><strong>im_shape</strong> – shape of the images in the dataset in (depth,width,length,channel) format</p></li>
+<li><p><strong>coord_sys</strong> – coordinate system (<cite>polar</cite> or <cite>carts</cite>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>im</strong>: image tensor of dataset with first row is sample ID,</p></li>
-<li><p><cite>label</cite>: label tensor similar to <cite>im</cite>,</p></li>
-<li><p><cite>train_data_id</cite>: row IDs of training samples,</p></li>
-<li><p><cite>test_data_id</cite>: row IDs of testing samples,</p></li>
-<li><p><cite>valid_data_id</cite>: row IDs of validation samples,</p></li>
-<li><p><cite>sample_caseID</cite>: caseID of each row,</p></li>
+<li><p><strong>label</strong>: label tensor similar to <cite>im</cite>,</p></li>
+<li><p><strong>train_data_id</strong>: row IDs of training samples,</p></li>
+<li><p><strong>test_data_id</strong>: row IDs of testing samples,</p></li>
+<li><p><strong>valid_data_id</strong>: row IDs of validation samples,</p></li>
+<li><p><strong>sample_caseID</strong>: caseID of each row,</p></li>
 </ul>
 </p>
 </dd>
