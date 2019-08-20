@@ -74,6 +74,8 @@ def animate(i):
         ax1.plot(data[iStart:, 0], smooth(data[iStart:, 2]))
         ax1.plot(data[iStart:, 0], smooth(data[iStart:, 3]))
         ax1.legend(['Training Loss', 'Validation Loss'])
+        ax1.set_title(args.exp_def)
+        ax1.set_xlabel('Epoch')
         ax1.set_ylabel('Loss')
         iStart = -50
         ax2.plot(data[iStart:, 0], data[iStart:, 2])

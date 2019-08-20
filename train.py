@@ -56,6 +56,7 @@ def main():
             nFeature: number of features in the first layer
             nLayer: number of layers in the U-Nnet model
             gpu_id: ID of GPUs to be used
+            optimizer: keras optimizer. see :meth:`keras.optimizers`
 
         See Also:
             * :meth:`unet.unet.unet_model`
@@ -63,6 +64,7 @@ def main():
             * :meth:`util.load_data.load_train_data`
             * :meth:`util.load_batch.load_batch_parallel`
             * :meth:`keras.utils.multi_gpu_model`
+            * :meth:`keras.optimizers`
 
     """
 
@@ -90,6 +92,7 @@ def main():
     parser.add_argument("-nFeature", type=int, default=32, help="number of features in the first layer")
     parser.add_argument("-nLayer", type=int, default=3, help="number of layers in the U-Nnet model")
     parser.add_argument("-gpu_id", type=str, default="0,1", help="ID of GPUs to be used")
+    parser.add_argument("-optimizer", type=str, default="Adam", help="optimizer")
 
     args = parser.parse_args()
     experiment_def = args.exp_def
@@ -133,7 +136,8 @@ def main():
         model = multi_gpu_model(model, gpus=numGPU)
     if not isTest:
         save_callback = ModelCheckpoint(save_file_name)
-        model.compile(optimizer=optimizers.RMSprop(lr=args.lr, decay=args.lr_decay), loss=get(loss))
+        optimizer = getattr(optimizers, args.optimizer)
+        model.compile(optimizer=optimizer(lr=args.lr, decay=args.lr_decay), loss=get(loss))
         print('Model is initialized.')
     else:
         iEpoch = args.testEpoch
