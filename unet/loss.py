@@ -8,6 +8,8 @@
 """CNN related loss functions"""
 
 import tensorflow as tf
+import numpy as np
+from scipy.ndimage.morphology import distance_transform_bf
 
 
 def dice_loss(label, target):
@@ -31,7 +33,7 @@ def dice_loss(label, target):
 
     Args:
         label: 4D or 5D label tensor
-        target: 4D or 5d target tensor
+        target: 4D or 5D target tensor
 
     Returns:
          dice loss
@@ -51,7 +53,7 @@ def weighted_cross_entropy(label, target):
 
     Args:
         label: 4D or 5D label tensor
-        target: 4D or 5d target tensor
+        target: 4D or 5D target tensor
 
     returns:
         weighted cross entropy value
@@ -92,3 +94,23 @@ def multi_loss_fun(loss_weight):
                    loss_weight[1] * dice_loss(label, target)
 
     return multi_loss
+
+
+def weighted_cross_entropy_with_boundary(label, target):
+    """Weighted cross entropy with foreground pixels having ten times higher weights
+
+    Args:
+        label: 4D or 5D label tensor
+        target: 4D or 5D target tensor
+
+    returns:
+        weighted cross entropy value
+
+    """
+    # Todo: add positive weight as an argument
+    dist = distance_transform_bf(label[:, -1]) + distance_transform_bf(1 - label[:, -1])
+    dist = np.logical_and(dist > 5, dist < 20)
+
+    return tf.matmul(tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=label, logits=target), axis=-1),
+                     0.001 + 0.010 * label[:, -1] + 0.100 * dist
+                     )
