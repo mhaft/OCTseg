@@ -58,8 +58,9 @@ def confusion_matrix(label, target, mask):
     FN = np.sum(np.logical_and(label, np.logical_not(target)))
     TPR = TP / (TP + FN)
     TNR = TN / (TN + FP)
+    Acc = (TP + TN) / (TP + TN + FP + FN)
     Dice = 2 * TP / (2 * TP + FP + FN)
-    return TP, TN, FP, FN, TPR, TNR, Dice
+    return TP, TN, FP, FN, TPR, TNR, Acc, Dice
 
 
 if __name__ == "__main__":
@@ -115,12 +116,15 @@ if __name__ == "__main__":
 
     if not os.path.exists(report_file):
         with open(report_file, 'w') as f:
-            f.write('Model, Epoch, Train TP, TN, FP, FN, TPR, TNR, Dice, Valid TP, TN, FP, FN, TPR, TNR, Dice')
+            f.write('Model, Epoch, ' +
+                    'Train TP, TN, FP, FN, TPR, TNR, Acc, Dice, ' +
+                    'Valid TP, TN, FP, FN, TPR, TNR, Acc, Dice \n')
 
     with open(report_file, 'a') as f:
-        f.write(('%s, %d' + 4 * ', %d' + 3 * ', %f' + 4 * ', %d' + 3 * ', %f' + '\n') % ((args.exp_def, args.epoch, ) +
+        f.write(('%s, %d' + 4 * ', %d' + 4 * ', %f' + 4 * ', %d' + 4 * ', %f' + '\n') % ((args.exp_def, args.epoch, ) +
                 train_confusion_matrix + valid_confusion_matrix))
 
-    print('Summ.\t' + 3 * '%s\t' % ('TPR', 'TNR', 'Dice'))
-    print('Train\t' + 3 * '%.2f\t' % train_confusion_matrix[-3:])
-    print('Valid\t' + 3 * '%.2f\t' % valid_confusion_matrix[-3:])
+    print('Summ.\t' + 4 * '%s\t' % ('TPR', 'TNR', 'Acc', 'Dice'))
+    print('Train\t' + 4 * '%.2f\t' % train_confusion_matrix[-4:])
+    print('Valid\t' + 4 * '%.2f\t' % valid_confusion_matrix[-4:])
+    print('Saved in %s' % report_file)
