@@ -46,7 +46,7 @@ def img_rand_scale(im, scale, order):
     return out
 
 
-def img_aug(im, l, coord_sys, p_lim=0.5):
+def img_aug(im, l, coord_sys, prob_lim=0.5):
     """Image augmentation manager.
 
     Based on the coordinate system (*Polar* vs.  *Cartesian*),  it selects the corresponding method.
@@ -55,7 +55,7 @@ def img_aug(im, l, coord_sys, p_lim=0.5):
         im: input image 4D or 5D tensor
         l: input label 4D or 5D tensor
         coord_sys: coordinate system.  'polar' or 'carts' for Polar and Cartesian,  respectively.
-        p_lim: probability limit for applying each augmentation case.
+        prob_lim: probability limit for applying each augmentation case.
 
     Returns:
         augmented im and l
@@ -67,9 +67,9 @@ def img_aug(im, l, coord_sys, p_lim=0.5):
     """
     assert coord_sys in ['carts', 'polar'], 'the coord_sys should be carts or polar. got %d' % coord_sys
     if coord_sys == 'carts':
-        return img_aug_carts(im, l, p_lim)
+        return img_aug_carts(im, l, prob_lim)
     else:
-        return img_aug_polar(im, l, p_lim)
+        return img_aug_polar(im, l, prob_lim)
 
 
 def img_aug_carts(image, L, prob_lim=0.5):
@@ -171,6 +171,10 @@ def img_aug_polar(image, label, prob_lim=0.5):
             j = np.floor(np.random.rand() * im_.shape[-2]).astype('int64')
             im_ = np.concatenate((im_[..., j:, :], im_[..., :j, :]), axis=-2)
             l_ = np.concatenate((l_[..., j:, :], l_[..., :j, :]), axis=-2)
+        if np.random.rand() > prob_lim:  # random reflection
+            j = np.floor(np.random.rand() * im_.shape[-2]).astype('int64')
+            im_ = np.concatenate((im_[..., :j:-1, :], im_[..., j::-1, :]), axis=-2)
+            l_ = np.concatenate((l_[..., :j:-1, :], l_[..., j::-1, :]), axis=-2)
         if np.random.rand() > prob_lim:  # intensity scaling
             im_ = np.clip(im_ * (1 + 0.5 * (np.random.rand() - 0.5)), 0, 1)
         if np.random.rand() > prob_lim:  # image scaling
