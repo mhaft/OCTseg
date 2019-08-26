@@ -36,7 +36,7 @@ def conv_layer(x, ChOut):
     h_conv2 = KL.LeakyReLU()(out_conv2)
     out_conv3 = ConvND(ChOut, kernel_size=3, padding='same', kernel_initializer='RandomNormal')(h_conv2)
     h_conv3 = KL.LeakyReLU()(out_conv3)
-    return h_conv3
+    return KL.add([h_conv3, h_conv1])
 
 
 def MaxPoolingND(x):
