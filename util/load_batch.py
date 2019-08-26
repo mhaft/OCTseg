@@ -16,6 +16,7 @@ from multiprocessing.pool import ThreadPool
 
 import numpy as np
 from scipy.ndimage import zoom
+from keras.utils import Sequence
 
 
 def img_rand_scale(im, scale, order):
@@ -265,3 +266,24 @@ def load_batch_parallel(im, datasetID, nBatch, label=None, isAug=False, coord_sy
                 im_[i, ...], label_[i, ...] = res.get()
             pool.close()
         yield (im_, label_)
+
+
+class LoadBatchGen(Sequence):
+    """data generator class, a sub-class of  Keras' Sequence class"""
+    def __init__(self, im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts'):
+        self.im, self.label = im, label
+        self.datasetID, self.nBatch, self.isAug, self.coord_sys = datasetID, nBatch, isAug, coord_sys
+
+    def __len__(self):
+        return int(np.ceil(len(self.datasetID) / self.nBatch))
+
+    def __getitem__(self, item):
+        j = self.datasetID[np.random.randint(0, len(self.datasetID), self.nBatch)]
+        im_ = self.im[j, ...]
+        if self.label is not None:
+            label_ = self.label[j, ...]
+        else:
+            label_ = None
+        if self.isAug:
+            im_, label_ = img_aug(im_, label_, self.coord_sys, 0.9)
+        return im_, label_
