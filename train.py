@@ -12,6 +12,7 @@ import time
 import csv
 import glob
 import argparse
+from multiprocessing import cpu_count
 
 import tifffile
 import h5py
@@ -24,7 +25,7 @@ from keras.backend.tensorflow_backend import set_session
 from keras.losses import get
 
 from unet.unet import unet_model
-from unet.loss import multi_loss_fun
+from unet.loss import weighted_cross_entropy_with_boundary
 from util.load_data import load_train_data
 from util.load_batch import load_batch_parallel
 
@@ -74,11 +75,11 @@ def main():
     parser.add_argument("-models_path", type=str, default="model/", help="path for saving models")
     parser.add_argument("-lr", type=float, default=1e-4, help="learning rate")
     parser.add_argument("-lr_decay", type=float, default=0.0, help="learning rate decay")
-    parser.add_argument("-data_path", type=str, default="C:\\MachineLearning\\PSTIFS\\", help="data folder path")
+    parser.add_argument("-data_path", type=str, default="C:\\MachineLearning\\Segmentation_NonIEL\\", help="data folder path")
     parser.add_argument("-nEpoch", type=int, default=2000, help="number of epochs")
-    parser.add_argument("-nBatch", type=int, default=5, help="batch size")
+    parser.add_argument("-nBatch", type=int, default=4, help="batch size")
     parser.add_argument("-outCh", type=int, default=2, help="size of output channel")
-    parser.add_argument("-inCh", type=int, default=1, help="size of input channel")
+    parser.add_argument("-inCh", type=int, default=3, help="size of input channel")
     parser.add_argument("-nZ", type=int, default=1, help="size of input depth")
     parser.add_argument("-w", type=int, default=512, help="size of input width (# of columns)")
     parser.add_argument("-l", type=int, default=512, help="size of input Length (# of rows)")
@@ -87,7 +88,7 @@ def main():
     parser.add_argument("-isCarts", type=int, default=0, help="whether images should be converted into Cartesian")
     parser.add_argument("-isTest", type=int, default=0, help="Is test run instead of train")
     parser.add_argument("-testEpoch", type=int, default=0, help="epoch of the saved model for testing")
-    parser.add_argument("-saveEpoch", type=int, default=500, help="epoch interval to save the model")
+    parser.add_argument("-saveEpoch", type=int, default=2500, help="epoch interval to save the model")
     parser.add_argument("-logEpoch", type=int, default=100, help="epoch interval to save the log")
     parser.add_argument("-nFeature", type=int, default=32, help="number of features in the first layer")
     parser.add_argument("-nLayer", type=int, default=3, help="number of layers in the U-Nnet model")
@@ -106,10 +107,11 @@ def main():
     loss_weight = np.array([float(i) for i in args.loss_w.split(',')])
     loss_weight = loss_weight / np.linalg.norm(loss_weight)
     coord_sys = 'carts' if args.isCarts else 'polar'
+    isTrain = 1 - args.isTest
 
     # GPU settings
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.975)
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9)
     config = tf.ConfigProto(gpu_options=gpu_options)
     config.gpu_options.allow_growth = True
     config.allow_soft_placement = True
@@ -125,24 +127,45 @@ def main():
         os.makedirs(models_path + experiment_def)
     save_file_name = models_path + experiment_def + '/model-epoch%06d.h5'
     log_file = models_path + experiment_def + '/log-' + experiment_def + '.csv'
-    if not isTest and not os.path.exists(log_file):
+    if isTrain and not os.path.exists(log_file):
         with open(log_file, 'w') as f:
             f.write('epoch, Time (hr), Test_Loss, Valid_Loss, ' + str(args) + '\n')
 
     # build the model
-    model = unet_model(im_shape, nFeature=args.nFeature, outCh=outCh, nLayer=args.nLayer)
-    loss = multi_loss_fun(loss_weight)
-    if numGPU > 1:
-        model = multi_gpu_model(model, gpus=numGPU)
-    if not isTest:
-        save_callback = ModelCheckpoint(save_file_name)
-        optimizer = getattr(optimizers, args.optimizer)
-        model.compile(optimizer=optimizer(lr=args.lr, decay=args.lr_decay), loss=get(loss))
-        print('Model is initialized.')
-    else:
+    model_template = unet_model(im_shape, nFeature=args.nFeature, outCh=outCh, nLayer=args.nLayer)
+
+    if isTrain:
+        # load the last saved model if exists
+        f = glob.glob(models_path + experiment_def + '/model-epoch*.h5')
+        f.sort()
+        if len(f):
+            iEpochStart = int(f[-1][-9:-3])
+            model_template.load_weights(save_file_name % iEpochStart)
+            with open(log_file, 'r') as f:
+                reader = csv.DictReader(f, delimiter=',', skipinitialspace=True)
+                for row in reader:
+                    if int(row['epoch']) == iEpochStart:
+                        last_time = float(row['Time (hr)']) * 3600
+            print('model at epoch %d is loaded.' % iEpochStart)
+            iEpochStart += 1
+        else:
+            iEpochStart = 1
+            last_time = 0
+            print('Model is initialized.')
+    elif isTest:
         iEpoch = args.testEpoch
-        model.load_weights(save_file_name % iEpoch)
+        model_template.load_weights(save_file_name % iEpoch)
         print('model at epoch %d is loaded.' % args.testEpoch)
+
+    if numGPU > 1:
+        model = multi_gpu_model(model_template, gpus=numGPU)
+    else:
+        model = model_template
+
+    optimizer = getattr(optimizers, args.optimizer)
+    model.compile(optimizer=optimizer(lr=args.lr, decay=args.lr_decay),
+                  loss=get(weighted_cross_entropy_with_boundary))
+
 
     # load data
     data_file = os.path.join(folder_path, 'Dataset ' + coord_sys + ' Z%d-L%d-W%d-C%d.h5' % im_shape)
@@ -172,7 +195,7 @@ def main():
 
     label_9class = label
     if loss_mask_classes:
-        loss_mask = np.any(label_9class[..., loss_mask_classes], -1)
+        loss_mask = np.logical_not(np.any(label_9class[..., loss_mask_classes], -1))
     else:
         loss_mask = np.ones(label_9class.shape[:-1])
     label = np.zeros_like(label[..., :len(classes)])
@@ -185,32 +208,14 @@ def main():
             tmp = np.logical_and(tmp, np.logical_not(label_9class[..., classes[i][1][j]]))
         label[..., i] = tmp
 
-
     # training
-    if not isTest:
+    if isTrain:
         train_data_gen = load_batch_parallel(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys)
         valid_data_gen = load_batch_parallel(im, valid_data_id, nBatch, label, isAug=False, coord_sys=coord_sys)
         print('Data is loaded. Training: %d, validation: %d' % (len(np.unique(sample_caseID[train_data_id])),
                                                                 len(np.unique(sample_caseID[valid_data_id]))))
 
-        # load the last saved model if exists
-        f = glob.glob(models_path + experiment_def + '/model-epoch*.h5')
-        f.sort()
-        if len(f):
-            iEpochStart = int(f[-1][-9:-3])
-            model.load_weights(save_file_name % iEpochStart)
-            print('model at epoch %d is loaded.' % iEpochStart)
-            with open(log_file, 'r') as f:
-                reader = csv.DictReader(f, delimiter=',', skipinitialspace=True)
-                for row in reader:
-                    if int(row['epoch']) == iEpochStart:
-                        start = time.time() - float(row['Time (hr)']) * 3600
-            iEpochStart += 1
-        else:
-            iEpochStart = 1
-            start = time.time()
-
-        # training
+        start = time.time() - last_time
         for iEpoch in range(iEpochStart, nEpoch + 1):
             x1, l1 = next(train_data_gen)
             model.train_on_batch(x1, l1)
