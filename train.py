@@ -217,24 +217,23 @@ def main():
 
         start = time.time() - last_time
         for iEpoch in range(iEpochStart, nEpoch + 1):
-            x1, l1 = next(train_data_gen)
-            model.train_on_batch(x1, l1)
-
+            # x1, l1 = next(train_data_gen)
+            # model.train_on_batch(x1, l1)
+            model.fit_generator(train_data_gen, steps_per_epoch=args.logEpoch, verbose=0)
             # evaluation
-            if iEpoch % args.logEpoch == 0:
-                train_loss = model.evaluate(im[train_data_id, ...], label[train_data_id, ...],
-                                            batch_size=nBatch, verbose=0)
-                valid_loss = model.evaluate(im[valid_data_id, ...], label[valid_data_id, ...],
-                                            batch_size=nBatch, verbose=0)
-                rem_time = (nEpoch - iEpoch) / iEpoch * (time.time() - start) / 3600.0
-                print("Epoch:%d, %.2f hr to finish, Train Loss: %f, Test Loss: %f" % (iEpoch, rem_time,
-                                                                                      train_loss, valid_loss))
-                with open(log_file, 'a') as f:
-                    f.write("%d, %.2f, %f, %f, \n" % (iEpoch, (time.time() - start) / 3600.0, train_loss, valid_loss))
+            train_loss = model.evaluate(im[train_data_id, ...], label[train_data_id, ...],
+                                        batch_size=nBatch, verbose=0)
+            valid_loss = model.evaluate(im[valid_data_id, ...], label[valid_data_id, ...],
+                                        batch_size=nBatch, verbose=0)
+            rem_time = (nEpoch - iEpoch) / iEpoch * (time.time() - start) / 3600.0
+            print("Epoch%d: %.2f hr to finish, Train Loss: %f, Valid Loss: %f" % (iEpoch, rem_time,
+                                                                                  train_loss, valid_loss))
+            with open(log_file, 'a') as f:
+                f.write("%d, %.2f, %f, %f, \n" % (iEpoch, (time.time() - start) / 3600.0, train_loss, valid_loss))
 
             # save model
             if iEpoch % args.saveEpoch == 0:
-                model.save(save_file_name % iEpoch)
+                model_template.save(save_file_name % iEpoch)
 
     # feed forward
     label = np.argmax(label, -1)
