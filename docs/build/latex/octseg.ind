@@ -9,7 +9,7 @@
 
   \indexspace
   \bigletter C
-  \item \spxentry{conv\_layer()}\spxextra{in module unet.ops}, \hyperpage{6}
+  \item \spxentry{conv\_layer()}\spxextra{in module unet.ops}, \hyperpage{7}
 
   \indexspace
   \bigletter D
@@ -28,6 +28,7 @@
   \item \spxentry{load\_batch()}\spxextra{in module util.load\_batch}, \hyperpage{11}
   \item \spxentry{load\_batch\_parallel()}\spxextra{in module util.load\_batch}, \hyperpage{11}
   \item \spxentry{load\_train\_data()}\spxextra{in module util.load\_data}, \hyperpage{12}
+  \item \spxentry{LoadBatchGen}\spxextra{class in util.load\_batch}, \hyperpage{9}
   \item \spxentry{lumen\_iel\_mask()}\spxextra{in module util.read\_oct\_roi\_file}, \hyperpage{15}
 
   \indexspace
@@ -51,7 +52,7 @@
   \item \spxentry{read\_oct\_roi\_file()}\spxextra{in module util.read\_oct\_roi\_file}, 
 		\hyperpage{15}
   \item \spxentry{roi\_file\_parser()}\spxextra{in module util.read\_oct\_roi\_file}, 
-		\hyperpage{15}
+		\hyperpage{16}
 
   \indexspace
   \bigletter U
@@ -71,5 +72,7 @@
   \indexspace
   \bigletter W
   \item \spxentry{weighted\_cross\_entropy()}\spxextra{in module unet.loss}, \hyperpage{6}
+  \item \spxentry{weighted\_cross\_entropy\_with\_boundary()}\spxextra{in module unet.loss}, 
+		\hyperpage{6}
 
 \end{sphinxtheindex}

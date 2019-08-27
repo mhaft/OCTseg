@@ -72,7 +72,7 @@
 
 
 \title{OCTseg}
-\date{Aug 20, 2019}
+\date{Aug 27, 2019}
 \release{}
 \author{Mohammad Haft-Javaherian}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -249,7 +249,7 @@ probability instead of hard classification
 \sphinxstyleliteralstrong{\sphinxupquote{label}} \textendash{} 4D or 5D label tensor
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{target}} \textendash{} 4D or 5d target tensor
+\sphinxstyleliteralstrong{\sphinxupquote{target}} \textendash{} 4D or 5D target tensor
 
 \end{itemize}
 
@@ -307,7 +307,29 @@ Weighted cross entropy with foreground pixels having ten times higher weights
 \sphinxstyleliteralstrong{\sphinxupquote{label}} \textendash{} 4D or 5D label tensor
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{target}} \textendash{} 4D or 5d target tensor
+\sphinxstyleliteralstrong{\sphinxupquote{target}} \textendash{} 4D or 5D target tensor
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+weighted cross entropy value
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{weighted\_cross\_entropy\_with\_boundary() (in module unet.loss)@\spxentry{weighted\_cross\_entropy\_with\_boundary()}\spxextra{in module unet.loss}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:unet.loss.weighted_cross_entropy_with_boundary}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{weighted\_cross\_entropy\_with\_boundary}}}{\emph{label}, \emph{target}}{}
+Weighted cross entropy with foreground pixels having ten times higher weights
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{label}} \textendash{} 4D or 5D label tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{target}} \textendash{} 4D or 5D target tensor
 
 \end{itemize}
 
@@ -581,10 +603,18 @@ add a line to the \sphinxtitleref{../model/confusion\_matrix.csv} file, which co
 Load a batch of data.
 
 Creates batches of data randomly in serial or multi-thread parallel fashion.
+\index{LoadBatchGen (class in util.load\_batch)@\spxentry{LoadBatchGen}\spxextra{class in util.load\_batch}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:util.load_batch.LoadBatchGen}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{LoadBatchGen}}}{\emph{im}, \emph{datasetID}, \emph{nBatch}, \emph{label=None}, \emph{isAug=False}, \emph{coord\_sys='carts'}}{}
+data generator class, a sub-class of  Keras’ Sequence class
+
+\end{fulllineitems}
+
 \index{img\_aug() (in module util.load\_batch)@\spxentry{img\_aug()}\spxextra{in module util.load\_batch}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:util.load_batch.img_aug}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{img\_aug}}}{\emph{im}, \emph{l}, \emph{coord\_sys}, \emph{p\_lim=0.5}}{}
+\phantomsection\label{\detokenize{index:util.load_batch.img_aug}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{img\_aug}}}{\emph{im}, \emph{l}, \emph{coord\_sys}, \emph{prob\_lim=0.5}}{}
 Image augmentation manager.
 
 Based on the coordinate system (\sphinxstyleemphasis{Polar} vs.  \sphinxstyleemphasis{Cartesian}),  it selects the corresponding method.
@@ -600,7 +630,7 @@ Based on the coordinate system (\sphinxstyleemphasis{Polar} vs.  \sphinxstyleemp
 \sphinxstyleliteralstrong{\sphinxupquote{coord\_sys}} \textendash{} coordinate system.  ‘polar’ or ‘carts’ for Polar and Cartesian,  respectively.
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{p\_lim}} \textendash{} probability limit for applying each augmentation case.
+\sphinxstyleliteralstrong{\sphinxupquote{prob\_lim}} \textendash{} probability limit for applying each augmentation case.
 
 \end{itemize}
 

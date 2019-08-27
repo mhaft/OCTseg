@@ -75,6 +75,7 @@
 <li><p><strong>nFeature</strong> – number of features in the first layer</p></li>
 <li><p><strong>nLayer</strong> – number of layers in the U-Nnet model</p></li>
 <li><p><strong>gpu_id</strong> – ID of GPUs to be used</p></li>
+<li><p><strong>optimizer</strong> – keras optimizer. see <code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.optimizers()</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -86,6 +87,7 @@
 <li><p><a class="reference internal" href="#util.load_data.load_train_data" title="util.load_data.load_train_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">util.load_data.load_train_data()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#util.load_batch.load_batch_parallel" title="util.load_batch.load_batch_parallel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">util.load_batch.load_batch_parallel()</span></code></a></p></li>
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.utils.multi_gpu_model()</span></code></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.optimizers()</span></code></p></li>
 </ul>
 </div>
 </dd></dl>
@@ -115,7 +117,7 @@ probability instead of hard classification</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>label</strong> – 4D or 5D label tensor</p></li>
-<li><p><strong>target</strong> – 4D or 5d target tensor</p></li>
+<li><p><strong>target</strong> – 4D or 5D target tensor</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -158,7 +160,24 @@ argument</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>label</strong> – 4D or 5D label tensor</p></li>
-<li><p><strong>target</strong> – 4D or 5d target tensor</p></li>
+<li><p><strong>target</strong> – 4D or 5D target tensor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>weighted cross entropy value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="unet.loss.weighted_cross_entropy_with_boundary">
+<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">weighted_cross_entropy_with_boundary</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.weighted_cross_entropy_with_boundary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weighted cross entropy with foreground pixels having ten times higher weights</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label</strong> – 4D or 5D label tensor</p></li>
+<li><p><strong>target</strong> – 4D or 5D target tensor</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -359,9 +378,15 @@ LeakyReLY.</p>
 <span id="load-batch"></span><h3>load batch<a class="headerlink" href="#module-util.load_batch" title="Permalink to this headline">¶</a></h3>
 <p>Load a batch of data.</p>
 <p>Creates batches of data randomly in serial or multi-thread parallel fashion.</p>
+<dl class="class">
+<dt id="util.load_batch.LoadBatchGen">
+<em class="property">class </em><code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">LoadBatchGen</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">datasetID</em>, <em class="sig-param">nBatch</em>, <em class="sig-param">label=None</em>, <em class="sig-param">isAug=False</em>, <em class="sig-param">coord_sys='carts'</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.LoadBatchGen" title="Permalink to this definition">¶</a></dt>
+<dd><p>data generator class, a sub-class of  Keras’ Sequence class</p>
+</dd></dl>
+
 <dl class="function">
 <dt id="util.load_batch.img_aug">
-<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">img_aug</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">l</em>, <em class="sig-param">coord_sys</em>, <em class="sig-param">p_lim=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.img_aug" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">img_aug</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">l</em>, <em class="sig-param">coord_sys</em>, <em class="sig-param">prob_lim=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.img_aug" title="Permalink to this definition">¶</a></dt>
 <dd><p>Image augmentation manager.</p>
 <p>Based on the coordinate system (<em>Polar</em> vs.  <em>Cartesian</em>),  it selects the corresponding method.</p>
 <dl class="field-list simple">
@@ -370,7 +395,7 @@ LeakyReLY.</p>
 <li><p><strong>im</strong> – input image 4D or 5D tensor</p></li>
 <li><p><strong>l</strong> – input label 4D or 5D tensor</p></li>
 <li><p><strong>coord_sys</strong> – coordinate system.  ‘polar’ or ‘carts’ for Polar and Cartesian,  respectively.</p></li>
-<li><p><strong>p_lim</strong> – probability limit for applying each augmentation case.</p></li>
+<li><p><strong>prob_lim</strong> – probability limit for applying each augmentation case.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
