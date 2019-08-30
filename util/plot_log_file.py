@@ -82,9 +82,8 @@ def animate(i):
         iStart = -50
         ax2.plot(data[iStart:, 0], data[iStart:, 2])
         ax2.plot(data[iStart:, 0], data[iStart:, 3])
-        # ax2.set_xlabel('Epoch')
+        ax2.set_xlabel('Epoch')
         ax2.set_ylabel('Loss')
-        ax2.set_xlabel('aa' + (4 * '%f ') % tuple(data[4, :]))
     except:
         pass
 
