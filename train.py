@@ -24,48 +24,51 @@ from keras.callbacks import ModelCheckpoint
 from keras.backend.tensorflow_backend import set_session
 from keras.losses import get
 
-from unet.unet import unet_model
-from unet.loss import weighted_cross_entropy_with_boundary
+from boundary.boundary import boundary_model
+from boundary.loss import weighted_cross_entropy_with_boundary, masked_mean_absolute_error, masked_mean_square_error
 from util.load_data import load_train_data
-from util.load_batch import load_batch_parallel
+from util.load_batch import load_batch_parallel, LoadBatchGen
+from util.segmentation2boundary import segmentation2boundary_multi_class, boundary2segmentation
 
 
 def main():
     """Train or test a U-Net model to analyze OCT images.
 
-        Args:
-            ***Note**: **All arguments are bash arguments**
-            exp_def: experiment definition
-            models_path: path for saving models
-            lr: learning rate
-            lr_decay: learning rate step for decay
-            data_pat: data folder path
-            nEpoch: number of epochs
-            nBatch: batch size
-            outCh: size of output channel
-            inCh: size of input channel
-            nZ: size of input depth
-            w: size of input width (number of columns)
-            l: size of input Length (number of rows)
-            loss_w: loss wights
-            isAug: Is data augmentation
-            isCarts: whether images should be converted into Cartesian
-            isTest: Is test run instead of train
-            testEpoch: epoch of the saved model for testing
-            saveEpoch: epoch interval to save the model
-            logEpoch: epoch interval to save the log")
-            nFeature: number of features in the first layer
-            nLayer: number of layers in the U-Nnet model
-            gpu_id: ID of GPUs to be used
-            optimizer: keras optimizer. see :meth:`keras.optimizers`
+    Notes:
+        **All arguments are bash arguments**.
 
-        See Also:
-            * :meth:`unet.unet.unet_model`
-            * :meth:`unet.loss.multi_loss_fun`
-            * :meth:`util.load_data.load_train_data`
-            * :meth:`util.load_batch.load_batch_parallel`
-            * :meth:`keras.utils.multi_gpu_model`
-            * :meth:`keras.optimizers`
+    Args:
+        exp_def: experiment definition
+        models_path: path for saving models
+        lr: learning rate
+        lr_decay: learning rate step for decay
+        data_pat: data folder path
+        nEpoch: number of epochs
+        nBatch: batch size
+        outCh: size of output channel
+        inCh: size of input channel
+        nZ: size of input depth
+        w: size of input width (number of columns)
+        l: size of input Length (number of rows)
+        loss_w: loss wights
+        isAug: Is data augmentation
+        isCarts: whether images should be converted into Cartesian
+        isTest: Is test run instead of train
+        testEpoch: epoch of the saved model for testing
+        saveEpoch: epoch interval to save the model
+        epochSize: number of samples per epoch
+        nFeature: number of features in the first layer
+        nLayer: number of layers in the U-Nnet model
+        gpu_id: ID of GPUs to be used
+        optimizer: keras optimizer. see :meth:`keras.optimizers`
+
+    See Also:
+        * :meth:`boundary.boundary.boundary_model`
+        * :meth:`boundary.loss.multi_loss_fun`
+        * :meth:`util.load_data.load_train_data`
+        * :meth:`util.load_batch.load_batch_parallel`
+        * :meth:`keras.utils.multi_gpu_model`
+        * :meth:`keras.optimizers`
 
     """
 
@@ -84,14 +87,14 @@ def main():
     parser.add_argument("-w", type=int, default=512, help="size of input width (# of columns)")
     parser.add_argument("-l", type=int, default=512, help="size of input Length (# of rows)")
     parser.add_argument("-loss_w", type=str, default="1, 100", help="loss wights")
-    parser.add_argument("-isAug", type=int, default=1, help="Is data augmentation")
+    parser.add_argument("-isAug", type=int, default=0, help="Is data augmentation")
     parser.add_argument("-isCarts", type=int, default=0, help="whether images should be converted into Cartesian")
     parser.add_argument("-isTest", type=int, default=0, help="Is test run instead of train")
     parser.add_argument("-testEpoch", type=int, default=0, help="epoch of the saved model for testing")
     parser.add_argument("-saveEpoch", type=int, default=2500, help="epoch interval to save the model")
-    parser.add_argument("-logEpoch", type=int, default=100, help="epoch interval to save the log")
+    parser.add_argument("-epochSize", type=int, default=100, help="number of samples per epoch")
     parser.add_argument("-nFeature", type=int, default=32, help="number of features in the first layer")
-    parser.add_argument("-nLayer", type=int, default=3, help="number of layers in the U-Nnet model")
+    parser.add_argument("-nLayer", type=int, default=9, help="number of layers in the U-Nnet model")
     parser.add_argument("-gpu_id", type=str, default="0,1", help="ID of GPUs to be used")
     parser.add_argument("-optimizer", type=str, default="Adam", help="optimizer")
 
@@ -129,10 +132,10 @@ def main():
     log_file = models_path + experiment_def + '/log-' + experiment_def + '.csv'
     if isTrain and not os.path.exists(log_file):
         with open(log_file, 'w') as f:
-            f.write('epoch, Time (hr), Test_Loss, Valid_Loss, ' + str(args) + '\n')
+            f.write('epoch, Time (hr), Train_Loss, Valid_Loss, ' + str(args) + '\n')
 
     # build the model
-    model_template = unet_model(im_shape, nFeature=args.nFeature, outCh=outCh, nLayer=args.nLayer)
+    model_template = boundary_model(im_shape, nFeature=args.nFeature, outCh=outCh, nLayer=args.nLayer)
 
     if isTrain:
         # load the last saved model if exists
@@ -148,6 +151,7 @@ def main():
                         last_time = float(row['Time (hr)']) * 3600
             print('model at epoch %d is loaded.' % iEpochStart)
             iEpochStart += 1
+            iEpoch = nEpoch  # in case training is done
         else:
             iEpochStart = 1
             last_time = 0
@@ -163,8 +167,11 @@ def main():
         model = model_template
 
     optimizer = getattr(optimizers, args.optimizer)
-    model.compile(optimizer=optimizer(lr=args.lr, decay=args.lr_decay),
-                  loss=get(weighted_cross_entropy_with_boundary))
+    if outCh == 2:
+        loss = 'mean_absolute_error'
+    else:
+        loss = get(masked_mean_square_error)
+    model.compile(optimizer=optimizer(lr=args.lr, decay=args.lr_decay), loss=loss)
 
 
     # load data
@@ -187,39 +194,24 @@ def main():
 
     # labels and masks
     # Todo: add an input method for classes and masks
-    loss_mask_classes = [0, 1]
-    classes = [
-        [[0, 1, 2], [3]],
-        [[3], []],
-    ]
+    classes = [2, 3]
+    mask_classes = [0, 1]
 
-    label_9class = label
-    if loss_mask_classes:
-        loss_mask = np.logical_not(np.any(label_9class[..., loss_mask_classes], -1))
-    else:
-        loss_mask = np.ones(label_9class.shape[:-1])
-    label = np.zeros_like(label[..., :len(classes)])
-    label[..., 0] = np.all(np.logical_not(label_9class), axis=-1)
-    for i in range(len(classes)):
-        tmp = label[..., i]
-        for j in range(len(classes[i][0])):
-            tmp = np.logical_or(tmp, label_9class[..., classes[i][0][j]])
-        for j in range(len(classes[i][1])):
-            tmp = np.logical_and(tmp, np.logical_not(label_9class[..., classes[i][1][j]]))
-        label[..., i] = tmp
+    mask = (segmentation2boundary_multi_class(label, mask_classes) < 0).astype('single')
+    label = segmentation2boundary_multi_class(label, classes)
+    mask[..., 1, :] = np.logical_and(mask[..., 0, :], mask[..., 1, :])
+    if label.shape[-2] != outCh:
+        label = np.concatenate((label, mask), axis=-2)
 
     # training
     if isTrain:
-        train_data_gen = load_batch_parallel(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys)
-        valid_data_gen = load_batch_parallel(im, valid_data_id, nBatch, label, isAug=False, coord_sys=coord_sys)
+        train_data_gen = LoadBatchGen(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys)
         print('Data is loaded. Training: %d, validation: %d' % (len(np.unique(sample_caseID[train_data_id])),
                                                                 len(np.unique(sample_caseID[valid_data_id]))))
 
         start = time.time() - last_time
         for iEpoch in range(iEpochStart, nEpoch + 1):
-            # x1, l1 = next(train_data_gen)
-            # model.train_on_batch(x1, l1)
-            model.fit_generator(train_data_gen, steps_per_epoch=args.logEpoch, verbose=0)
+            model.fit_generator(train_data_gen, steps_per_epoch=args.epochSize, verbose=1)
             # evaluation
             train_loss = model.evaluate(im[train_data_id, ...], label[train_data_id, ...],
                                         batch_size=nBatch, verbose=0)
@@ -236,10 +228,13 @@ def main():
                 model_template.save(save_file_name % iEpoch)
 
     # feed forward
-    label = np.argmax(label, -1)
+    label = np.logical_and(boundary2segmentation(label[..., [1], :], im_shape[1]),
+                           np.logical_not(boundary2segmentation(label[..., [0], :], im_shape[1])))
     train_valid_data_id = np.union1d(train_data_id, valid_data_id)
     out = model.predict(im, batch_size=nBatch, verbose=1)
-    out = np.argmax(out, -1)
+    out = np.logical_and(boundary2segmentation(out[..., [1], :], im_shape[1]),
+                           np.logical_not(boundary2segmentation(out[..., [0], :], im_shape[1])))
+    label, out, im = label.astype(np.uint8), out.astype(np.uint8), (im * 255).astype(np.uint8).squeeze()
     if len(out.shape) > 3:
         i = int(out.shape[1] // 2)
         label, out, im = label[:, i, ...].squeeze(), out[:, i, ...].squeeze(), im[:, i, ...].squeeze()
@@ -248,11 +243,9 @@ def main():
     label[train_data_id, ...] *= 2
 
     # write files
-    tifffile.imwrite(models_path + experiment_def + '/a-label.tif', label[train_valid_data_id, ...].astype(np.uint8))
-    tifffile.imwrite(models_path + experiment_def + '/a-out-epoch%06d.tif' % iEpoch,
-                     out[train_valid_data_id, ...].astype(np.uint8))
-    tifffile.imwrite(models_path + experiment_def + '/a-im.tif',
-                     (im[train_valid_data_id, ...] * 255).astype(np.uint8).squeeze())
+    tifffile.imwrite(models_path + experiment_def + '/a-label.tif', label[train_valid_data_id, ...])
+    tifffile.imwrite(models_path + experiment_def + '/a-out-epoch%06d.tif' % iEpoch, out[train_valid_data_id, ...])
+    tifffile.imwrite(models_path + experiment_def + '/a-im.tif', im[train_valid_data_id, ...])
 
 
 if __name__ == '__main__':
