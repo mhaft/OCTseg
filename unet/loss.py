@@ -111,6 +111,6 @@ def weighted_cross_entropy_with_boundary(label, target):
     dist = distance_transform_bf(label[:, -1]) + distance_transform_bf(1 - label[:, -1])
     dist = np.logical_and(dist > 5, dist < 20)
 
-    return tf.matmul(tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=label, logits=target), axis=-1),
+    return tf.multiply(tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=label, logits=target), axis=-1),
                      0.001 + 0.010 * label[:, -1] + 0.100 * dist
                      )
