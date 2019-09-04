@@ -27,7 +27,7 @@ from keras.losses import get
 from unet.unet import unet_model
 from unet.loss import weighted_cross_entropy_with_boundary
 from util.load_data import load_train_data
-from util.load_batch import load_batch_parallel
+from util.load_batch import LoadBatchGen
 
 
 def main():
@@ -210,16 +210,13 @@ def main():
 
     # training
     if isTrain:
-        train_data_gen = load_batch_parallel(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys)
-        valid_data_gen = load_batch_parallel(im, valid_data_id, nBatch, label, isAug=False, coord_sys=coord_sys)
+        train_data_gen = LoadBatchGen(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys)
         print('Data is loaded. Training: %d, validation: %d' % (len(np.unique(sample_caseID[train_data_id])),
                                                                 len(np.unique(sample_caseID[valid_data_id]))))
 
         start = time.time() - last_time
         for iEpoch in range(iEpochStart, nEpoch + 1):
-            # x1, l1 = next(train_data_gen)
-            # model.train_on_batch(x1, l1)
-            model.fit_generator(train_data_gen, steps_per_epoch=args.logEpoch, verbose=0)
+            model.fit_generator(train_data_gen, steps_per_epoch=args.logEpoch, verbose=1)
             # evaluation
             train_loss = model.evaluate(im[train_data_id, ...], label[train_data_id, ...],
                                         batch_size=nBatch, verbose=0)
