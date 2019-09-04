@@ -21,22 +21,22 @@ Training and Testing
 ====================
 .. autofunction:: train.main
 
-=====
-U-Net
-=====
+========
+Boundary
+========
 loss
 ----
-.. automodule:: unet.loss
+.. automodule:: boundary.loss
 	:members:
 
 ops
 ---
-.. automodule:: unet.ops
+.. automodule:: boundary.ops
 	:members:
 	
 unet
 ----
-.. automodule:: unet.unet
+.. automodule:: boundary.boundary
 	:members:
 	
 =======

@@ -1,7 +1,7 @@
 \babel@toc {english}{}
 \contentsline {chapter}{\numberline {1}Indices and tables}{1}{chapter.1}% 
 \contentsline {chapter}{\numberline {2}Training and Testing}{3}{chapter.2}% 
-\contentsline {chapter}{\numberline {3}U-Net}{5}{chapter.3}% 
+\contentsline {chapter}{\numberline {3}Boundary}{5}{chapter.3}% 
 \contentsline {section}{\numberline {3.1}loss}{5}{section.3.1}% 
 \contentsline {section}{\numberline {3.2}ops}{6}{section.3.2}% 
 \contentsline {section}{\numberline {3.3}unet}{7}{section.3.3}% 
@@ -13,5 +13,5 @@
 \contentsline {section}{\numberline {4.5}polar to cartesian}{13}{section.4.5}% 
 \contentsline {section}{\numberline {4.6}process oct folder}{14}{section.4.6}% 
 \contentsline {section}{\numberline {4.7}read oct roi file}{15}{section.4.7}% 
-\contentsline {chapter}{Python Module Index}{17}{section*.30}% 
-\contentsline {chapter}{Index}{19}{section*.31}% 
+\contentsline {chapter}{Python Module Index}{17}{section*.31}% 
+\contentsline {chapter}{Index}{19}{section*.32}% 

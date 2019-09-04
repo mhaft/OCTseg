@@ -1,17 +1,18 @@
 \indexentry{main() (in module train)@\spxentry{main()}\spxextra{in module train}|hyperpage}{3}
-\indexentry{unet.loss (module)@\spxentry{unet.loss}\spxextra{module}|hyperpage}{5}
-\indexentry{dice\_loss() (in module unet.loss)@\spxentry{dice\_loss()}\spxextra{in module unet.loss}|hyperpage}{5}
-\indexentry{multi\_loss\_fun() (in module unet.loss)@\spxentry{multi\_loss\_fun()}\spxextra{in module unet.loss}|hyperpage}{5}
-\indexentry{weighted\_cross\_entropy() (in module unet.loss)@\spxentry{weighted\_cross\_entropy()}\spxextra{in module unet.loss}|hyperpage}{6}
-\indexentry{weighted\_cross\_entropy\_with\_boundary() (in module unet.loss)@\spxentry{weighted\_cross\_entropy\_with\_boundary()}\spxextra{in module unet.loss}|hyperpage}{6}
-\indexentry{unet.ops (module)@\spxentry{unet.ops}\spxextra{module}|hyperpage}{6}
-\indexentry{MaxPoolingND() (in module unet.ops)@\spxentry{MaxPoolingND()}\spxextra{in module unet.ops}|hyperpage}{6}
-\indexentry{accuracy() (in module unet.ops)@\spxentry{accuracy()}\spxextra{in module unet.ops}|hyperpage}{6}
-\indexentry{conv\_layer() (in module unet.ops)@\spxentry{conv\_layer()}\spxextra{in module unet.ops}|hyperpage}{7}
-\indexentry{placeholder\_inputs() (in module unet.ops)@\spxentry{placeholder\_inputs()}\spxextra{in module unet.ops}|hyperpage}{7}
-\indexentry{up\_conv() (in module unet.ops)@\spxentry{up\_conv()}\spxextra{in module unet.ops}|hyperpage}{7}
-\indexentry{unet.unet (module)@\spxentry{unet.unet}\spxextra{module}|hyperpage}{7}
-\indexentry{unet\_model() (in module unet.unet)@\spxentry{unet\_model()}\spxextra{in module unet.unet}|hyperpage}{7}
+\indexentry{boundary.loss (module)@\spxentry{boundary.loss}\spxextra{module}|hyperpage}{5}
+\indexentry{dice\_loss() (in module boundary.loss)@\spxentry{dice\_loss()}\spxextra{in module boundary.loss}|hyperpage}{5}
+\indexentry{masked\_mean\_absolute\_error() (in module boundary.loss)@\spxentry{masked\_mean\_absolute\_error()}\spxextra{in module boundary.loss}|hyperpage}{5}
+\indexentry{masked\_mean\_square\_error() (in module boundary.loss)@\spxentry{masked\_mean\_square\_error()}\spxextra{in module boundary.loss}|hyperpage}{5}
+\indexentry{multi\_loss\_fun() (in module boundary.loss)@\spxentry{multi\_loss\_fun()}\spxextra{in module boundary.loss}|hyperpage}{6}
+\indexentry{weighted\_cross\_entropy() (in module boundary.loss)@\spxentry{weighted\_cross\_entropy()}\spxextra{in module boundary.loss}|hyperpage}{6}
+\indexentry{weighted\_cross\_entropy\_with\_boundary() (in module boundary.loss)@\spxentry{weighted\_cross\_entropy\_with\_boundary()}\spxextra{in module boundary.loss}|hyperpage}{6}
+\indexentry{boundary.ops (module)@\spxentry{boundary.ops}\spxextra{module}|hyperpage}{6}
+\indexentry{MaxPoolingND() (in module boundary.ops)@\spxentry{MaxPoolingND()}\spxextra{in module boundary.ops}|hyperpage}{6}
+\indexentry{conv\_layer() (in module boundary.ops)@\spxentry{conv\_layer()}\spxextra{in module boundary.ops}|hyperpage}{7}
+\indexentry{dense\_layer() (in module boundary.ops)@\spxentry{dense\_layer()}\spxextra{in module boundary.ops}|hyperpage}{7}
+\indexentry{placeholder\_inputs() (in module boundary.ops)@\spxentry{placeholder\_inputs()}\spxextra{in module boundary.ops}|hyperpage}{7}
+\indexentry{boundary.boundary (module)@\spxentry{boundary.boundary}\spxextra{module}|hyperpage}{7}
+\indexentry{boundary\_model() (in module boundary.boundary)@\spxentry{boundary\_model()}\spxextra{in module boundary.boundary}|hyperpage}{7}
 \indexentry{util.confusion\_matrix (module)@\spxentry{util.confusion\_matrix}\spxextra{module}|hyperpage}{9}
 \indexentry{util.load\_batch (module)@\spxentry{util.load\_batch}\spxextra{module}|hyperpage}{9}
 \indexentry{LoadBatchGen (class in util.load\_batch)@\spxentry{LoadBatchGen}\spxextra{class in util.load\_batch}|hyperpage}{9}

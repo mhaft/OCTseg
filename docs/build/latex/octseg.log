@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.7140 64-bit) (preloaded format=pdflatex 2019.8.2)  27 AUG 2019 18:30
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.7140 64-bit) (preloaded format=pdflatex 2019.8.2)  4 SEP 2019 11:31
 entering extended mode
 **./octseg.tex
 (octseg.tex
@@ -856,29 +856,31 @@ File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
 LaTeX Font Info:    Font shape `T1/pcr/bx/n' in size <10> not available
 (Font)              Font shape `T1/pcr/b/n' tried instead on input line 110.
+ [3]
 LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <10> not available
 (Font)              Font shape `T1/pcr/m/sl' tried instead on input line 195.
- [3] [4]
+ [4]
 Chapter 3.
-LaTeX Font Info:    Font shape `T1/ptm/bx/it' in size <10> not available
-(Font)              Font shape `T1/ptm/b/it' tried instead on input line 275.
-LaTeX Font Info:    Font shape `T1/pcr/bx/it' in size <10> not available
-(Font)              Font shape `T1/pcr/b/it' tried instead on input line 275.
-LaTeX Font Info:    Font shape `T1/pcr/b/it' in size <10> not available
-(Font)              Font shape `T1/pcr/b/sl' tried instead on input line 275.
+[5
 
-Underfull \hbox (badness 10000) in paragraph at lines 275--277
+]
+LaTeX Font Info:    Font shape `T1/ptm/bx/it' in size <10> not available
+(Font)              Font shape `T1/ptm/b/it' tried instead on input line 319.
+LaTeX Font Info:    Font shape `T1/pcr/bx/it' in size <10> not available
+(Font)              Font shape `T1/pcr/b/it' tried instead on input line 319.
+LaTeX Font Info:    Font shape `T1/pcr/b/it' in size <10> not available
+(Font)              Font shape `T1/pcr/b/sl' tried instead on input line 319.
+
+Underfull \hbox (badness 10000) in paragraph at lines 319--321
 []\T1/ptm/m/n/10 has
  []
 
-[5
-
-] [6] [7] [8
+[6] [7] [8
 
 ]
 Chapter 4.
 [9] [10] [11] [12] [13]
-Underfull \hbox (badness 10000) in paragraph at lines 1091--1091
+Underfull \hbox (badness 10000) in paragraph at lines 1087--1087
 []\T1/ptm/m/it/10 im\T1/ptm/m/n/10 , \T1/ptm/m/it/10 r0=0\T1/ptm/m/n/10 , \T1/p
 tm/m/it/10 full=True\T1/ptm/m/n/10 , \T1/ptm/m/it/10 deg=1\T1/ptm/m/n/10 ,
  []
@@ -891,70 +893,76 @@ tm/m/it/10 full=True\T1/ptm/m/n/10 , \T1/ptm/m/it/10 deg=1\T1/ptm/m/n/10 ,
 
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 29--30
+Underfull \hbox (badness 10000) in paragraph at lines 33--34
 []\T1/pcr/m/n/10 load_batch_parallel() \T1/ptm/m/n/10 (\T1/ptm/m/it/10 in mod-u
 le
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 32--33
+Underfull \hbox (badness 10000) in paragraph at lines 36--37
 []\T1/pcr/m/n/10 lumen_iel_mask() \T1/ptm/m/n/10 (\T1/ptm/m/it/10 in mod-ule
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 44--45
+Underfull \hbox (badness 10000) in paragraph at lines 42--43
+[]\T1/pcr/m/n/10 masked_mean_absolute_error() \T1/ptm/m/n/10 (\T1/ptm/m/it/10 i
+n mod-ule
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 43--44
+[]\T1/pcr/m/n/10 masked_mean_square_error() \T1/ptm/m/n/10 (\T1/ptm/m/it/10 in 
+mod-ule
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 50--51
 []\T1/pcr/m/n/10 polar2cartesian() \T1/ptm/m/n/10 (\T1/ptm/m/it/10 in mod-ule
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 47--49
+Underfull \hbox (badness 10000) in paragraph at lines 53--55
 []\T1/pcr/m/n/10 process_oct_folder() \T1/ptm/m/n/10 (\T1/ptm/m/it/10 in mod-ul
 e
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 52--54
+Underfull \hbox (badness 10000) in paragraph at lines 58--60
 []\T1/pcr/m/n/10 read_oct_roi_file() \T1/ptm/m/n/10 (\T1/ptm/m/it/10 in mod-ule
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 54--56
+Underfull \hbox (badness 10000) in paragraph at lines 60--62
 []\T1/pcr/m/n/10 roi_file_parser() \T1/ptm/m/n/10 (\T1/ptm/m/it/10 in mod-ule
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 74--75
-[]\T1/pcr/m/n/10 weighted_cross_entropy() \T1/ptm/m/n/10 (\T1/ptm/m/it/10 in mo
-d-ule
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 75--77
+Underfull \hbox (badness 10000) in paragraph at lines 76--78
 []\T1/pcr/m/n/10 weighted_cross_entropy_with_boundary()
  []
 
 [19
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1422.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1422.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1420.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1420.
  (octseg.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1422.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1422.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1420.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1420.
 
 Package rerunfilecheck Info: File `octseg.out' has not changed.
-(rerunfilecheck)             Checksum: 13161F1FF42B2CFD9CE0F0048650293D;1809.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1422.
+(rerunfilecheck)             Checksum: 56974C79A94830BCDD3B3501A63C4327;1824.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1420.
  ) 
 Here is how much of TeX's memory you used:
- 13519 strings out of 492895
- 190985 string characters out of 3133471
- 291307 words of memory out of 3000000
- 17059 multiletter control sequences out of 15000+200000
+ 13521 strings out of 492895
+ 191132 string characters out of 3133471
+ 290342 words of memory out of 3000000
+ 17060 multiletter control sequences out of 15000+200000
  46685 words of font info for 68 fonts, out of 3000000 for 9000
  1142 hyphenation exceptions out of 8191
- 37i,16n,45p,383b,607s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 37i,16n,45p,383b,620s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Program Files/MiKTeX 2.9/fonts/enc/dvips/base/8r.enc}<C:/Program Files/Mi
 KTeX 2.9/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Program Files/MiKTeX 2.9
 /fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Program Files/MiKTeX 2.9/fonts/t
@@ -971,9 +979,9 @@ am Files/MiKTeX 2.9/fonts/type1/urw/times/utmb8a.pfb><C:/Program Files/MiKTeX 2
 .9/fonts/type1/urw/times/utmbi8a.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/u
 rw/times/utmr8a.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/times/utmri8a.
 pfb>
-Output written on octseg.pdf (23 pages, 253345 bytes).
+Output written on octseg.pdf (23 pages, 250439 bytes).
 PDF statistics:
  384 PDF objects out of 1000 (max. 8388607)
- 74 named destinations out of 1000 (max. 500000)
+ 75 named destinations out of 1000 (max. 500000)
  149 words of extra memory for PDF output out of 10000 (max. 10000000)
 

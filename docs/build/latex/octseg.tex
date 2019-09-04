@@ -72,7 +72,7 @@
 
 
 \title{OCTseg}
-\date{Aug 27, 2019}
+\date{Sep 04, 2019}
 \release{}
 \author{Mohammad Haft-Javaherian}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -109,11 +109,11 @@
 \begin{fulllineitems}
 \phantomsection\label{\detokenize{index:train.main}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{train.}}\sphinxbfcode{\sphinxupquote{main}}}{}{}
 Train or test a U-Net model to analyze OCT images.
+\subsubsection*{Notes}
+
+\sphinxstylestrong{All arguments are bash arguments}.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{***Note**}} \textendash{} \sphinxstylestrong{All arguments are bash arguments}
-
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{exp\_def}} \textendash{} experiment definition
 
@@ -169,7 +169,7 @@ Train or test a U-Net model to analyze OCT images.
 \sphinxstyleliteralstrong{\sphinxupquote{saveEpoch}} \textendash{} epoch interval to save the model
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{logEpoch}} \textendash{} epoch interval to save the log”)
+\sphinxstyleliteralstrong{\sphinxupquote{epochSize}} \textendash{} number of samples per epoch
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{nFeature}} \textendash{} number of features in the first layer
@@ -192,10 +192,10 @@ Train or test a U-Net model to analyze OCT images.
 
 \begin{itemize}
 \item {} 
-{\hyperref[\detokenize{index:unet.unet.unet_model}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{unet.unet.unet\_model()}}}}}
+{\hyperref[\detokenize{index:boundary.boundary.boundary_model}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{boundary.boundary.boundary\_model()}}}}}
 
 \item {} 
-{\hyperref[\detokenize{index:unet.loss.multi_loss_fun}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{unet.loss.multi\_loss\_fun()}}}}}
+{\hyperref[\detokenize{index:boundary.loss.multi_loss_fun}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{boundary.loss.multi\_loss\_fun()}}}}}
 
 \item {} 
 {\hyperref[\detokenize{index:util.load_data.load_train_data}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{util.load\_data.load\_train\_data()}}}}}
@@ -217,16 +217,16 @@ Train or test a U-Net model to analyze OCT images.
 
 
 
-\chapter{U-Net}
-\label{\detokenize{index:u-net}}
+\chapter{Boundary}
+\label{\detokenize{index:boundary}}
 
 \section{loss}
-\label{\detokenize{index:module-unet.loss}}\label{\detokenize{index:loss}}\index{unet.loss (module)@\spxentry{unet.loss}\spxextra{module}}
+\label{\detokenize{index:module-boundary.loss}}\label{\detokenize{index:loss}}\index{boundary.loss (module)@\spxentry{boundary.loss}\spxextra{module}}
 CNN related loss functions
-\index{dice\_loss() (in module unet.loss)@\spxentry{dice\_loss()}\spxextra{in module unet.loss}}
+\index{dice\_loss() (in module boundary.loss)@\spxentry{dice\_loss()}\spxextra{in module boundary.loss}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.loss.dice_loss}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{dice\_loss}}}{\emph{label}, \emph{target}}{}
+\phantomsection\label{\detokenize{index:boundary.loss.dice_loss}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{boundary.loss.}}\sphinxbfcode{\sphinxupquote{dice\_loss}}}{\emph{label}, \emph{target}}{}
 Soft Dice coefficient loss
 
 TP, FP, and FN are true positive, false positive, and false negative.
@@ -260,10 +260,54 @@ dice loss
 
 \end{fulllineitems}
 
-\index{multi\_loss\_fun() (in module unet.loss)@\spxentry{multi\_loss\_fun()}\spxextra{in module unet.loss}}
+\index{masked\_mean\_absolute\_error() (in module boundary.loss)@\spxentry{masked\_mean\_absolute\_error()}\spxextra{in module boundary.loss}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.loss.multi_loss_fun}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{multi\_loss\_fun}}}{\emph{loss\_weight}}{}
+\phantomsection\label{\detokenize{index:boundary.loss.masked_mean_absolute_error}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{boundary.loss.}}\sphinxbfcode{\sphinxupquote{masked\_mean\_absolute\_error}}}{\emph{label}, \emph{target}}{}
+Mean absolute error with mask for omitting points.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{label}} \textendash{} 4D or 5D label tensor.  The first half of features are results and the second half is the mask
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{target}} \textendash{} 4D or 5D label tensor.  The first half of features are results and the second half is the mask
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+Mean absolute error
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{masked\_mean\_square\_error() (in module boundary.loss)@\spxentry{masked\_mean\_square\_error()}\spxextra{in module boundary.loss}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:boundary.loss.masked_mean_square_error}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{boundary.loss.}}\sphinxbfcode{\sphinxupquote{masked\_mean\_square\_error}}}{\emph{label}, \emph{target}}{}
+Mean square error with mask for omitting points.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{label}} \textendash{} 4D or 5D label tensor.  The first half of features are results and the second half is the mask
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{target}} \textendash{} 4D or 5D label tensor.  The first half of features are results and the second half is the mask
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+Mean square error
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{multi\_loss\_fun() (in module boundary.loss)@\spxentry{multi\_loss\_fun()}\spxextra{in module boundary.loss}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:boundary.loss.multi_loss_fun}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{boundary.loss.}}\sphinxbfcode{\sphinxupquote{multi\_loss\_fun}}}{\emph{loss\_weight}}{}
 Semantic loss function based on the weighted cross entropy and dice and wighted by the loss weights in the input
 argument
 \begin{quote}\begin{description}
@@ -272,7 +316,7 @@ argument
 
 \item[{Returns}] \leavevmode
 \begin{description}
-\item[{function, which similar to {\hyperref[\detokenize{index:unet.loss.weighted_cross_entropy}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{weighted\_cross\_entropy()}}}}} and {\hyperref[\detokenize{index:unet.loss.dice_loss}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{dice\_loss()}}}}}}] \leavevmode
+\item[{function, which similar to {\hyperref[\detokenize{index:boundary.loss.weighted_cross_entropy}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{weighted\_cross\_entropy()}}}}} and {\hyperref[\detokenize{index:boundary.loss.dice_loss}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{dice\_loss()}}}}}}] \leavevmode
 has label and target arguments
 
 \end{description}
@@ -285,10 +329,10 @@ has label and target arguments
 
 \begin{itemize}
 \item {} 
-{\hyperref[\detokenize{index:unet.loss.weighted_cross_entropy}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{weighted\_cross\_entropy()}}}}}
+{\hyperref[\detokenize{index:boundary.loss.weighted_cross_entropy}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{weighted\_cross\_entropy()}}}}}
 
 \item {} 
-{\hyperref[\detokenize{index:unet.loss.dice_loss}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{dice\_loss()}}}}}
+{\hyperref[\detokenize{index:boundary.loss.dice_loss}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{dice\_loss()}}}}}
 
 \end{itemize}
 
@@ -296,10 +340,10 @@ has label and target arguments
 
 \end{fulllineitems}
 
-\index{weighted\_cross\_entropy() (in module unet.loss)@\spxentry{weighted\_cross\_entropy()}\spxextra{in module unet.loss}}
+\index{weighted\_cross\_entropy() (in module boundary.loss)@\spxentry{weighted\_cross\_entropy()}\spxextra{in module boundary.loss}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.loss.weighted_cross_entropy}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{weighted\_cross\_entropy}}}{\emph{label}, \emph{target}}{}
+\phantomsection\label{\detokenize{index:boundary.loss.weighted_cross_entropy}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{boundary.loss.}}\sphinxbfcode{\sphinxupquote{weighted\_cross\_entropy}}}{\emph{label}, \emph{target}}{}
 Weighted cross entropy with foreground pixels having ten times higher weights
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -318,10 +362,10 @@ weighted cross entropy value
 
 \end{fulllineitems}
 
-\index{weighted\_cross\_entropy\_with\_boundary() (in module unet.loss)@\spxentry{weighted\_cross\_entropy\_with\_boundary()}\spxextra{in module unet.loss}}
+\index{weighted\_cross\_entropy\_with\_boundary() (in module boundary.loss)@\spxentry{weighted\_cross\_entropy\_with\_boundary()}\spxextra{in module boundary.loss}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.loss.weighted_cross_entropy_with_boundary}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{weighted\_cross\_entropy\_with\_boundary}}}{\emph{label}, \emph{target}}{}
+\phantomsection\label{\detokenize{index:boundary.loss.weighted_cross_entropy_with_boundary}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{boundary.loss.}}\sphinxbfcode{\sphinxupquote{weighted\_cross\_entropy\_with\_boundary}}}{\emph{label}, \emph{target}}{}
 Weighted cross entropy with foreground pixels having ten times higher weights
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -343,12 +387,12 @@ weighted cross entropy value
 
 
 \section{ops}
-\label{\detokenize{index:module-unet.ops}}\label{\detokenize{index:ops}}\index{unet.ops (module)@\spxentry{unet.ops}\spxextra{module}}
+\label{\detokenize{index:module-boundary.ops}}\label{\detokenize{index:ops}}\index{boundary.ops (module)@\spxentry{boundary.ops}\spxextra{module}}
 CNN related operations
-\index{MaxPoolingND() (in module unet.ops)@\spxentry{MaxPoolingND()}\spxextra{in module unet.ops}}
+\index{MaxPoolingND() (in module boundary.ops)@\spxentry{MaxPoolingND()}\spxextra{in module boundary.ops}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.ops.MaxPoolingND}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{MaxPoolingND}}}{\emph{x}}{}
+\phantomsection\label{\detokenize{index:boundary.ops.MaxPoolingND}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{boundary.ops.}}\sphinxbfcode{\sphinxupquote{MaxPoolingND}}}{\emph{x}}{}
 Maxpooling in x and y direction for 2D and 3D inputs
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode
@@ -364,7 +408,7 @@ downscaled of \sphinxtitleref{x} in x and y direction
 
 \begin{itemize}
 \item {} 
-{\hyperref[\detokenize{index:unet.ops.up_conv}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{up\_conv()}}}}}
+\sphinxcode{\sphinxupquote{up\_conv()}}
 
 \item {} 
 \sphinxcode{\sphinxupquote{keras.layers.MaxPooling2D()}}
@@ -378,49 +422,10 @@ downscaled of \sphinxtitleref{x} in x and y direction
 
 \end{fulllineitems}
 
-\index{accuracy() (in module unet.ops)@\spxentry{accuracy()}\spxextra{in module unet.ops}}
+\index{conv\_layer() (in module boundary.ops)@\spxentry{conv\_layer()}\spxextra{in module boundary.ops}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.ops.accuracy}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{accuracy}}}{\emph{labels}, \emph{logits}}{}
-Measure accuracy metrics. The code calculate the prediction based on the input logits. Metrics are:
-\begin{itemize}
-\item {} 
-accuracy: The ratio of correctly labeled voxels to the total number of voxels.
-
-\item {} 
-Jaccard Index: ratio of number of foreground voxels in the intersection of \sphinxtitleref{labels} and \sphinxtitleref{logits} divided by
-total number of foreground voxels in the union of \sphinxtitleref{labels} and \sphinxtitleref{logits}
-
-\end{itemize}
-\begin{equation*}
-\begin{split}accuracy &= \frac{1}{N \times M \times L} \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} (
-    label_{i,j,k} == predict_{i,j,k}) \\
-Jaccard &= \frac{
-    \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} (label_{i,j,k} \  \&\& \  predict_{i,j,k})
-}{
-    \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} (label_{i,j,k} \  \| \  predict_{i,j,k})
-}\end{split}
-\end{equation*}\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{labels}} \textendash{} 4D or 5D tensor of labels
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{logits}} \textendash{} 4D or 5D tensor of prediction logits.
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-accuracy and Jaccard Index
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{conv\_layer() (in module unet.ops)@\spxentry{conv\_layer()}\spxextra{in module unet.ops}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.ops.conv_layer}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{conv\_layer}}}{\emph{x}, \emph{ChOut}}{}
+\phantomsection\label{\detokenize{index:boundary.ops.conv_layer}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{boundary.ops.}}\sphinxbfcode{\sphinxupquote{conv\_layer}}}{\emph{x}, \emph{ChOut}}{}
 Multi-layer convolution operators consists of three convolutions (2D or 3D based on the input shape) followed by
 LeakyReLY.
 \begin{quote}\begin{description}
@@ -457,10 +462,34 @@ output of the final layer with same size as \sphinxtitleref{x}
 
 \end{fulllineitems}
 
-\index{placeholder\_inputs() (in module unet.ops)@\spxentry{placeholder\_inputs()}\spxextra{in module unet.ops}}
+\index{dense\_layer() (in module boundary.ops)@\spxentry{dense\_layer()}\spxextra{in module boundary.ops}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.ops.placeholder_inputs}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{placeholder\_inputs}}}{\emph{im\_shape}, \emph{outCh}}{}
+\phantomsection\label{\detokenize{index:boundary.ops.dense_layer}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{boundary.ops.}}\sphinxbfcode{\sphinxupquote{dense\_layer}}}{\emph{x}, \emph{nFeature}}{}
+A Dense layer in Keras.
+
+A dense layer in Keras with input \sphinxtitleref{x} and outpur that has \sphinxtitleref{nFeature} features.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{x}} \textendash{} input matrix
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{nFeature}} \textendash{} number of output features
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+keras layer
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{placeholder\_inputs() (in module boundary.ops)@\spxentry{placeholder\_inputs()}\spxextra{in module boundary.ops}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:boundary.ops.placeholder_inputs}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{boundary.ops.}}\sphinxbfcode{\sphinxupquote{placeholder\_inputs}}}{\emph{im\_shape}, \emph{outCh}}{}
 Generate placeholder variables to represent the input tensors.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -479,48 +508,15 @@ image and label placeholders
 
 \end{fulllineitems}
 
-\index{up\_conv() (in module unet.ops)@\spxentry{up\_conv()}\spxextra{in module unet.ops}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.ops.up_conv}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{up\_conv}}}{\emph{x}}{}
-upscaling of input tensor in x and y direction using transpose convolution in 2D or 3D.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\sphinxstyleliteralstrong{\sphinxupquote{x}} \textendash{} input 4D or 5D tensor
-
-\item[{Returns}] \leavevmode
-unscaled of \sphinxtitleref{x} in x and y direction
-
-\end{description}\end{quote}
-
-
-\sphinxstrong{See also:}
-
-\begin{itemize}
-\item {} 
-{\hyperref[\detokenize{index:unet.ops.MaxPoolingND}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{MaxPoolingND()}}}}}
-
-\item {} 
-\sphinxcode{\sphinxupquote{keras.layers..Conv2DTranspose()}}
-
-\item {} 
-\sphinxcode{\sphinxupquote{keras.layers..Conv3DTranspose()}}
-
-\end{itemize}
-
-
-
-\end{fulllineitems}
-
 
 
 \section{unet}
-\label{\detokenize{index:module-unet.unet}}\label{\detokenize{index:unet}}\index{unet.unet (module)@\spxentry{unet.unet}\spxextra{module}}
-Build U-Net model
-\index{unet\_model() (in module unet.unet)@\spxentry{unet\_model()}\spxextra{in module unet.unet}}
+\label{\detokenize{index:module-boundary.boundary}}\label{\detokenize{index:unet}}\index{boundary.boundary (module)@\spxentry{boundary.boundary}\spxextra{module}}
+Build boundary model
+\index{boundary\_model() (in module boundary.boundary)@\spxentry{boundary\_model()}\spxextra{in module boundary.boundary}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.unet.unet_model}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.unet.}}\sphinxbfcode{\sphinxupquote{unet\_model}}}{\emph{im\_shape}, \emph{nFeature=32}, \emph{outCh=2}, \emph{nLayer=3}}{}
+\phantomsection\label{\detokenize{index:boundary.boundary.boundary_model}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{boundary.boundary.}}\sphinxbfcode{\sphinxupquote{boundary\_model}}}{\emph{im\_shape}, \emph{nFeature=16}, \emph{outCh=2}, \emph{nLayer=3}}{}
 Build U-Net model.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -1404,10 +1400,12 @@ The object\_list dictionary.
 \renewcommand{\indexname}{Python Module Index}
 \begin{sphinxtheindex}
 \let\bigletter\sphinxstyleindexlettergroup
+\bigletter{b}
+\item\relax\sphinxstyleindexentry{boundary.boundary}\sphinxstyleindexpageref{index:\detokenize{module-boundary.boundary}}
+\item\relax\sphinxstyleindexentry{boundary.loss}\sphinxstyleindexpageref{index:\detokenize{module-boundary.loss}}
+\item\relax\sphinxstyleindexentry{boundary.ops}\sphinxstyleindexpageref{index:\detokenize{module-boundary.ops}}
+\indexspace
 \bigletter{u}
-\item\relax\sphinxstyleindexentry{unet.loss}\sphinxstyleindexpageref{index:\detokenize{module-unet.loss}}
-\item\relax\sphinxstyleindexentry{unet.ops}\sphinxstyleindexpageref{index:\detokenize{module-unet.ops}}
-\item\relax\sphinxstyleindexentry{unet.unet}\sphinxstyleindexpageref{index:\detokenize{module-unet.unet}}
 \item\relax\sphinxstyleindexentry{util.confusion\_matrix}\sphinxstyleindexpageref{index:\detokenize{module-util.confusion_matrix}}
 \item\relax\sphinxstyleindexentry{util.load\_batch}\sphinxstyleindexpageref{index:\detokenize{module-util.load_batch}}
 \item\relax\sphinxstyleindexentry{util.load\_data}\sphinxstyleindexpageref{index:\detokenize{module-util.load_data}}

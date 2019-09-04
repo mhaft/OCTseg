@@ -49,10 +49,11 @@
 <dt id="train.main">
 <code class="sig-prename descclassname">train.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#train.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Train or test a U-Net model to analyze OCT images.</p>
+<p class="rubric">Notes</p>
+<p><strong>All arguments are bash arguments</strong></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>***Note**</strong> – <strong>All arguments are bash arguments</strong></p></li>
 <li><p><strong>exp_def</strong> – experiment definition</p></li>
 <li><p><strong>models_path</strong> – path for saving models</p></li>
 <li><p><strong>lr</strong> – learning rate</p></li>
@@ -71,7 +72,7 @@
 <li><p><strong>isTest</strong> – Is test run instead of train</p></li>
 <li><p><strong>testEpoch</strong> – epoch of the saved model for testing</p></li>
 <li><p><strong>saveEpoch</strong> – epoch interval to save the model</p></li>
-<li><p><strong>logEpoch</strong> – epoch interval to save the log”)</p></li>
+<li><p><strong>epochSize</strong> – number of samples per epoch</p></li>
 <li><p><strong>nFeature</strong> – number of features in the first layer</p></li>
 <li><p><strong>nLayer</strong> – number of layers in the U-Nnet model</p></li>
 <li><p><strong>gpu_id</strong> – ID of GPUs to be used</p></li>
@@ -82,8 +83,8 @@
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#unet.unet.unet_model" title="unet.unet.unet_model"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unet.unet.unet_model()</span></code></a></p></li>
-<li><p><a class="reference internal" href="#unet.loss.multi_loss_fun" title="unet.loss.multi_loss_fun"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unet.loss.multi_loss_fun()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#boundary.boundary.boundary_model" title="boundary.boundary.boundary_model"><code class="xref py py-meth docutils literal notranslate"><span class="pre">boundary.boundary.boundary_model()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#boundary.loss.multi_loss_fun" title="boundary.loss.multi_loss_fun"><code class="xref py py-meth docutils literal notranslate"><span class="pre">boundary.loss.multi_loss_fun()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#util.load_data.load_train_data" title="util.load_data.load_train_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">util.load_data.load_train_data()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#util.load_batch.load_batch_parallel" title="util.load_batch.load_batch_parallel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">util.load_batch.load_batch_parallel()</span></code></a></p></li>
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.utils.multi_gpu_model()</span></code></p></li>
@@ -93,14 +94,14 @@
 </dd></dl>
 
 </div>
-<div class="section" id="u-net">
-<h2>U-Net<a class="headerlink" href="#u-net" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="module-unet.loss">
-<span id="loss"></span><h3>loss<a class="headerlink" href="#module-unet.loss" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="boundary">
+<h2>Boundary<a class="headerlink" href="#boundary" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-boundary.loss">
+<span id="loss"></span><h3>loss<a class="headerlink" href="#module-boundary.loss" title="Permalink to this headline">¶</a></h3>
 <p>CNN related loss functions</p>
 <dl class="function">
-<dt id="unet.loss.dice_loss">
-<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">dice_loss</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.dice_loss" title="Permalink to this definition">¶</a></dt>
+<dt id="boundary.loss.dice_loss">
+<code class="sig-prename descclassname">boundary.loss.</code><code class="sig-name descname">dice_loss</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#boundary.loss.dice_loss" title="Permalink to this definition">¶</a></dt>
 <dd><p>Soft Dice coefficient loss</p>
 <p>TP, FP, and FN are true positive, false positive, and false negative.</p>
 <div class="math notranslate nohighlight">
@@ -127,8 +128,8 @@ probability instead of hard classification</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="unet.loss.multi_loss_fun">
-<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">multi_loss_fun</code><span class="sig-paren">(</span><em class="sig-param">loss_weight</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.multi_loss_fun" title="Permalink to this definition">¶</a></dt>
+<dt id="boundary.loss.multi_loss_fun">
+<code class="sig-prename descclassname">boundary.loss.</code><code class="sig-name descname">multi_loss_fun</code><span class="sig-paren">(</span><em class="sig-param">loss_weight</em><span class="sig-paren">)</span><a class="headerlink" href="#boundary.loss.multi_loss_fun" title="Permalink to this definition">¶</a></dt>
 <dd><p>Semantic loss function based on the weighted cross entropy and dice and wighted by the loss weights in the input
 argument</p>
 <dl class="field-list simple">
@@ -137,7 +138,7 @@ argument</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><dl class="simple">
-<dt>function, which similar to <a class="reference internal" href="#unet.loss.weighted_cross_entropy" title="unet.loss.weighted_cross_entropy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></a> and <a class="reference internal" href="#unet.loss.dice_loss" title="unet.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a></dt><dd><p>has label and target arguments</p>
+<dt>function, which similar to <a class="reference internal" href="#boundary.loss.weighted_cross_entropy" title="boundary.loss.weighted_cross_entropy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></a> and <a class="reference internal" href="#boundary.loss.dice_loss" title="boundary.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a></dt><dd><p>has label and target arguments</p>
 </dd>
 </dl>
 </p>
@@ -146,15 +147,15 @@ argument</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#unet.loss.weighted_cross_entropy" title="unet.loss.weighted_cross_entropy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></a></p></li>
-<li><p><a class="reference internal" href="#unet.loss.dice_loss" title="unet.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#boundary.loss.weighted_cross_entropy" title="boundary.loss.weighted_cross_entropy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#boundary.loss.dice_loss" title="boundary.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a></p></li>
 </ul>
 </div>
 </dd></dl>
 
 <dl class="function">
-<dt id="unet.loss.weighted_cross_entropy">
-<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">weighted_cross_entropy</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.weighted_cross_entropy" title="Permalink to this definition">¶</a></dt>
+<dt id="boundary.loss.weighted_cross_entropy">
+<code class="sig-prename descclassname">boundary.loss.</code><code class="sig-name descname">weighted_cross_entropy</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#boundary.loss.weighted_cross_entropy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Weighted cross entropy with foreground pixels having ten times higher weights</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -170,8 +171,8 @@ argument</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="unet.loss.weighted_cross_entropy_with_boundary">
-<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">weighted_cross_entropy_with_boundary</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.weighted_cross_entropy_with_boundary" title="Permalink to this definition">¶</a></dt>
+<dt id="boundary.loss.weighted_cross_entropy_with_boundary">
+<code class="sig-prename descclassname">boundary.loss.</code><code class="sig-name descname">weighted_cross_entropy_with_boundary</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#boundary.loss.weighted_cross_entropy_with_boundary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Weighted cross entropy with foreground pixels having ten times higher weights</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -187,12 +188,12 @@ argument</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-unet.ops">
-<span id="ops"></span><h3>ops<a class="headerlink" href="#module-unet.ops" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="module-boundary.ops">
+<span id="ops"></span><h3>ops<a class="headerlink" href="#module-boundary.ops" title="Permalink to this headline">¶</a></h3>
 <p>CNN related operations</p>
 <dl class="function">
-<dt id="unet.ops.MaxPoolingND">
-<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">MaxPoolingND</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.MaxPoolingND" title="Permalink to this definition">¶</a></dt>
+<dt id="boundary.ops.MaxPoolingND">
+<code class="sig-prename descclassname">boundary.ops.</code><code class="sig-name descname">MaxPoolingND</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#boundary.ops.MaxPoolingND" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maxpooling in x and y direction for 2D and 3D inputs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -205,7 +206,7 @@ argument</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#unet.ops.up_conv" title="unet.ops.up_conv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">up_conv()</span></code></a></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">up_conv()</span></code></p></li>
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.layers.MaxPooling2D()</span></code></p></li>
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.layers.MaxPooling3D()</span></code></p></li>
 </ul>
@@ -213,40 +214,8 @@ argument</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="unet.ops.accuracy">
-<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">accuracy</code><span class="sig-paren">(</span><em class="sig-param">labels</em>, <em class="sig-param">logits</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.accuracy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Measure accuracy metrics. The code calculate the prediction based on the input logits. Metrics are:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>accuracy: The ratio of correctly labeled voxels to the total number of voxels.</p></li>
-<li><p>Jaccard Index: ratio of number of foreground voxels in the intersection of <cite>labels</cite> and <cite>logits</cite> divided by
-total number of foreground voxels in the union of <cite>labels</cite> and <cite>logits</cite></p></li>
-</ul>
-</div></blockquote>
-<div class="math notranslate nohighlight">
-\[\begin{split}accuracy &amp;= \frac{1}{N \times M \times L} \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} (
-    label_{i,j,k} == predict_{i,j,k}) \\
-Jaccard &amp;= \frac{
-    \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} (label_{i,j,k} \  \&amp;\&amp; \  predict_{i,j,k})
-}{
-    \sum_{i \in [[N]],  j \in [[M]],  k \in [[L]]} (label_{i,j,k} \  \| \  predict_{i,j,k})
-}\end{split}\]</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>labels</strong> – 4D or 5D tensor of labels</p></li>
-<li><p><strong>logits</strong> – 4D or 5D tensor of prediction logits.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>accuracy and Jaccard Index</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="unet.ops.conv_layer">
-<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">conv_layer</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">ChOut</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.conv_layer" title="Permalink to this definition">¶</a></dt>
+<dt id="boundary.ops.conv_layer">
+<code class="sig-prename descclassname">boundary.ops.</code><code class="sig-name descname">conv_layer</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">ChOut</em><span class="sig-paren">)</span><a class="headerlink" href="#boundary.ops.conv_layer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Multi-layer convolution operators consists of three convolutions (2D or 3D based on the input shape) followed by
 LeakyReLY.</p>
 <dl class="field-list simple">
@@ -271,8 +240,26 @@ LeakyReLY.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="unet.ops.placeholder_inputs">
-<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">placeholder_inputs</code><span class="sig-paren">(</span><em class="sig-param">im_shape</em>, <em class="sig-param">outCh</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.placeholder_inputs" title="Permalink to this definition">¶</a></dt>
+<dt id="boundary.ops.dense_layer">
+<code class="sig-prename descclassname">boundary.ops.</code><code class="sig-name descname">dense_layer</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">nFeature</em><span class="sig-paren">)</span><a class="headerlink" href="#boundary.ops.dense_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Dense layer in Keras.</p>
+<p>A dense layer in Keras with input <cite>x</cite> and outpur that has <cite>nFeature</cite> features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – input matrix</p></li>
+<li><p><strong>nFeature</strong> – number of output features</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>keras layer</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="boundary.ops.placeholder_inputs">
+<code class="sig-prename descclassname">boundary.ops.</code><code class="sig-name descname">placeholder_inputs</code><span class="sig-paren">(</span><em class="sig-param">im_shape</em>, <em class="sig-param">outCh</em><span class="sig-paren">)</span><a class="headerlink" href="#boundary.ops.placeholder_inputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate placeholder variables to represent the input tensors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -287,35 +274,13 @@ LeakyReLY.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="unet.ops.up_conv">
-<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">up_conv</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.up_conv" title="Permalink to this definition">¶</a></dt>
-<dd><p>upscaling of input tensor in x and y direction using transpose convolution in 2D or 3D.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>x</strong> – input 4D or 5D tensor</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>unscaled of <cite>x</cite> in x and y direction</p>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="#unet.ops.MaxPoolingND" title="unet.ops.MaxPoolingND"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MaxPoolingND()</span></code></a></p></li>
-<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.layers..Conv2DTranspose()</span></code></p></li>
-<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.layers..Conv3DTranspose()</span></code></p></li>
-</ul>
 </div>
-</dd></dl>
-
-</div>
-<div class="section" id="module-unet.unet">
-<span id="unet"></span><h3>unet<a class="headerlink" href="#module-unet.unet" title="Permalink to this headline">¶</a></h3>
-<p>Build U-Net model</p>
+<div class="section" id="module-boundary.boundary">
+<span id="unet"></span><h3>unet<a class="headerlink" href="#module-boundary.boundary" title="Permalink to this headline">¶</a></h3>
+<p>Build boundary model</p>
 <dl class="function">
-<dt id="unet.unet.unet_model">
-<code class="sig-prename descclassname">unet.unet.</code><code class="sig-name descname">unet_model</code><span class="sig-paren">(</span><em class="sig-param">im_shape</em>, <em class="sig-param">nFeature=32</em>, <em class="sig-param">outCh=2</em>, <em class="sig-param">nLayer=3</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.unet.unet_model" title="Permalink to this definition">¶</a></dt>
+<dt id="boundary.boundary.boundary_model">
+<code class="sig-prename descclassname">boundary.boundary.</code><code class="sig-name descname">boundary_model</code><span class="sig-paren">(</span><em class="sig-param">im_shape</em>, <em class="sig-param">nFeature=16</em>, <em class="sig-param">outCh=2</em>, <em class="sig-param">nLayer=3</em><span class="sig-paren">)</span><a class="headerlink" href="#boundary.boundary.boundary_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Build U-Net model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

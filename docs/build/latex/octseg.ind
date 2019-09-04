@@ -4,16 +4,20 @@
 \let\spxentry \sphinxstyleindexentry
 \let\spxextra \sphinxstyleindexextra
 
-  \bigletter A
-  \item \spxentry{accuracy()}\spxextra{in module unet.ops}, \hyperpage{6}
+  \bigletter B
+  \item \spxentry{boundary.boundary}\spxextra{module}, \hyperpage{7}
+  \item \spxentry{boundary.loss}\spxextra{module}, \hyperpage{5}
+  \item \spxentry{boundary.ops}\spxextra{module}, \hyperpage{6}
+  \item \spxentry{boundary\_model()}\spxextra{in module boundary.boundary}, \hyperpage{7}
 
   \indexspace
   \bigletter C
-  \item \spxentry{conv\_layer()}\spxextra{in module unet.ops}, \hyperpage{7}
+  \item \spxentry{conv\_layer()}\spxextra{in module boundary.ops}, \hyperpage{7}
 
   \indexspace
   \bigletter D
-  \item \spxentry{dice\_loss()}\spxextra{in module unet.loss}, \hyperpage{5}
+  \item \spxentry{dense\_layer()}\spxextra{in module boundary.ops}, \hyperpage{7}
+  \item \spxentry{dice\_loss()}\spxextra{in module boundary.loss}, \hyperpage{5}
 
   \indexspace
   \bigletter I
@@ -35,12 +39,14 @@
   \bigletter M
   \item \spxentry{main()}\spxextra{in module train}, \hyperpage{3}
   \item \spxentry{make\_dataset()}\spxextra{in module util.load\_data}, \hyperpage{12}
-  \item \spxentry{MaxPoolingND()}\spxextra{in module unet.ops}, \hyperpage{6}
-  \item \spxentry{multi\_loss\_fun()}\spxextra{in module unet.loss}, \hyperpage{5}
+  \item \spxentry{masked\_mean\_absolute\_error()}\spxextra{in module boundary.loss}, \hyperpage{5}
+  \item \spxentry{masked\_mean\_square\_error()}\spxextra{in module boundary.loss}, \hyperpage{5}
+  \item \spxentry{MaxPoolingND()}\spxextra{in module boundary.ops}, \hyperpage{6}
+  \item \spxentry{multi\_loss\_fun()}\spxextra{in module boundary.loss}, \hyperpage{6}
 
   \indexspace
   \bigletter P
-  \item \spxentry{placeholder\_inputs()}\spxextra{in module unet.ops}, \hyperpage{7}
+  \item \spxentry{placeholder\_inputs()}\spxextra{in module boundary.ops}, \hyperpage{7}
   \item \spxentry{polar2cartesian()}\spxextra{in module util.polar2cartesian}, \hyperpage{13}
   \item \spxentry{polar2cartesian\_large\_3d\_file()}\spxextra{in module util.polar2cartesian}, 
 		\hyperpage{14}
@@ -56,11 +62,6 @@
 
   \indexspace
   \bigletter U
-  \item \spxentry{unet.loss}\spxextra{module}, \hyperpage{5}
-  \item \spxentry{unet.ops}\spxextra{module}, \hyperpage{6}
-  \item \spxentry{unet.unet}\spxextra{module}, \hyperpage{7}
-  \item \spxentry{unet\_model()}\spxextra{in module unet.unet}, \hyperpage{7}
-  \item \spxentry{up\_conv()}\spxextra{in module unet.ops}, \hyperpage{7}
   \item \spxentry{util.confusion\_matrix}\spxextra{module}, \hyperpage{9}
   \item \spxentry{util.load\_batch}\spxextra{module}, \hyperpage{9}
   \item \spxentry{util.load\_data}\spxextra{module}, \hyperpage{12}
@@ -71,8 +72,8 @@
 
   \indexspace
   \bigletter W
-  \item \spxentry{weighted\_cross\_entropy()}\spxextra{in module unet.loss}, \hyperpage{6}
-  \item \spxentry{weighted\_cross\_entropy\_with\_boundary()}\spxextra{in module unet.loss}, 
+  \item \spxentry{weighted\_cross\_entropy()}\spxextra{in module boundary.loss}, \hyperpage{6}
+  \item \spxentry{weighted\_cross\_entropy\_with\_boundary()}\spxextra{in module boundary.loss}, 
 		\hyperpage{6}
 
 \end{sphinxtheindex}
