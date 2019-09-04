@@ -181,18 +181,16 @@ def img_aug_polar(image, label, prob_lim=0.5):
         if np.random.rand() > prob_lim:  # image scaling
             scale = 1 + 0.25 * (np.random.rand() - 0.5)
             if scale > 1:
-                tmp = np.zeros_like(im_)
-                tmp = zoom(tmp, (dim == 3) * (1,) + (scale - 1, 1, 1))
+                tmp = np.zeros(im_.shape[:-3] + (int(im_.shape[-3] * (scale - 1)),) + im_.shape[-2:])
                 im_ = np.concatenate((im_, tmp), axis=-3)
-                tmp = np.zeros_like(l_)
-                tmp = zoom(tmp, (dim == 3) * (1,) + (scale - 1, 1, 1))
-                l_ = np.concatenate((l_, tmp), axis=-3)
             else:
                 j = np.ceil(im_.shape[-3] * scale).astype('int64')
                 im_ = im_[..., :j, :, :]
-                l_ = l_[..., :j, :, :]
-            im_ = zoom(im_, (dim == 3) * (1,) + (image.shape[-3] / im_.shape[-3], 1, 1), order=2, mode='reflect')
-            l_ = zoom(l_, (dim == 3) * (1,) + (label.shape[-3] / l_.shape[-3], 1, 1), order=0)
+            idx = np.arange(0, image.shape[-3]) * (im_.shape[-3] / image.shape[-3])
+            a = np.tile(np.mod(idx, 1)[..., np.newaxis, np.newaxis], (1,) + im_.shape[-2:])
+            idx_lo, idx_hi = np.clip(np.floor(idx), 0, im_.shape[-3] - 1), np.clip(np.ceil(idx), 0, im_.shape[-3] - 1)
+            im_ = (1 - a) * im_[..., idx_lo.astype(int), :, :] + a * im_[..., idx_hi.astype(int), :, :]
+            l_ = np.clip(l_ / scale, -1, 1)
         image[i, ...], label[i, ...] = im_, l_
     return image, label
 
