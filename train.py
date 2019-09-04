@@ -27,37 +27,39 @@ from keras.losses import get
 from unet.unet import unet_model
 from unet.loss import weighted_cross_entropy_with_boundary
 from util.load_data import load_train_data
-from util.load_batch import LoadBatchGen
+from util.load_batch import load_batch_parallel, LoadBatchGen
 
 
 def main():
     """Train or test a U-Net model to analyze OCT images.
 
-        Args:
-            ***Note**: **All arguments are bash arguments**
-            exp_def: experiment definition
-            models_path: path for saving models
-            lr: learning rate
-            lr_decay: learning rate step for decay
-            data_pat: data folder path
-            nEpoch: number of epochs
-            nBatch: batch size
-            outCh: size of output channel
-            inCh: size of input channel
-            nZ: size of input depth
-            w: size of input width (number of columns)
-            l: size of input Length (number of rows)
-            loss_w: loss wights
-            isAug: Is data augmentation
-            isCarts: whether images should be converted into Cartesian
-            isTest: Is test run instead of train
-            testEpoch: epoch of the saved model for testing
-            saveEpoch: epoch interval to save the model
-            logEpoch: epoch interval to save the log")
-            nFeature: number of features in the first layer
-            nLayer: number of layers in the U-Nnet model
-            gpu_id: ID of GPUs to be used
-            optimizer: keras optimizer. see :meth:`keras.optimizers`
+    Notes:
+        **All arguments are bash arguments**.
+
+    Args:
+        exp_def: experiment definition
+        models_path: path for saving models
+        lr: learning rate
+        lr_decay: learning rate step for decay
+        data_pat: data folder path
+        nEpoch: number of epochs
+        nBatch: batch size
+        outCh: size of output channel
+        inCh: size of input channel
+        nZ: size of input depth
+        w: size of input width (number of columns)
+        l: size of input Length (number of rows)
+        loss_w: loss wights
+        isAug: Is data augmentation
+        isCarts: whether images should be converted into Cartesian
+        isTest: Is test run instead of train
+        testEpoch: epoch of the saved model for testing
+        saveEpoch: epoch interval to save the model
+        epochSize: number of samples per epoch
+        nFeature: number of features in the first layer
+        nLayer: number of layers in the U-Nnet model
+        gpu_id: ID of GPUs to be used
+        optimizer: keras optimizer. see :meth:`keras.optimizers`
 
         See Also:
             * :meth:`unet.unet.unet_model`
@@ -89,9 +91,9 @@ def main():
     parser.add_argument("-isTest", type=int, default=0, help="Is test run instead of train")
     parser.add_argument("-testEpoch", type=int, default=0, help="epoch of the saved model for testing")
     parser.add_argument("-saveEpoch", type=int, default=2500, help="epoch interval to save the model")
-    parser.add_argument("-logEpoch", type=int, default=100, help="epoch interval to save the log")
+    parser.add_argument("-epochSize", type=int, default=100, help="number of samples per epoch")
     parser.add_argument("-nFeature", type=int, default=32, help="number of features in the first layer")
-    parser.add_argument("-nLayer", type=int, default=3, help="number of layers in the U-Nnet model")
+    parser.add_argument("-nLayer", type=int, default=9, help="number of layers in the U-Nnet model")
     parser.add_argument("-gpu_id", type=str, default="0,1", help="ID of GPUs to be used")
     parser.add_argument("-optimizer", type=str, default="Adam", help="optimizer")
 
@@ -129,7 +131,7 @@ def main():
     log_file = models_path + experiment_def + '/log-' + experiment_def + '.csv'
     if isTrain and not os.path.exists(log_file):
         with open(log_file, 'w') as f:
-            f.write('epoch, Time (hr), Test_Loss, Valid_Loss, ' + str(args) + '\n')
+            f.write('epoch, Time (hr), Train_Loss, Valid_Loss, ' + str(args) + '\n')
 
     # build the model
     model_template = unet_model(im_shape, nFeature=args.nFeature, outCh=outCh, nLayer=args.nLayer)
@@ -148,6 +150,7 @@ def main():
                         last_time = float(row['Time (hr)']) * 3600
             print('model at epoch %d is loaded.' % iEpochStart)
             iEpochStart += 1
+            iEpoch = nEpoch  # in case training is done
         else:
             iEpochStart = 1
             last_time = 0
@@ -216,7 +219,7 @@ def main():
 
         start = time.time() - last_time
         for iEpoch in range(iEpochStart, nEpoch + 1):
-            model.fit_generator(train_data_gen, steps_per_epoch=args.logEpoch, verbose=1)
+            model.fit_generator(train_data_gen, steps_per_epoch=args.epochSize, verbose=1)
             # evaluation
             train_loss = model.evaluate(im[train_data_id, ...], label[train_data_id, ...],
                                         batch_size=nBatch, verbose=0)
