@@ -114,3 +114,26 @@ def weighted_cross_entropy_with_boundary(label, target):
     return tf.multiply(tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=label, logits=target), axis=-1),
                      0.001 + 0.010 * label[:, -1] + 0.100 * dist
                      )
+
+
+def masked_mean_absolute_error(label, target):
+    """Mean absolute error with mask for omitting points.
+
+    Args:
+        label: 4D or 5D label tensor.  The first half of features are results and the second half is the mask
+        target: 4D or 5D label tensor.  The first half of features are results and the second half is the mask
+
+    Returns:
+        Mean absolute error
+
+    """
+
+    i = label.shape[-2].value
+
+    # to handle None during the operation generation phase
+    if i:
+        i //= 2
+    else:
+        i = 2
+    return (tf.reduce_mean(tf.multiply(label[..., i:, :], tf.abs(label[..., :i, :] - target[..., :i, :]))) /
+            tf.reduce_mean(label[..., i:, :]))
