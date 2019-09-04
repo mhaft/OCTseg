@@ -137,3 +137,26 @@ def masked_mean_absolute_error(label, target):
         i = 2
     return (tf.reduce_mean(tf.multiply(label[..., i:, :], tf.abs(label[..., :i, :] - target[..., :i, :]))) /
             tf.reduce_mean(label[..., i:, :]))
+
+
+def masked_mean_square_error(label, target):
+    """Mean square error with mask for omitting points.
+
+    Args:
+        label: 4D or 5D label tensor.  The first half of features are results and the second half is the mask
+        target: 4D or 5D label tensor.  The first half of features are results and the second half is the mask
+
+    Returns:
+        Mean square error
+
+    """
+
+    i = label.shape[-2].value
+
+    # to handle None during the operation generation phase
+    if i:
+        i //= 2
+    else:
+        i = 2
+    return (tf.reduce_mean(tf.multiply(label[..., i:, :], tf.square(label[..., :i, :] - target[..., :i, :]))) /
+            tf.reduce_mean(label[..., i:, :]))
