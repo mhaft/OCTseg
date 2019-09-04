@@ -44,7 +44,7 @@ def segmentation2boundary(label):
     of the last foreground pixel divided by the size of radius axis.  In case of no foreground pixel, returns -1.
 
     Args:
-        label: inpput n dimensional numpy array.  The last axis is angle and the second axis from last is radius. The
+        label: input n dimensional numpy array.  The last axis is angle and the second axis from last is radius. The
         batch and depth axis can exist at the beginning of the array.
 
     Returns:
@@ -54,6 +54,7 @@ def segmentation2boundary(label):
     See Also:
         * :meth:`segmentation2boundary_slice`
         * :meth:`boundary2segmentation`
+        * :meth: `segmentation2boundary_multi_class`
 
     """
     label_shape = label.shape
@@ -86,3 +87,20 @@ def boundary2segmentation(boundary, w):
     return np.reshape(out >= out_range, boundary.shape[:-2] + (boundary.shape[-1], w)).swapaxes(-1, -2)
 
 
+def segmentation2boundary_multi_class(label, classes):
+    """
+
+    Args:
+        label: input n dimensional numpy array.  The last axis is angle and the second axis from last is radius. The
+        batch and depth axis can exist at the beginning of the array.
+        classes: Class Ids for boundary (e.g. [2, 3])
+
+    Returns:
+        multi-class boundary labels.
+
+    See Also:
+        * :meth:`segmentation2boundary`
+        * :meth:`boundary2segmentation`
+
+    """
+    return np.concatenate([segmentation2boundary(label[..., i]) for i in classes], axis=-2)
