@@ -78,18 +78,21 @@ if __name__ == "__main__":
     with open(log_file) as fp:
         line = fp.readline().split(',')
     for x in line:
-        if x.startswith(" Namespace(data_path="):
-            dataset_path = x[22:-1]
-        elif x.startswith(" l="):
-            L = int(x[3:])
-        elif x.startswith(" w="):
-            w = int(x[3:-2])
-        elif x.startswith(" inCh="):
-            inCh = int(x[6:])
-        elif x.startswith(" nZ="):
-            nZ = int(x[4:])
-        elif x.startswith(" isCarts="):
-            isCarts = int(x[9:])
+        x = x.strip(' \t\n\r)')
+        if x.startswith("Namespace"):
+            x = x[10:]
+        if x.startswith("data_path="):
+            dataset_path = x[11:-1]
+        elif x.startswith("l="):
+            L = int(x[2:])
+        elif x.startswith("w="):
+            w = int(x[2:])
+        elif x.startswith("inCh="):
+            inCh = int(x[5:])
+        elif x.startswith("nZ="):
+            nZ = int(x[3:])
+        elif x.startswith("isCarts="):
+            isCarts = int(x[8:])
             coord_sys = 'carts' if isCarts else 'polar'
 
     data_file = os.path.join(dataset_path, 'Dataset ' + coord_sys + ' Z%d-L%d-W%d-C%d.h5' % (nZ, L, w, inCh))
