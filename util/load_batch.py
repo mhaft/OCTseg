@@ -220,9 +220,9 @@ def load_batch(im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts'
 
     while True:
         j = np.random.randint(0, len(datasetID), nBatch)
-        im_ = im[datasetID[j], ...]
+        im_ = im[datasetID[j], ...].copy()
         if label is not None:
-            label_ = label[datasetID[j], ...]
+            label_ = label[datasetID[j], ...].copy()
         else:
             label_ = None
         if isAug:
@@ -253,9 +253,9 @@ def load_batch_parallel(im, datasetID, nBatch, label=None, isAug=False, coord_sy
 
     while True:
         j = np.random.randint(0, len(datasetID), nBatch)
-        im_ = im[datasetID[j], ...]
+        im_ = im[datasetID[j], ...].copy()
         if label is not None:
-            label_ = label[datasetID[j], ...]
+            label_ = label[datasetID[j], ...].copy()
         else:
             label_ = None
         if isAug:
@@ -279,9 +279,9 @@ class LoadBatchGen(Sequence):
 
     def __getitem__(self, item):
         j = self.datasetID[np.random.randint(0, len(self.datasetID), self.nBatch)]
-        im_ = self.im[j, ...]
+        im_ = self.im[j, ...].copy()
         if self.label is not None:
-            label_ = self.label[j, ...]
+            label_ = self.label[j, ...].copy()
         else:
             label_ = None
         if self.isAug:
