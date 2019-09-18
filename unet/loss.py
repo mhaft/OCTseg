@@ -46,7 +46,7 @@ def dice_loss(label, target):
     return 1 - (2 * tf.reduce_sum(yl) + 1) / (tf.reduce_sum(ll) + tf.reduce_sum(yy) + 1)
 
 
-def weighted_cross_entropy(label, target):
+def weighted_cross_entropy_fun(loss_weight):
     """Weighted cross entropy with foreground pixels having ten times higher weights
 
     Args:
@@ -57,8 +57,10 @@ def weighted_cross_entropy(label, target):
         weighted cross entropy value
 
     """
-    # Todo: add positive weight as an argument
-    return tf.reduce_mean(tf.nn.weighted_cross_entropy_with_logits(labels=label, logits=target, pos_weight=10))
+    def weighted_cross_entropy(label, target):
+        return tf.reduce_mean(tf.nn.weighted_cross_entropy_with_logits(labels=label, logits=target,
+                                                                       pos_weight=loss_weight))
+    return weighted_cross_entropy
 
 
 def multi_loss_fun(loss_weight):
