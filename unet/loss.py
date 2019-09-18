@@ -8,8 +8,6 @@
 """CNN related loss functions"""
 
 import tensorflow as tf
-import numpy as np
-from scipy.ndimage.morphology import distance_transform_bf
 
 
 def dice_loss(label, target):
@@ -96,21 +94,57 @@ def multi_loss_fun(loss_weight):
     return multi_loss
 
 
-def weighted_cross_entropy_with_boundary(label, target):
+def weighted_cross_entropy_with_boundary_fun(loss_weight):
     """Weighted cross entropy with foreground pixels having ten times higher weights
 
-    Args:
-        label: 4D or 5D label tensor
-        target: 4D or 5D target tensor
+     Args:
+         loss_weight: a list with two weights for weighted cross entropy and dice losses, respectively.
+         label: 4D or 5D label tensor
+         target: 4D or 5D target tensor
 
-    returns:
-        weighted cross entropy value
+     returns:
+         weighted cross entropy value
+
+     See Also:
+         * :meth:`mask_boundary_neighborhood`
+
+     """
+
+    def weighted_cross_entropy_with_boundary(label, target):
+        dist_mask = mask_boundary_neighborhood(label, r=10)
+        dist_mask = dist_mask * tf.cast(tf.size(dist_mask), dtype=tf.float32) / tf.reduce_sum(dist_mask)
+        mask = tf.cast(tf.logical_not(tf.reduce_any(tf.math.equal(label[..., 1:], 2), axis=-1, keepdims=True)),
+                       dtype=tf.float32)
+        label2 = tf.multiply(label, mask)
+        target2 = tf.multiply(target, mask)
+        mask = mask * tf.cast(tf.size(mask), dtype=tf.float32) / tf.reduce_sum(mask)
+        cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=label2, logits=target2)
+        loss = (loss_weight[0] +
+                loss_weight[1] * tf.cast(tf.reduce_any(tf.math.equal(label[..., 1:], 1), axis=-1), dtype=tf.float32) +
+                loss_weight[2] * dist_mask[..., -1])
+        return tf.multiply(cross_entropy, tf.multiply(mask[..., 0], loss))
+
+    return weighted_cross_entropy_with_boundary
+
+
+def mask_boundary_neighborhood(label, r=5):
+    """ mask the neighborhood of the boundary between foreground and background.
+
+    Args:
+        label: input label
+        r: neighborhood radius
+
+    Returns:
+        mask
+
+    See Also:
+         * :meth:`weighted_cross_entropy_with_boundary`
 
     """
-    # Todo: add positive weight as an argument
-    dist = distance_transform_bf(label[:, -1]) + distance_transform_bf(1 - label[:, -1])
-    dist = np.logical_and(dist > 5, dist < 20)
-
-    return tf.multiply(tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=label, logits=target), axis=-1),
-                     0.001 + 0.010 * label[:, -1] + 0.100 * dist
-                     )
+    fg = tf.reduce_any(tf.math.equal(label[..., 1:], 1), axis=-1, keepdims=True)
+    if tf.rank(fg) == 3:
+        tf.expand_dims(fg, axis=-1)
+    bg = tf.logical_not(fg)
+    before = tf.logical_xor(tf.nn.conv2d(tf.cast(bg, tf.float32), filter=tf.ones([r, r, 1, 1]), padding="SAME") > 0, bg)
+    after = tf.logical_xor(tf.nn.conv2d(tf.cast(fg, tf.float32), filter=tf.ones([r, r, 1, 1]), padding="SAME") > 0, fg)
+    return tf.cast(tf.logical_or(before, after), tf.float32)
