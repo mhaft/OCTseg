@@ -49,10 +49,11 @@
 <dt id="train.main">
 <code class="sig-prename descclassname">train.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#train.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Train or test a U-Net model to analyze OCT images.</p>
+<p class="rubric">Notes</p>
+<p><strong>All arguments are bash arguments</strong>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>***Note**</strong> – <strong>All arguments are bash arguments</strong></p></li>
 <li><p><strong>exp_def</strong> – experiment definition</p></li>
 <li><p><strong>models_path</strong> – path for saving models</p></li>
 <li><p><strong>lr</strong> – learning rate</p></li>
@@ -71,23 +72,23 @@
 <li><p><strong>isTest</strong> – Is test run instead of train</p></li>
 <li><p><strong>testEpoch</strong> – epoch of the saved model for testing</p></li>
 <li><p><strong>saveEpoch</strong> – epoch interval to save the model</p></li>
-<li><p><strong>logEpoch</strong> – epoch interval to save the log”)</p></li>
+<li><p><strong>epochSize</strong> – number of samples per epoch</p></li>
 <li><p><strong>nFeature</strong> – number of features in the first layer</p></li>
 <li><p><strong>nLayer</strong> – number of layers in the U-Nnet model</p></li>
 <li><p><strong>gpu_id</strong> – ID of GPUs to be used</p></li>
-</ul>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<ul class="simple">
+<li><p><strong>optimizer</strong> – keras optimizer. see <code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.optimizers()</span></code></p></li>
+<li><p><strong>Also</strong> (<em>See</em>) – <ul>
 <li><p><a class="reference internal" href="#unet.unet.unet_model" title="unet.unet.unet_model"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unet.unet.unet_model()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#unet.loss.multi_loss_fun" title="unet.loss.multi_loss_fun"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unet.loss.multi_loss_fun()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#util.load_data.load_train_data" title="util.load_data.load_train_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">util.load_data.load_train_data()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#util.load_batch.load_batch_parallel" title="util.load_batch.load_batch_parallel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">util.load_batch.load_batch_parallel()</span></code></a></p></li>
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.utils.multi_gpu_model()</span></code></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.optimizers()</span></code></p></li>
 </ul>
-</div>
+</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -115,7 +116,7 @@ probability instead of hard classification</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>label</strong> – 4D or 5D label tensor</p></li>
-<li><p><strong>target</strong> – 4D or 5d target tensor</p></li>
+<li><p><strong>target</strong> – 4D or 5D target tensor</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -125,17 +126,40 @@ probability instead of hard classification</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="unet.loss.mask_boundary_neighborhood">
+<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">mask_boundary_neighborhood</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">r=5</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.mask_boundary_neighborhood" title="Permalink to this definition">¶</a></dt>
+<dd><p>mask the neighborhood of the boundary between foreground and background.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label</strong> – input label</p></li>
+<li><p><strong>r</strong> – neighborhood radius</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>mask</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy_with_boundary()</span></code></p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="function">
 <dt id="unet.loss.multi_loss_fun">
 <code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">multi_loss_fun</code><span class="sig-paren">(</span><em class="sig-param">loss_weight</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.multi_loss_fun" title="Permalink to this definition">¶</a></dt>
 <dd><p>Semantic loss function based on the weighted cross entropy and dice and wighted by the loss weights in the input
 argument</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>loss_weight</strong> – a list with two weights for weighted cross entropy and dice losses, respectively.</p>
+<dd class="field-odd"><p><strong>loss_weight</strong> – a list with three weights for weighted cross entropy, foreground, and dice losses, respectively.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><dl class="simple">
-<dt>function, which similar to <a class="reference internal" href="#unet.loss.weighted_cross_entropy" title="unet.loss.weighted_cross_entropy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></a> and <a class="reference internal" href="#unet.loss.dice_loss" title="unet.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a></dt><dd><p>has label and target arguments</p>
+<dt>function, which similar to <code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code> and <a class="reference internal" href="#unet.loss.dice_loss" title="unet.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a></dt><dd><p>has label and target arguments</p>
 </dd>
 </dl>
 </p>
@@ -144,27 +168,53 @@ argument</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#unet.loss.weighted_cross_entropy" title="unet.loss.weighted_cross_entropy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></a></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy()</span></code></p></li>
 <li><p><a class="reference internal" href="#unet.loss.dice_loss" title="unet.loss.dice_loss"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dice_loss()</span></code></a></p></li>
 </ul>
 </div>
 </dd></dl>
 
 <dl class="function">
-<dt id="unet.loss.weighted_cross_entropy">
-<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">weighted_cross_entropy</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.weighted_cross_entropy" title="Permalink to this definition">¶</a></dt>
+<dt id="unet.loss.weighted_cross_entropy_fun">
+<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">weighted_cross_entropy_fun</code><span class="sig-paren">(</span><em class="sig-param">loss_weight</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.weighted_cross_entropy_fun" title="Permalink to this definition">¶</a></dt>
 <dd><p>Weighted cross entropy with foreground pixels having ten times higher weights</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>label</strong> – 4D or 5D label tensor</p></li>
-<li><p><strong>target</strong> – 4D or 5d target tensor</p></li>
+<li><p><strong>target</strong> – 4D or 5D target tensor</p></li>
+<li><p><strong>loss_weight</strong> – pos_weight for the <code class="xref py py-meth docutils literal notranslate"><span class="pre">tf.nn.weighted_cross_entropy_with_logits()</span></code></p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>weighted cross entropy value</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="unet.loss.weighted_cross_entropy_with_boundary_fun">
+<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">weighted_cross_entropy_with_boundary_fun</code><span class="sig-paren">(</span><em class="sig-param">loss_weight</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.weighted_cross_entropy_with_boundary_fun" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weighted cross entropy with foreground pixels having ten times higher weights</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>loss_weight</strong> – a list with three weights for all pixels outside the mask, foreground, and pixels close to the
+boundary, respectively.</p></li>
+<li><p><strong>label</strong> – 4D or 5D label tensor</p></li>
+<li><p><strong>target</strong> – 4D or 5D target tensor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>weighted cross entropy value</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#unet.loss.mask_boundary_neighborhood" title="unet.loss.mask_boundary_neighborhood"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mask_boundary_neighborhood()</span></code></a></p></li>
+</ul>
+</div>
 </dd></dl>
 
 </div>
@@ -359,9 +409,21 @@ LeakyReLY.</p>
 <span id="load-batch"></span><h3>load batch<a class="headerlink" href="#module-util.load_batch" title="Permalink to this headline">¶</a></h3>
 <p>Load a batch of data.</p>
 <p>Creates batches of data randomly in serial or multi-thread parallel fashion.</p>
+<dl class="class">
+<dt id="util.load_batch.LoadBatchGen">
+<em class="property">class </em><code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">LoadBatchGen</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">datasetID</em>, <em class="sig-param">nBatch</em>, <em class="sig-param">label=None</em>, <em class="sig-param">isAug=False</em>, <em class="sig-param">coord_sys='carts'</em>, <em class="sig-param">prob_lim=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.LoadBatchGen" title="Permalink to this definition">¶</a></dt>
+<dd><p>data generator class, a sub-class of  Keras’ Sequence class</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="util.load_batch.LoadBatchGenGPU">
+<em class="property">class </em><code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">LoadBatchGenGPU</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">datasetID</em>, <em class="sig-param">nBatch</em>, <em class="sig-param">label</em>, <em class="sig-param">isAug=True</em>, <em class="sig-param">coord_sys='polar'</em>, <em class="sig-param">prob_lim=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.LoadBatchGenGPU" title="Permalink to this definition">¶</a></dt>
+<dd><p>data generator class, a sub-class of  Keras’ Sequence class</p>
+</dd></dl>
+
 <dl class="function">
 <dt id="util.load_batch.img_aug">
-<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">img_aug</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">l</em>, <em class="sig-param">coord_sys</em>, <em class="sig-param">p_lim=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.img_aug" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">img_aug</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">l</em>, <em class="sig-param">coord_sys</em>, <em class="sig-param">prob_lim=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.img_aug" title="Permalink to this definition">¶</a></dt>
 <dd><p>Image augmentation manager.</p>
 <p>Based on the coordinate system (<em>Polar</em> vs.  <em>Cartesian</em>),  it selects the corresponding method.</p>
 <dl class="field-list simple">
@@ -370,7 +432,7 @@ LeakyReLY.</p>
 <li><p><strong>im</strong> – input image 4D or 5D tensor</p></li>
 <li><p><strong>l</strong> – input label 4D or 5D tensor</p></li>
 <li><p><strong>coord_sys</strong> – coordinate system.  ‘polar’ or ‘carts’ for Polar and Cartesian,  respectively.</p></li>
-<li><p><strong>p_lim</strong> – probability limit for applying each augmentation case.</p></li>
+<li><p><strong>prob_lim</strong> – probability limit for applying each augmentation case.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -531,6 +593,24 @@ maintain the original image shape.  For interpolation close to the boundaries,  
 <li><p><a class="reference internal" href="#util.load_batch.load_batch" title="util.load_batch.load_batch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_batch()</span></code></a></p></li>
 </ul>
 </div>
+</dd></dl>
+
+<dl class="function">
+<dt id="util.load_batch.polar_zoom">
+<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">polar_zoom</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">scale</em>, <em class="sig-param">order=1</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.polar_zoom" title="Permalink to this definition">¶</a></dt>
+<dd><p>apply image scaling to polar images along the radius axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>im</strong> – input image</p></li>
+<li><p><strong>scale</strong> – scaling factor</p></li>
+<li><p><strong>order</strong> – interpolation order.  0 for nearest and 1 for linear.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>scaled image.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

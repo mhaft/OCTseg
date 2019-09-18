@@ -5,11 +5,11 @@
 \let\spxextra \sphinxstyleindexextra
 
   \bigletter A
-  \item \spxentry{accuracy()}\spxextra{in module unet.ops}, \hyperpage{6}
+  \item \spxentry{accuracy()}\spxextra{in module unet.ops}, \hyperpage{7}
 
   \indexspace
   \bigletter C
-  \item \spxentry{conv\_layer()}\spxextra{in module unet.ops}, \hyperpage{6}
+  \item \spxentry{conv\_layer()}\spxextra{in module unet.ops}, \hyperpage{7}
 
   \indexspace
   \bigletter D
@@ -18,7 +18,7 @@
   \indexspace
   \bigletter I
   \item \spxentry{im\_fix\_width()}\spxextra{in module util.load\_data}, \hyperpage{12}
-  \item \spxentry{img\_aug()}\spxextra{in module util.load\_batch}, \hyperpage{9}
+  \item \spxentry{img\_aug()}\spxextra{in module util.load\_batch}, \hyperpage{10}
   \item \spxentry{img\_aug\_carts()}\spxextra{in module util.load\_batch}, \hyperpage{10}
   \item \spxentry{img\_aug\_polar()}\spxextra{in module util.load\_batch}, \hyperpage{10}
   \item \spxentry{img\_rand\_scale()}\spxextra{in module util.load\_batch}, \hyperpage{11}
@@ -28,12 +28,15 @@
   \item \spxentry{load\_batch()}\spxextra{in module util.load\_batch}, \hyperpage{11}
   \item \spxentry{load\_batch\_parallel()}\spxextra{in module util.load\_batch}, \hyperpage{11}
   \item \spxentry{load\_train\_data()}\spxextra{in module util.load\_data}, \hyperpage{12}
+  \item \spxentry{LoadBatchGen}\spxextra{class in util.load\_batch}, \hyperpage{9}
+  \item \spxentry{LoadBatchGenGPU}\spxextra{class in util.load\_batch}, \hyperpage{9}
   \item \spxentry{lumen\_iel\_mask()}\spxextra{in module util.read\_oct\_roi\_file}, \hyperpage{15}
 
   \indexspace
   \bigletter M
   \item \spxentry{main()}\spxextra{in module train}, \hyperpage{3}
-  \item \spxentry{make\_dataset()}\spxextra{in module util.load\_data}, \hyperpage{12}
+  \item \spxentry{make\_dataset()}\spxextra{in module util.load\_data}, \hyperpage{13}
+  \item \spxentry{mask\_boundary\_neighborhood()}\spxextra{in module unet.loss}, \hyperpage{5}
   \item \spxentry{MaxPoolingND()}\spxextra{in module unet.ops}, \hyperpage{6}
   \item \spxentry{multi\_loss\_fun()}\spxextra{in module unet.loss}, \hyperpage{5}
 
@@ -43,6 +46,7 @@
   \item \spxentry{polar2cartesian()}\spxextra{in module util.polar2cartesian}, \hyperpage{13}
   \item \spxentry{polar2cartesian\_large\_3d\_file()}\spxextra{in module util.polar2cartesian}, 
 		\hyperpage{14}
+  \item \spxentry{polar\_zoom()}\spxextra{in module util.load\_batch}, \hyperpage{12}
   \item \spxentry{process\_oct\_folder()}\spxextra{in module util.process\_oct\_folder}, 
 		\hyperpage{14}
 
@@ -51,14 +55,14 @@
   \item \spxentry{read\_oct\_roi\_file()}\spxextra{in module util.read\_oct\_roi\_file}, 
 		\hyperpage{15}
   \item \spxentry{roi\_file\_parser()}\spxextra{in module util.read\_oct\_roi\_file}, 
-		\hyperpage{15}
+		\hyperpage{16}
 
   \indexspace
   \bigletter U
   \item \spxentry{unet.loss}\spxextra{module}, \hyperpage{5}
   \item \spxentry{unet.ops}\spxextra{module}, \hyperpage{6}
-  \item \spxentry{unet.unet}\spxextra{module}, \hyperpage{7}
-  \item \spxentry{unet\_model()}\spxextra{in module unet.unet}, \hyperpage{7}
+  \item \spxentry{unet.unet}\spxextra{module}, \hyperpage{8}
+  \item \spxentry{unet\_model()}\spxextra{in module unet.unet}, \hyperpage{8}
   \item \spxentry{up\_conv()}\spxextra{in module unet.ops}, \hyperpage{7}
   \item \spxentry{util.confusion\_matrix}\spxextra{module}, \hyperpage{9}
   \item \spxentry{util.load\_batch}\spxextra{module}, \hyperpage{9}
@@ -70,6 +74,8 @@
 
   \indexspace
   \bigletter W
-  \item \spxentry{weighted\_cross\_entropy()}\spxextra{in module unet.loss}, \hyperpage{6}
+  \item \spxentry{weighted\_cross\_entropy\_fun()}\spxextra{in module unet.loss}, \hyperpage{6}
+  \item \spxentry{weighted\_cross\_entropy\_with\_boundary\_fun()}\spxextra{in module unet.loss}, 
+		\hyperpage{6}
 
 \end{sphinxtheindex}
