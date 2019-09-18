@@ -44,8 +44,9 @@ def smooth(x):
         smoothed 1D vector
 
     """
-    x[4:] = (x[4:] + x[3:-1] + x[2:-2] + x[1:-3] + x[:-4]) / 5
-    return x
+    s = np.concatenate((np.tile(x[0], 4), x))
+    s[4:] = (s[4:] + s[3:-1] + s[2:-2] + s[1:-3] + s[:-4]) / 5
+    return s[4:]
 
 
 def animate(i):
@@ -61,27 +62,31 @@ def animate(i):
         * :meth: animation.FuncAnimation
 
     """
+    global numRecord
     try:
         with open(log_file, 'r') as f:
-            reader = csv.DictReader(f, delimiter=',', skipinitialspace=True)
+            reader = csv.reader(f, delimiter=',', skipinitialspace=True)
+            _ = next(reader)  # header
             data = []
             for row in reader:
-                data.append([int(row['epoch']), float(row['Time (hr)']), float(row['Test_Loss']), float(row['Valid_Loss'])])
-        ax1.clear()
-        ax2.clear()
-        data = np.array(data)
-        iStart = 0
-        ax1.plot(data[iStart:, 0], smooth(data[iStart:, 2]))
-        ax1.plot(data[iStart:, 0], smooth(data[iStart:, 3]))
-        ax1.legend(['Training Loss', 'Validation Loss'])
-        ax1.set_title(args.exp_def)
-        ax1.set_xlabel('Epoch')
-        ax1.set_ylabel('Loss')
-        iStart = -50
-        ax2.plot(data[iStart:, 0], data[iStart:, 2])
-        ax2.plot(data[iStart:, 0], data[iStart:, 3])
-        ax2.set_xlabel('Epoch')
-        ax2.set_ylabel('Loss')
+                data.append([float(i) for i in row[:4]])
+        if len(data) != numRecord:
+            numRecord = len(data)
+            ax1.clear()
+            ax2.clear()
+            data = np.array(data)
+            iStart = 0
+            ax1.plot(data[iStart:, 0], smooth(data[iStart:, 2]))
+            ax1.plot(data[iStart:, 0], smooth(data[iStart:, 3]))
+            ax1.legend(['Training Loss', 'Validation Loss'])
+            ax1.set_title(args.exp_def)
+            ax1.set_xlabel('Epoch')
+            ax1.set_ylabel('Loss')
+            iStart = -50 if data.shape[0] > 50 else 0
+            ax2.plot(data[iStart:, 0], data[iStart:, 2] / data[iStart, 2])
+            ax2.plot(data[iStart:, 0], data[iStart:, 3] / data[iStart, 3])
+            ax2.set_xlabel('Epoch')
+            ax2.set_ylabel('Loss')
     except:
         pass
 
@@ -97,6 +102,8 @@ if __name__ == "__main__":
     ax1 = fig.add_subplot(2, 1, 1)
     ax2 = fig.add_subplot(2, 1, 2)
 
+    numRecord = 0
+    animate(-1)
     ani = animation.FuncAnimation(fig, animate, interval=5000)
     plt.show()
 
