@@ -12,22 +12,22 @@ import time
 import csv
 import glob
 import argparse
-from multiprocessing import cpu_count
 
 import tifffile
 import h5py
 import numpy as np
 import tensorflow as tf
+from tqdm import tqdm
 from keras.utils import multi_gpu_model
 from keras import optimizers
-from keras.callbacks import ModelCheckpoint
 from keras.backend.tensorflow_backend import set_session
+from keras import backend as K
 from keras.losses import get
 
 from unet.unet import unet_model
-from unet.loss import weighted_cross_entropy_with_boundary
+from unet.loss import weighted_cross_entropy_with_boundary_fun
 from util.load_data import load_train_data
-from util.load_batch import load_batch_parallel, LoadBatchGen
+from util.load_batch import load_batch_parallel, LoadBatchGen, LoadBatchGenGPU
 
 
 def main():
@@ -89,13 +89,13 @@ def main():
     parser.add_argument("-isAug", type=int, default=1, help="Is data augmentation")
     parser.add_argument("-isCarts", type=int, default=0, help="whether images should be converted into Cartesian")
     parser.add_argument("-isTest", type=int, default=0, help="Is test run instead of train")
-    parser.add_argument("-testEpoch", type=int, default=0, help="epoch of the saved model for testing")
-    parser.add_argument("-saveEpoch", type=int, default=2500, help="epoch interval to save the model")
+    parser.add_argument("-testEpoch", type=int, default=10, help="epoch of the saved model for testing")
+    parser.add_argument("-saveEpoch", type=int, default=100, help="epoch interval to save the model")
     parser.add_argument("-epochSize", type=int, default=100, help="number of samples per epoch")
     parser.add_argument("-nFeature", type=int, default=32, help="number of features in the first layer")
     parser.add_argument("-nLayer", type=int, default=9, help="number of layers in the U-Nnet model")
     parser.add_argument("-gpu_id", type=str, default="0,1", help="ID of GPUs to be used")
-    parser.add_argument("-optimizer", type=str, default="Adam", help="optimizer")
+    parser.add_argument("-optimizer", type=str, default="RMSprop", help="optimizer")
 
     args = parser.parse_args()
     experiment_def = args.exp_def
@@ -167,7 +167,7 @@ def main():
 
     optimizer = getattr(optimizers, args.optimizer)
     model.compile(optimizer=optimizer(lr=args.lr, decay=args.lr_decay),
-                  loss=get(weighted_cross_entropy_with_boundary))
+                  loss=get(weighted_cross_entropy_with_boundary_fun(loss_weight)))
 
 
     # load data
@@ -198,10 +198,10 @@ def main():
 
     label_9class = label
     if loss_mask_classes:
-        loss_mask = np.logical_not(np.any(label_9class[..., loss_mask_classes], -1))
+        loss_mask = np.any(label_9class[..., loss_mask_classes], -1)
     else:
-        loss_mask = np.ones(label_9class.shape[:-1])
-    label = np.zeros_like(label[..., :len(classes)])
+        loss_mask = np.zeros(label_9class.shape[:-1], dtype=np.bool)
+    label = np.zeros(label.shape[:-1] + (len(classes),))
     label[..., 0] = np.all(np.logical_not(label_9class), axis=-1)
     for i in range(len(classes)):
         tmp = label[..., i]
@@ -209,11 +209,13 @@ def main():
             tmp = np.logical_or(tmp, label_9class[..., classes[i][0][j]])
         for j in range(len(classes[i][1])):
             tmp = np.logical_and(tmp, np.logical_not(label_9class[..., classes[i][1][j]]))
+        tmp = tmp.astype('float32')
+        tmp[loss_mask] = 2
         label[..., i] = tmp
 
     # training
     if isTrain:
-        train_data_gen = LoadBatchGen(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys)
+        train_data_gen = LoadBatchGenGPU(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys)
         print('Data is loaded. Training: %d, validation: %d' % (len(np.unique(sample_caseID[train_data_id])),
                                                                 len(np.unique(sample_caseID[valid_data_id]))))
 
@@ -236,10 +238,14 @@ def main():
                 model_template.save(save_file_name % iEpoch)
 
     # feed forward
-    label = np.argmax(label, -1)
     train_valid_data_id = np.union1d(train_data_id, valid_data_id)
     out = model.predict(im, batch_size=nBatch, verbose=1)
+    print(out[[i], ...].shape)
+    LOSS = np.zeros(label.shape[:-1], dtype='float32')
+    for i in tqdm(range(10)):  # LOSS.shape[0]), 'Loss'):
+        LOSS[[i], ...] = K.eval(model.loss(label[[i], ...].astype('float32'), (out[[i], ...]).astype('float32')))
     out = np.argmax(out, -1)
+    label = np.argmax(label, -1)
     if len(out.shape) > 3:
         i = int(out.shape[1] // 2)
         label, out, im = label[:, i, ...].squeeze(), out[:, i, ...].squeeze(), im[:, i, ...].squeeze()
@@ -253,6 +259,7 @@ def main():
                      out[train_valid_data_id, ...].astype(np.uint8))
     tifffile.imwrite(models_path + experiment_def + '/a-im.tif',
                      (im[train_valid_data_id, ...] * 255).astype(np.uint8).squeeze())
+    tifffile.imwrite(models_path + experiment_def + '/a-loss.tif', LOSS[train_valid_data_id, ...].astype('float32'))
 
 
 if __name__ == '__main__':
