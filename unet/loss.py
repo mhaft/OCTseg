@@ -52,6 +52,7 @@ def weighted_cross_entropy_fun(loss_weight):
     Args:
         label: 4D or 5D label tensor
         target: 4D or 5D target tensor
+        loss_weight: pos_weight for the :meth:`tf.nn.weighted_cross_entropy_with_logits`
 
     returns:
         weighted cross entropy value
@@ -68,7 +69,7 @@ def multi_loss_fun(loss_weight):
     argument
 
     Args:
-        loss_weight: a list with two weights for weighted cross entropy and dice losses, respectively.
+        loss_weight: a list with three weights for weighted cross entropy, foreground, and dice losses, respectively.
 
     Returns:
          function, which similar to :meth:`weighted_cross_entropy` and :meth:`dice_loss`
@@ -87,11 +88,11 @@ def multi_loss_fun(loss_weight):
             label, target = label[:, i, ...], target[:, i, ...]
         if loss_weight[0] == 0:
             return dice_loss(label, target)
-        elif loss_weight[1] == 0:
-            return weighted_cross_entropy(label, target)
+        elif loss_weight[2] == 0:
+            return weighted_cross_entropy_fun(loss_weight[1])(label, target)
         else:
-            return loss_weight[0] * weighted_cross_entropy(label, target) + \
-                   loss_weight[1] * dice_loss(label, target)
+            return loss_weight[0] * weighted_cross_entropy_fun(loss_weight[1])(label, target) + \
+                   loss_weight[2] * dice_loss(label, target)
 
     return multi_loss
 
@@ -100,7 +101,8 @@ def weighted_cross_entropy_with_boundary_fun(loss_weight):
     """Weighted cross entropy with foreground pixels having ten times higher weights
 
      Args:
-         loss_weight: a list with two weights for weighted cross entropy and dice losses, respectively.
+         loss_weight: a list with three weights for all pixels outside the mask, foreground, and pixels close to the
+                        boundary, respectively.
          label: 4D or 5D label tensor
          target: 4D or 5D target tensor
 
