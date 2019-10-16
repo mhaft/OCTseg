@@ -75,25 +75,25 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-exp_def", type=str, default="test", help="experiment definition")
     parser.add_argument("-models_path", type=str, default="model/", help="path for saving models")
-    parser.add_argument("-lr", type=float, default=1e-4, help="learning rate")
+    parser.add_argument("-lr", type=float, default=1e-3, help="learning rate")
     parser.add_argument("-lr_decay", type=float, default=0.0, help="learning rate decay")
     parser.add_argument("-data_path", type=str, default="C:\\MachineLearning\\Segmentation_NonIEL\\", help="data folder path")
-    parser.add_argument("-nEpoch", type=int, default=2000, help="number of epochs")
-    parser.add_argument("-nBatch", type=int, default=4, help="batch size")
+    parser.add_argument("-nEpoch", type=int, default=1000, help="number of epochs")
+    parser.add_argument("-nBatch", type=int, default=30, help="batch size")
     parser.add_argument("-outCh", type=int, default=2, help="size of output channel")
     parser.add_argument("-inCh", type=int, default=3, help="size of input channel")
     parser.add_argument("-nZ", type=int, default=1, help="size of input depth")
     parser.add_argument("-w", type=int, default=512, help="size of input width (# of columns)")
     parser.add_argument("-l", type=int, default=512, help="size of input Length (# of rows)")
-    parser.add_argument("-loss_w", type=str, default="1, 100", help="loss wights")
+    parser.add_argument("-loss_w", type=str, default=".33, .33, .34", help="loss wights")
     parser.add_argument("-isAug", type=int, default=1, help="Is data augmentation")
     parser.add_argument("-isCarts", type=int, default=0, help="whether images should be converted into Cartesian")
     parser.add_argument("-isTest", type=int, default=0, help="Is test run instead of train")
     parser.add_argument("-testEpoch", type=int, default=10, help="epoch of the saved model for testing")
     parser.add_argument("-saveEpoch", type=int, default=100, help="epoch interval to save the model")
     parser.add_argument("-epochSize", type=int, default=100, help="number of samples per epoch")
-    parser.add_argument("-nFeature", type=int, default=32, help="number of features in the first layer")
-    parser.add_argument("-nLayer", type=int, default=9, help="number of layers in the U-Nnet model")
+    parser.add_argument("-nFeature", type=int, default=5, help="number of features in the first layer")
+    parser.add_argument("-nLayer", type=int, default=1, help="number of layers in the U-Nnet model")
     parser.add_argument("-gpu_id", type=str, default="0,1", help="ID of GPUs to be used")
     parser.add_argument("-optimizer", type=str, default="RMSprop", help="optimizer")
 
@@ -190,11 +190,28 @@ def main():
 
     # labels and masks
     # Todo: add an input method for classes and masks
+    # Intima layer
     loss_mask_classes = [0, 1]
     classes = [
-        [[0, 1, 2], [3]],
-        [[3], []],
+        [[0, 1, 2, 4], []],
+        [[3], [0]],
     ]
+
+    # # Multi class
+    # loss_mask_classes = []
+    # classes = [
+    #     [[1], [0, 2]],
+    #     [[0], []],
+    #     [[2], [0]],
+    #     [[3], [0, 1]],
+    # ]
+
+    # # media
+    # loss_mask_classes = []
+    # classes = [
+    #     [[0, 1, 2, 3], []],
+    #     [[4], [0, 1]],
+    # ]
 
     label_9class = label
     if loss_mask_classes:
@@ -240,9 +257,8 @@ def main():
     # feed forward
     train_valid_data_id = np.union1d(train_data_id, valid_data_id)
     out = model.predict(im, batch_size=nBatch, verbose=1)
-    print(out[[i], ...].shape)
     LOSS = np.zeros(label.shape[:-1], dtype='float32')
-    for i in tqdm(range(10)):  # LOSS.shape[0]), 'Loss'):
+    for i in tqdm(range(10)):  # train_valid_data_id), 'Loss'):
         LOSS[[i], ...] = K.eval(model.loss(label[[i], ...].astype('float32'), (out[[i], ...]).astype('float32')))
     out = np.argmax(out, -1)
     label = np.argmax(label, -1)
