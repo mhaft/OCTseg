@@ -150,7 +150,12 @@ def load_train_data(folder_path, im_shape, coord_sys):
     label = np.unpackbits(label.astype(np.uint8), axis=-1)[..., ::-1]
     if im_shape[0] == 1:
         im, label = np.squeeze(im, axis=1), np.squeeze(label, axis=1)
-    train_data_id = np.nonzero(np.mod(sample_caseID, 2) == 1)[0]
-    test_data_id = np.nonzero(np.mod(sample_caseID, 4) == 2)[0]
-    valid_data_id = np.nonzero(np.mod(sample_caseID, 4) == 0)[0]
+    # # 50% - 25% - 25%
+    # train_data_id = np.nonzero(np.mod(sample_caseID, 2) == 1)[0]
+    # test_data_id = np.nonzero(np.mod(sample_caseID, 4) == 2)[0]
+    # valid_data_id = np.nonzero(np.mod(sample_caseID, 4) == 0)[0]
+    # 80% - 10% - 10%
+    train_data_id = np.nonzero(np.mod(sample_caseID, 8) > 1)[0]
+    test_data_id = np.nonzero(np.mod(sample_caseID, 8) == 1)[0]
+    valid_data_id = np.nonzero(np.mod(sample_caseID, 8) == 0)[0]
     return im, label, train_data_id, test_data_id, valid_data_id, sample_caseID
