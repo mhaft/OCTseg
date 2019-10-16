@@ -67,7 +67,7 @@ def process_oct_folder(folder_path, scale=0.25):
                     # str to float to int
                     r0 = float(row[1]) - 1
 
-        im = tifffile.imread(case)
+        im = tifffile.imread(case)[:3, ...]
         im_shape0 = im.shape
         im = polar2cartesian_large_3d_file(im, r0=r0, full=True, deg=1, scale=scale)
         tifffile.imwrite(case[:-6] + '-im.tif', im)
