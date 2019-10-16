@@ -116,16 +116,16 @@ def weighted_cross_entropy_with_boundary_fun(loss_weight):
 
     def weighted_cross_entropy_with_boundary(label, target):
         dist_mask = mask_boundary_neighborhood(label, r=10)
-        dist_mask = dist_mask * tf.cast(tf.size(dist_mask), dtype=tf.float32) / tf.reduce_sum(dist_mask)
+        # dist_mask = dist_mask * tf.cast(tf.size(dist_mask), dtype=tf.float32) / tf.reduce_sum(dist_mask) # normalize
         mask = tf.cast(tf.logical_not(tf.reduce_any(tf.math.equal(label[..., 1:], 2), axis=-1, keepdims=True)),
                        dtype=tf.float32)
         label2 = tf.multiply(label, mask)
         target2 = tf.multiply(target, mask)
         mask = mask * tf.cast(tf.size(mask), dtype=tf.float32) / tf.reduce_sum(mask)
         cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=label2, logits=target2)
-        loss = (loss_weight[0] +
-                loss_weight[1] * tf.cast(tf.reduce_any(tf.math.equal(label[..., 1:], 1), axis=-1), dtype=tf.float32) +
-                loss_weight[2] * dist_mask[..., -1])
+        nonTN = tf.cast(tf.logical_or(tf.reduce_any(tf.math.equal(label[..., 1:], 1), axis=-1),
+                                      tf.math.greater(tf.argmax(target2, axis=-1), 0)), dtype=tf.float32)
+        loss = (loss_weight[0] + loss_weight[1] * nonTN + loss_weight[2] * dist_mask[..., -1])
         return tf.multiply(cross_entropy, tf.multiply(mask[..., 0], loss))
 
     return weighted_cross_entropy_with_boundary
