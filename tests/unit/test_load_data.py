@@ -17,15 +17,19 @@ from ...util.load_data import make_dataset, load_train_data
 
 def test_make_dataset():
     # polar
-    _ = make_dataset(os.path.dirname(os.path.realpath(__file__)) + '/fixtures/', (1, 10, 10, 1), coord_sys='polar')
+    _ = make_dataset(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', ''), (1, 10, 10, 1),
+                     coord_sys='polar')
     # cartesian with scale up
-    _ = make_dataset(os.path.dirname(os.path.realpath(__file__)) + '/fixtures/', (1, 10, 10, 3), coord_sys='carts',
+    _ = make_dataset(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', ''), (1, 10, 10, 3),
+                                  coord_sys='carts',
                      carts_w=15)
     # cartesian with scale down
-    _ = make_dataset(os.path.dirname(os.path.realpath(__file__)) + '/fixtures/', (1, 10, 10, 3), coord_sys='carts',
+    _ = make_dataset(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', ''), (1, 10, 10, 3),
+                                  coord_sys='carts',
                      carts_w=5)
 
 
 def test_load_train_data():
     # load train data
-    _ = load_train_data(os.path.dirname(os.path.realpath(__file__)) + '/fixtures/', (1, 10, 10, 1), coord_sys='polar')
+    _ = load_train_data(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', ''), (1, 10, 10, 1),
+                                     coord_sys='polar')

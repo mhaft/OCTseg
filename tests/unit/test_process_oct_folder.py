@@ -15,4 +15,4 @@ from ...util.process_oct_folder import process_oct_folder
 
 
 def test_process_oct_folder():
-    process_oct_folder(os.path.dirname(os.path.realpath(__file__)) + '/fixtures/')
+    process_oct_folder(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', ''))
