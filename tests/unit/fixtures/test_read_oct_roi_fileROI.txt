@@ -14,9 +14,16 @@ Angle	9	4	1
 Angle	8	6	1
 Snake	10	1	2	IEL
 Snake	10	5	2	
-closed	
+closed
+Snake	10	1	2	EEL
+Snake	10	5	2
+closed
 Angle	2	1	2	GW
-Angle	8	9	1	
+Angle	8	9	2
+Angle	9	2	2
+Angle	2	1	2	nonIEL
+Angle	8	9	2
 Angle	9	2	2
 Snake	9	5	2	Calcium
+Snake	8	3	2
 closed

@@ -8,6 +8,10 @@
   \item \spxentry{accuracy()}\spxextra{in module unet.ops}, \hyperpage{7}
 
   \indexspace
+  \bigletter B
+  \item \spxentry{boundary\_mask()}\spxextra{in module util.read\_oct\_roi\_file}, \hyperpage{15}
+
+  \indexspace
   \bigletter C
   \item \spxentry{conv\_layer()}\spxextra{in module unet.ops}, \hyperpage{7}
 
@@ -30,7 +34,6 @@
   \item \spxentry{load\_train\_data()}\spxextra{in module util.load\_data}, \hyperpage{12}
   \item \spxentry{LoadBatchGen}\spxextra{class in util.load\_batch}, \hyperpage{9}
   \item \spxentry{LoadBatchGenGPU}\spxextra{class in util.load\_batch}, \hyperpage{9}
-  \item \spxentry{lumen\_iel\_mask()}\spxextra{in module util.read\_oct\_roi\_file}, \hyperpage{15}
 
   \indexspace
   \bigletter M

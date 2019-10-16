@@ -220,7 +220,7 @@
 <p id="t67" class="pln">                    <span class="com"># str to float to int</span><span class="strut">&nbsp;</span></p>
 <p id="t68" class="stm run hide_run">                    <span class="nam">r0</span> <span class="op">=</span> <span class="nam">float</span><span class="op">(</span><span class="nam">row</span><span class="op">[</span><span class="num">1</span><span class="op">]</span><span class="op">)</span> <span class="op">-</span> <span class="num">1</span><span class="strut">&nbsp;</span></p>
 <p id="t69" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t70" class="stm run hide_run">        <span class="nam">im</span> <span class="op">=</span> <span class="nam">tifffile</span><span class="op">.</span><span class="nam">imread</span><span class="op">(</span><span class="nam">case</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t70" class="stm run hide_run">        <span class="nam">im</span> <span class="op">=</span> <span class="nam">tifffile</span><span class="op">.</span><span class="nam">imread</span><span class="op">(</span><span class="nam">case</span><span class="op">)</span><span class="op">[</span><span class="op">:</span><span class="num">3</span><span class="op">,</span> <span class="op">...</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
 <p id="t71" class="stm run hide_run">        <span class="nam">im_shape0</span> <span class="op">=</span> <span class="nam">im</span><span class="op">.</span><span class="nam">shape</span><span class="strut">&nbsp;</span></p>
 <p id="t72" class="stm run hide_run">        <span class="nam">im</span> <span class="op">=</span> <span class="nam">polar2cartesian_large_3d_file</span><span class="op">(</span><span class="nam">im</span><span class="op">,</span> <span class="nam">r0</span><span class="op">=</span><span class="nam">r0</span><span class="op">,</span> <span class="nam">full</span><span class="op">=</span><span class="key">True</span><span class="op">,</span> <span class="nam">deg</span><span class="op">=</span><span class="num">1</span><span class="op">,</span> <span class="nam">scale</span><span class="op">=</span><span class="nam">scale</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t73" class="stm run hide_run">        <span class="nam">tifffile</span><span class="op">.</span><span class="nam">imwrite</span><span class="op">(</span><span class="nam">case</span><span class="op">[</span><span class="op">:</span><span class="op">-</span><span class="num">6</span><span class="op">]</span> <span class="op">+</span> <span class="str">'-im.tif'</span><span class="op">,</span> <span class="nam">im</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
@@ -242,7 +242,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
-            created at 2019-08-14 17:17
+            created at 2019-10-16 15:56
         </p>
     </div>
 </div>

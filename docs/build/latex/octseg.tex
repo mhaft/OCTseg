@@ -72,7 +72,7 @@
 
 
 \title{OCTseg}
-\date{Sep 18, 2019}
+\date{Oct 16, 2019}
 \release{}
 \author{Mohammad Haft-Javaherian}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -1283,10 +1283,10 @@ It saves three files in the \sphinxtitleref{folder\_path} for each case with a s
 \section{read oct roi file}
 \label{\detokenize{index:module-util.read_oct_roi_file}}\label{\detokenize{index:read-oct-roi-file}}\index{util.read\_oct\_roi\_file (module)@\spxentry{util.read\_oct\_roi\_file}\spxextra{module}}
 Read ROI file generated based on the and generate segmentation results.
-\index{lumen\_iel\_mask() (in module util.read\_oct\_roi\_file)@\spxentry{lumen\_iel\_mask()}\spxextra{in module util.read\_oct\_roi\_file}}
+\index{boundary\_mask() (in module util.read\_oct\_roi\_file)@\spxentry{boundary\_mask()}\spxextra{in module util.read\_oct\_roi\_file}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:util.read_oct_roi_file.lumen_iel_mask}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.read\_oct\_roi\_file.}}\sphinxbfcode{\sphinxupquote{lumen\_iel\_mask}}}{\emph{obj\_list}, \emph{im\_shape}}{}
+\phantomsection\label{\detokenize{index:util.read_oct_roi_file.boundary_mask}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.read\_oct\_roi\_file.}}\sphinxbfcode{\sphinxupquote{boundary\_mask}}}{\emph{obj\_list}, \emph{im\_shape}}{}
 generate lumen or IEL mask based on the point list.
 
 Based on the periodic nature of polar coordinate system, the boundary within {[}0, 2 pi{]} is copied to {[}- 2 pi, 0{]} and
@@ -1337,9 +1337,17 @@ bit 2 (2**1) encode \sphinxtitleref{noniel} (NonIEL, where IEL is not visible)
 \item {} 
 bit 2  (2**2) encode \sphinxtitleref{lumen} area
 
-\item {} 
-bit 3  (2**3) encode \sphinxtitleref{iel} area (the correct term is \sphinxstyleemphasis{intima} layer), which is the between \sphinxtitleref{lumen} and \sphinxtitleref{iel}
+\item {} \begin{description}
+\item[{bit 3  (2**3) encode \sphinxtitleref{iel} area (the \sphinxstyleemphasis{Tunica Intima} layer), which is the layer between \sphinxtitleref{lumen} and \sphinxtitleref{iel}}] \leavevmode
 boundaries.
+
+\end{description}
+
+\item {} \begin{description}
+\item[{bit 4 (2**4) encode \sphinxtitleref{eel} area (the \sphinxstyleemphasis{Tunica Media} layer), which is the layer between \sphinxtitleref{iel} and \sphinxtitleref{eel}}] \leavevmode
+boundaries
+
+\end{description}
 
 \item {} 
 other bits are not utilized and can be used for other classes in future.
@@ -1368,7 +1376,7 @@ uint8
 
 \begin{itemize}
 \item {} 
-{\hyperref[\detokenize{index:util.read_oct_roi_file.lumen_iel_mask}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{lumen\_iel\_mask()}}}}}
+{\hyperref[\detokenize{index:util.read_oct_roi_file.boundary_mask}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{boundary\_mask()}}}}}
 
 \item {} 
 {\hyperref[\detokenize{index:util.read_oct_roi_file.roi_file_parser}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{roi\_file\_parser()}}}}}

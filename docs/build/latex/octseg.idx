@@ -35,6 +35,6 @@
 \indexentry{util.process\_oct\_folder (module)@\spxentry{util.process\_oct\_folder}\spxextra{module}|hyperpage}{14}
 \indexentry{process\_oct\_folder() (in module util.process\_oct\_folder)@\spxentry{process\_oct\_folder()}\spxextra{in module util.process\_oct\_folder}|hyperpage}{14}
 \indexentry{util.read\_oct\_roi\_file (module)@\spxentry{util.read\_oct\_roi\_file}\spxextra{module}|hyperpage}{15}
-\indexentry{lumen\_iel\_mask() (in module util.read\_oct\_roi\_file)@\spxentry{lumen\_iel\_mask()}\spxextra{in module util.read\_oct\_roi\_file}|hyperpage}{15}
+\indexentry{boundary\_mask() (in module util.read\_oct\_roi\_file)@\spxentry{boundary\_mask()}\spxextra{in module util.read\_oct\_roi\_file}|hyperpage}{15}
 \indexentry{read\_oct\_roi\_file() (in module util.read\_oct\_roi\_file)@\spxentry{read\_oct\_roi\_file()}\spxextra{in module util.read\_oct\_roi\_file}|hyperpage}{15}
 \indexentry{roi\_file\_parser() (in module util.read\_oct\_roi\_file)@\spxentry{roi\_file\_parser()}\spxextra{in module util.read\_oct\_roi\_file}|hyperpage}{16}

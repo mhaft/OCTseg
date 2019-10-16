@@ -820,8 +820,8 @@ boundary.  Default is True.</p></li>
 <span id="read-oct-roi-file"></span><h3>read oct roi file<a class="headerlink" href="#module-util.read_oct_roi_file" title="Permalink to this headline">¶</a></h3>
 <p>Read ROI file generated based on the and generate segmentation results.</p>
 <dl class="function">
-<dt id="util.read_oct_roi_file.lumen_iel_mask">
-<code class="sig-prename descclassname">util.read_oct_roi_file.</code><code class="sig-name descname">lumen_iel_mask</code><span class="sig-paren">(</span><em class="sig-param">obj_list</em>, <em class="sig-param">im_shape</em><span class="sig-paren">)</span><a class="headerlink" href="#util.read_oct_roi_file.lumen_iel_mask" title="Permalink to this definition">¶</a></dt>
+<dt id="util.read_oct_roi_file.boundary_mask">
+<code class="sig-prename descclassname">util.read_oct_roi_file.</code><code class="sig-name descname">boundary_mask</code><span class="sig-paren">(</span><em class="sig-param">obj_list</em>, <em class="sig-param">im_shape</em><span class="sig-paren">)</span><a class="headerlink" href="#util.read_oct_roi_file.boundary_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>generate lumen or IEL mask based on the point list.</p>
 <p>Based on the periodic nature of polar coordinate system, the boundary within [0, 2 pi] is copied to [- 2 pi, 0] and
 [2 pi, 4 pi]. The interpolation happened along the path for x and y independently. Number of points interpolated
@@ -878,7 +878,7 @@ boundaries.</p></li>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#util.read_oct_roi_file.lumen_iel_mask" title="util.read_oct_roi_file.lumen_iel_mask"><code class="xref py py-meth docutils literal notranslate"><span class="pre">lumen_iel_mask()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#util.read_oct_roi_file.boundary_mask" title="util.read_oct_roi_file.boundary_mask"><code class="xref py py-meth docutils literal notranslate"><span class="pre">boundary_mask()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#util.read_oct_roi_file.roi_file_parser" title="util.read_oct_roi_file.roi_file_parser"><code class="xref py py-meth docutils literal notranslate"><span class="pre">roi_file_parser()</span></code></a></p></li>
 </ul>
 </div>
