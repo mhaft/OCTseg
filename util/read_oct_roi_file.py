@@ -62,7 +62,7 @@ def roi_file_parser(file_path):
     obj_list, last_row, last_case = {'lumen': [], 'iel': [], 'eel': [], 'gw': [], 'noniel': []}, [''], ''
     lumen_label = ['lumen', 'fibro-fatty', 'fibrous', 'fc', 'fa', 'normal']
     gw_label = ['exclude', 'gw']
-    ignore_label = ['', 'calcification', 'cap']
+    ignore_label = ['', 'calcification', 'cap', 'calcium']
     with open(file_path, 'r') as f:
         reader = csv.reader(f, delimiter='\t')
         for row in reader:
@@ -170,29 +170,36 @@ def read_oct_roi_file(file_path, im_shape):
 
     """
     obj_list = roi_file_parser(file_path)
-    out = np.zeros(im_shape + (8,), dtype=np.uint8)
+    out = np.zeros(tuple(im_shape) + (8,), dtype=np.uint8)
     for eel in obj_list['eel']:
-        slice2D = out[int(eel[0][2]) - 1, ..., 4]
-        slice2D[boundary_mask(eel, im_shape)] = 1
-        out[int(eel[0][2]) - 1, ..., 4] = slice2D
+        z = int(eel[0][2]) - 1
+        if z < out.shape[0]:
+            slice2D = out[z, ..., 4]
+            slice2D[boundary_mask(eel, im_shape)] = 1
+            out[z, ..., 4] = slice2D
     for iel in obj_list['iel']:
-        slice2D = out[int(iel[0][2]) - 1, ..., 3]
-        slice2D[boundary_mask(iel, im_shape)] = 1
-        out[int(iel[0][2]) - 1, ..., 3] = slice2D
+        z = int(iel[0][2]) - 1
+        if z < out.shape[0]:
+            slice2D = out[z, ..., 3]
+            slice2D[boundary_mask(iel, im_shape)] = 1
+            out[z, ..., 3] = slice2D
     for lumen in obj_list['lumen']:
-        slice2D = out[int(lumen[0][2]) - 1, ..., 2]
-        slice2D[boundary_mask(lumen, im_shape)] += 1
-        out[int(lumen[0][2]) - 1, ..., 2] = slice2D
+        z = int(lumen[0][2]) - 1
+        if z < out.shape[0]:
+            slice2D = out[z, ..., 2]
+            slice2D[boundary_mask(lumen, im_shape)] += 1
+            out[z, ..., 2] = slice2D
     for i, gw in enumerate(obj_list['gw'] + obj_list['noniel'], 1):
         z = int(gw[1][2]) - 1
         # val is 1 and 2 for GW and NonIEL, respectively
         val = 1 if (i > len(obj_list['gw'])) else 0
         gw = np.array([gw[1][1], gw[2][1]]).astype('int')
-        if gw[0] <= gw[1]:
-            out[z, :, gw[0]:(gw[1] + 1), val] = 1
-        else:
-            out[z, :, gw[0]:, val] = 1
-            out[z, :, :(gw[1] + 1), val] = 1
+        if z < out.shape[0]:
+            if gw[0] <= gw[1]:
+                out[z, :, gw[0]:(gw[1] + 1), val] = 1
+            else:
+                out[z, :, gw[0]:, val] = 1
+                out[z, :, :(gw[1] + 1), val] = 1
 
     # makes the layers exclusive
     out[..., 4] *= 1 - out[..., 3]
