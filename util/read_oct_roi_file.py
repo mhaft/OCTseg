@@ -59,27 +59,33 @@ def roi_file_parser(file_path):
         * :meth:`read_oct_roi_file`
 
     """
-    obj_list, last_row, last_case = {'lumen': [], 'iel': [], 'gw': [], 'noniel': []}, [''], ''
-    lumen_label = ['lumen', 'fibro-fatty', 'fibrous', 'fc', 'fibrous', 'fa', 'normal']
+    obj_list, last_row, last_case = {'lumen': [], 'iel': [], 'eel': [], 'gw': [], 'noniel': []}, [''], ''
+    lumen_label = ['lumen', 'fibro-fatty', 'fibrous', 'fc', 'fa', 'normal']
+    gw_label = ['exclude', 'gw']
+    ignore_label = ['', 'calcification', 'cap']
     with open(file_path, 'r') as f:
         reader = csv.reader(f, delimiter='\t')
         for row in reader:
             if len(row) > 4 and row[4] != '':
                 row[4] = row[4].lower()
-                if row[4] in ['iel', 'gw', 'noniel']:
+                if row[4] in ['eel', 'iel', 'noniel']:
                     last_case = row[4]
-                elif row[-1] in lumen_label:
+                elif row[4] in gw_label:
+                    last_case = 'gw'
+                elif row[4] in lumen_label:
                     last_case = 'lumen'
-                else:
+                elif row[4] in ignore_label:
                     last_case = ''
+                else:
+                    raise Exception('unknown label %s was found in the file %s' % (row[4], file_path))
                 if last_case != '':
                     obj_list[last_case].append([])
-            if last_case != '' and row[0] != 'closed':
-                obj_list[last_case][-1].append([int(i) for i in row[1:4]])
+            if last_case != '' and row[0] != 'closed' and row[0] != 'open':
+                obj_list[last_case][-1].append([float(i) for i in row[1:4]])
     return obj_list
 
 
-def lumen_iel_mask(obj_list, im_shape):
+def boundary_mask(obj_list, im_shape):
     """generate lumen or IEL mask based on the point list.
 
     Based on the periodic nature of polar coordinate system, the boundary within [0, 2 pi] is copied to [- 2 pi, 0] and
@@ -145,8 +151,10 @@ def read_oct_roi_file(file_path, im_shape):
         * bit 1 (2**0) encode `gw` (Guide Wire, where guide wire has shadow)
         * bit 2 (2**1) encode `noniel` (NonIEL, where IEL is not visible)
         * bit 2  (2**2) encode `lumen` area
-        * bit 3  (2**3) encode `iel` area (the correct term is *intima* layer), which is the between `lumen` and `iel`
-          boundaries.
+        * bit 3  (2**3) encode `iel` area (the *Tunica Intima* layer), which is the layer between `lumen` and `iel`
+            boundaries.
+        * bit 4 (2**4) encode `eel` area (the *Tunica Media* layer), which is the layer between `iel` and `eel`
+            boundaries
         * other bits are not utilized and can be used for other classes in future.
 
     Args:
@@ -157,30 +165,38 @@ def read_oct_roi_file(file_path, im_shape):
         uint8: the output label image
 
     See Also:
-        * :meth:`lumen_iel_mask`
+        * :meth:`boundary_mask`
         * :meth:`roi_file_parser`
 
     """
     obj_list = roi_file_parser(file_path)
-    out = np.zeros(im_shape, dtype=np.uint8)
+    out = np.zeros(im_shape + (8,), dtype=np.uint8)
+    for eel in obj_list['eel']:
+        slice2D = out[int(eel[0][2]) - 1, ..., 4]
+        slice2D[boundary_mask(eel, im_shape)] = 1
+        out[int(eel[0][2]) - 1, ..., 4] = slice2D
     for iel in obj_list['iel']:
-        tmp = out[iel[0][2] - 1, ...]
-        tmp[lumen_iel_mask(iel, im_shape)] += 2 ** 3
-        out[iel[0][2] - 1, ...] = tmp
+        slice2D = out[int(iel[0][2]) - 1, ..., 3]
+        slice2D[boundary_mask(iel, im_shape)] = 1
+        out[int(iel[0][2]) - 1, ..., 3] = slice2D
     for lumen in obj_list['lumen']:
-        tmp = out[lumen[0][2] - 1, ...]
-        tmp[lumen_iel_mask(lumen, im_shape)] += 2 ** 2
-        tmp[np.right_shift(tmp, 2) % 4 == 3] -= 2 ** 3
-        out[lumen[0][2] - 1, ...] = tmp
+        slice2D = out[int(lumen[0][2]) - 1, ..., 2]
+        slice2D[boundary_mask(lumen, im_shape)] += 1
+        out[int(lumen[0][2]) - 1, ..., 2] = slice2D
     for i, gw in enumerate(obj_list['gw'] + obj_list['noniel'], 1):
-        z = gw[1][2] - 1
+        z = int(gw[1][2]) - 1
         # val is 1 and 2 for GW and NonIEL, respectively
-        val = 2 ** (i > len(obj_list['gw']))
-        gw = np.array([gw[1][1], gw[2][1]])
+        val = 1 if (i > len(obj_list['gw'])) else 0
+        gw = np.array([gw[1][1], gw[2][1]]).astype('int')
         if gw[0] <= gw[1]:
-            out[z, :, gw[0]:(gw[1] + 1)] += val
+            out[z, :, gw[0]:(gw[1] + 1), val] = 1
         else:
-            out[z, :, gw[0]:] += val
-            out[z, :, :(gw[1] + 1)] += val
+            out[z, :, gw[0]:, val] = 1
+            out[z, :, :(gw[1] + 1), val] = 1
+
+    # makes the layers exclusive
+    out[..., 4] *= 1 - out[..., 3]
+    out[..., 3] *= 1 - out[..., 2]
+    out = np.packbits(out[..., ::-1], axis=-1)[..., 0]
     return out
 
