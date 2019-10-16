@@ -98,7 +98,7 @@ def make_dataset(folder_path, im_shape, coord_sys, carts_w=512):
             tmp = tifffile.imread(case[:-9] + '-im.tif')
             tmp = im_fix_width(tmp, carts_w)
         elif coord_sys == 'polar':
-            tmp = tifffile.imread(case[:-9] + '.pstif')
+            tmp = tifffile.imread(case[:-9] + '.pstif')[:3, ...]
 
         # single channel vs multi channel
         if im_shape[-1] == 1:
