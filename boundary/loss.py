@@ -158,5 +158,7 @@ def masked_mean_square_error(label, target):
         i //= 2
     else:
         i = 2
-    return (tf.reduce_mean(tf.multiply(label[..., i:, :], tf.square(label[..., :i, :] - target[..., :i, :]))) /
-            tf.reduce_mean(label[..., i:, :]))
+    return (tf.reduce_mean(tf.multiply(label[..., i:, :],
+                                       tf.abs(label[..., :i, :] - tf.clip_by_value(target[..., :i, :], 0, 1))))
+            * (1 / tf.reduce_mean(label[..., i:, :]))
+            + tf.reduce_mean(tf.abs(label[..., 2, :] - tf.clip_by_value(target[..., 2, :], 0, 1))))
