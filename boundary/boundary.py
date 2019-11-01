@@ -42,8 +42,6 @@ def boundary_model(im_shape, nFeature=16, outCh=2, nLayer=3):
         out.append(dense_layer(out[-1], im_shape[0] * nFeature))
     out.append(dense_layer(out[-1], outCh))
     out.append(KL.Lambda(lambda i: K.permute_dimensions(i, (0, 2, 1)))(out[-1]))
-    for iLayer in range(nLayer):
-        out.append(dense_layer(out[-1], im_shape[1]))
 
     return Model(inputs=x, outputs=out[-1])
 
