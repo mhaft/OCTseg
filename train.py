@@ -17,6 +17,7 @@ from multiprocessing import cpu_count
 import tifffile
 import h5py
 import numpy as np
+from scipy.ndimage import median_filter
 import tensorflow as tf
 from keras.utils import multi_gpu_model
 from keras import optimizers
@@ -27,7 +28,7 @@ from keras.losses import get
 from boundary.boundary import boundary_model
 from boundary.loss import weighted_cross_entropy_with_boundary, masked_mean_absolute_error, masked_mean_square_error
 from util.load_data import load_train_data
-from util.load_batch import load_batch_parallel, LoadBatchGen
+from util.load_batch import load_batch_parallel, LoadBatchGen, LoadBatchGenGPU
 from util.segmentation2boundary import segmentation2boundary_multi_class, boundary2segmentation
 
 
@@ -197,7 +198,7 @@ def main():
     classes = [2, 3]
     mask_classes = [0, 1]
 
-    mask = (segmentation2boundary_multi_class(label, mask_classes) < 0).astype('single')
+    mask = (segmentation2boundary_multi_class(label, mask_classes) < 0.5).astype('single')
     label = segmentation2boundary_multi_class(label, classes)
     mask[..., 1, :] = np.logical_and(mask[..., 0, :], mask[..., 1, :])
     if label.shape[-2] != outCh:
@@ -205,7 +206,7 @@ def main():
 
     # training
     if isTrain:
-        train_data_gen = LoadBatchGen(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys)
+        train_data_gen = load_batch_parallel(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys)
         print('Data is loaded. Training: %d, validation: %d' % (len(np.unique(sample_caseID[train_data_id])),
                                                                 len(np.unique(sample_caseID[valid_data_id]))))
 
@@ -228,12 +229,25 @@ def main():
                 model_template.save(save_file_name % iEpoch)
 
     # feed forward
-    label = np.logical_and(boundary2segmentation(label[..., [1], :], im_shape[1]),
-                           np.logical_not(boundary2segmentation(label[..., [0], :], im_shape[1])))
+    label = np.logical_and(np.logical_and(boundary2segmentation(label[..., [1], :], im_shape[1]),
+                           np.logical_not(boundary2segmentation(label[..., [0], :], im_shape[1]))),
+                           np.logical_and(boundary2segmentation(label[..., [2], :], im_shape[1]),
+                           boundary2segmentation(label[..., [3], :], im_shape[1])))
     train_valid_data_id = np.union1d(train_data_id, valid_data_id)
     out = model.predict(im, batch_size=nBatch, verbose=1)
-    out = np.logical_and(boundary2segmentation(out[..., [1], :], im_shape[1]),
-                           np.logical_not(boundary2segmentation(out[..., [0], :], im_shape[1])))
+    if label.shape[-2] == mask.shape[-2]:
+        out = np.logical_and(boundary2segmentation(out[..., [1], :], im_shape[1]),
+                             np.logical_not(boundary2segmentation(out[..., [0], :], im_shape[1])))
+    else:
+        filt_size = (out.ndim - 1) * (1,) + (21,)
+        m1 = median_filter(out[..., [3], :], size=filt_size) > 0.5
+        m2 = median_filter(out[..., [2], :], size=filt_size) > 0.5
+        x1 = median_filter(out[..., [1], :], size=filt_size)
+        x1 = boundary2segmentation(x1 * m2 - (1 - m2), im_shape[1])
+        x2 = median_filter(out[..., [0], :], size=filt_size)
+        x2 = boundary2segmentation(x2 * m2 - (1 - m2), im_shape[1])
+        out = np.logical_and(x1, np.logical_not(x2))
+
     label, out, im = label.astype(np.uint8), out.astype(np.uint8), (im * 255).astype(np.uint8).squeeze()
     if len(out.shape) > 3:
         i = int(out.shape[1] // 2)
