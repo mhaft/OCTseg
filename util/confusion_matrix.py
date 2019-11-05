@@ -68,7 +68,7 @@ if __name__ == "__main__":
     parser.add_argument("-exp_def", type=str, default="1z", help="experiment definition")
     parser.add_argument("-models_path", type=str, default='../model/', help="experiment definition")
     parser.add_argument("-epoch", type=int, default=1000, help="model saved at this epoch")
-    parser.add_argument("-useMask", type=int, default=0, help="use guide wire and nonIEL masks")
+    parser.add_argument("-useMask", type=int, default=1, help="use guide wire and nonIEL masks")
     args = parser.parse_args()
 
     label = tifffile.imread(args.models_path + args.exp_def + '/a-label.tif')
