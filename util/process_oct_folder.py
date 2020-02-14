@@ -7,11 +7,11 @@
 
 """process OCT folder to generate the segmentation labels of cases. Each case has all these three files
 
-        * \* .PSTIF
+        *  **.PSTIF
 
-        * \* .INI
+        *  **.INI
 
-        * \* ROI.txt
+        *  **ROI.txt
 
 """
 
@@ -31,17 +31,18 @@ def process_oct_folder(folder_path, scale=0.25):
 
     The *Cartesian* output file can be scale.  Each case should have all these three files
 
-        * \* .PSTIF
+        *  .PSTIF
 
-        * \* .INI
+        *  .INI
 
-        * \* ROI.txt
+        *  ROI.txt
 
     Args:
-        folder_path:
-        scale:
+        folder_path: the folder containing the file
+        scale: the scale of the Cartisian output file
 
     Returns:
+        * case_slice_id: the case id and slice id for each sample
         : It saves three files in the `folder_path` for each case with a suffix:
 
         * **-im.tif**: the image in cartesian, possibly scaled.
@@ -59,6 +60,7 @@ def process_oct_folder(folder_path, scale=0.25):
     """
     cases = glob.glob(folder_path + '*.pstif')
     for case in tqdm(cases):
+        # information from ini file
         with open(case[:-6] + 'ROI.ini', 'r') as f:
             reader = csv.reader(f, delimiter='\t')
             r0 = 1
@@ -66,12 +68,13 @@ def process_oct_folder(folder_path, scale=0.25):
                 if row[0] == 'zeroOffset':
                     # str to float to int
                     r0 = float(row[1]) - 1
-
-        im = tifffile.imread(case)[:3, ...]
+        # read the polar image and write the Cartesian
+        im = tifffile.imread(case)
         im_shape0 = im.shape
         im = polar2cartesian_large_3d_file(im, r0=r0, full=True, deg=1, scale=scale)
         tifffile.imwrite(case[:-6] + '-im.tif', im)
 
+        # read ROI file and write both Polar and Cartesian segmentation results
         seg = read_oct_roi_file(case[:-6] + 'ROI.txt', (int(im_shape0[0] / 3),) + im_shape0[1:])
         tifffile.imwrite(case[:-6] + '-SegP.tif', seg)
 
