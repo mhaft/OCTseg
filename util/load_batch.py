@@ -133,7 +133,7 @@ def img_aug_carts(image, L, prob_lim=0.5):
             im_ = np.rot90(im_, k=1, axes=(-2, -3))
             l_ = np.rot90(l_, k=1, axes=(-2, -3))
         if np.random.rand() > prob_lim:  # intensity scaling
-            im_ = np.clip(im_ * (1 + 0.5 * (np.random.rand() - 0.5)), 0, 1)
+            im_ = np.clip(0.1 * (np.random.rand() - 0.5) + im_ * (1 + 0.20 * (np.random.rand() - 0.5)), 0, 1)
         if np.random.rand() > prob_lim:  # image scaling
             scale = 1 + 0.25 * (np.random.rand() - 0.5)
             im_ = img_rand_scale(im_, scale, 2)
@@ -179,7 +179,7 @@ def img_aug_polar(image, label, prob_lim=0.5):
             im_ = np.concatenate((im_[..., :j:-1, :], im_[..., j::-1, :]), axis=-2)
             l_ = np.concatenate((l_[..., :j:-1, :], l_[..., j::-1, :]), axis=-2)
         if np.random.rand() > prob_lim:  # intensity scaling
-            im_ = np.clip(im_ * (1 + 0.5 * (np.random.rand() - 0.5)), 0, 1)
+            im_ = np.clip(0.1 * (np.random.rand() - 0.5) + im_ * (1 + 0.20 * (np.random.rand() - 0.5)), 0, 1)
         if np.random.rand() > prob_lim:  # image scaling
             scale = 1 + 0.25 * (np.random.rand() - 0.5)
             if scale > 1:
@@ -367,7 +367,8 @@ class LoadBatchGenGPU(Sequence):
                 im_ = tf.concat((im_[..., :j:-1, :], im_[..., j::-1, :]), -2)
                 l_ = tf.concat((l_[..., :j:-1, :], l_[..., j::-1, :]), -2)
             if np.random.rand() > self.prob_lim:  # intensity scaling
-                im_ = tf.clip_by_value(im_ * (1 + 0.5 * (np.random.rand() - 0.5)), 0, 1)
+                im_ = tf.clip_by_value(0.1 * (np.random.rand() - 0.5) +
+                                       im_ * (1 + 0.20 * (np.random.rand() - 0.5)), 0, 1)
             if np.random.rand() > self.prob_lim:  # image scaling
                 scale = 1 + 0.25 * (np.random.rand() - 0.5)
                 idx = scale * np.arange(0, self.W)
