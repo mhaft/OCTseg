@@ -78,15 +78,25 @@ def make_dataset(folder_path, im_shape, coord_sys, carts_w=512):
         cases = glob.glob(folder_path + '*-SegP.tif')
     z_pad = (im_shape[0] - 1) // 2
     sample_caseID = []
+    sample_sliceID = []
+    i_patient, last_patient = -1, ""
     # iterate over the cases
-    for i_case in tqdm(range(len(cases))):
+    for case in tqdm(cases):
         # read segmentation
-        case = cases[i_case]
         tmp = tifffile.imread(case)
         if coord_sys == 'carts':
             tmp = im_fix_width(tmp, carts_w)
         # find the annotated slices
         slice_list = np.nonzero(np.any(np.any(tmp > 1, axis=-1), axis=-1))[0]
+
+        # patient id
+        current_patient = case[len(folder_path):]
+        current_patient = current_patient[1:] if current_patient[0] == '[' else current_patient
+        current_patient = current_patient.split(']')[0].split('_')[0].lower()
+        if current_patient != last_patient:
+            i_patient += 1
+            last_patient = current_patient
+            print('patient %d: %s ' % (i_patient + 1, current_patient))
 
         # iterate over the annotated slices
         for i in slice_list:
@@ -97,15 +107,16 @@ def make_dataset(folder_path, im_shape, coord_sys, carts_w=512):
             # add the sample to the placeholder
             label = np.concatenate((label, tmp_label), axis=0)
 
-            # track the rows caseIDs
-            sample_caseID.append(i_case)
+            # track the rows caseID and sliceID
+            sample_caseID.append(i_patient)
+            sample_sliceID.append(i)
 
         # read the image
         if coord_sys == 'carts':
             tmp = tifffile.imread(case[:-9] + '-im.tif')
             tmp = im_fix_width(tmp, carts_w)
         elif coord_sys == 'polar':
-            tmp = tifffile.imread(case[:-9] + '.pstif')[:3, ...]
+            tmp = tifffile.imread(case[:-9] + '.pstif')
 
         # single channel vs multi channel
         if im_shape[-1] == 1:
@@ -120,7 +131,8 @@ def make_dataset(folder_path, im_shape, coord_sys, carts_w=512):
                                                            tmp.shape[2], 1), order=2, mode='reflect')
             # add the sample to the placeholder
             im = np.concatenate((im, tmp_im), axis=0)
-    return im, label, np.array(sample_caseID)
+    print('%d patients and %d pullbacks' % (i_patient + 1, len(cases)))
+    return im, label, np.array(sample_caseID), np.array(sample_sliceID)
 
 
 def load_train_data(folder_path, im_shape, coord_sys):
