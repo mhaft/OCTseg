@@ -247,6 +247,8 @@ def load_batch(im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts'
 
     """
 
+    n = len(datasetID)
+    j = np.mod(np.arange(nBatch), n)
     while True:
         j = np.random.randint(0, len(datasetID), nBatch)
         im_ = im[datasetID[j], ...].copy()
@@ -257,6 +259,7 @@ def load_batch(im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts'
         if isAug:
             im_, label_ = img_aug(im_, label_, coord_sys, 0.5)
         yield (im_, label_)
+        j = np.mod(j + nBatch, n)
 
 
 def load_batch_parallel(im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts'):
@@ -280,8 +283,9 @@ def load_batch_parallel(im, datasetID, nBatch, label=None, isAug=False, coord_sy
 
     """
 
+    n = len(datasetID)
+    j = np.mod(np.arange(nBatch), n)
     while True:
-        j = np.random.randint(0, len(datasetID), nBatch)
         im_ = im[datasetID[j], ...].copy()
         if label is not None:
             label_ = label[datasetID[j], ...].copy()
@@ -294,28 +298,31 @@ def load_batch_parallel(im, datasetID, nBatch, label=None, isAug=False, coord_sy
             for i, res in enumerate(multiple_results):
                 im_[i, ...], label_[i, ...] = res.get()
             pool.close()
-        yield (im_, label_)
+        yield (im_, [label_, np.zeros((label_.shape[0], 1))])
+        j = np.mod(j + nBatch, n)
 
 
 class LoadBatchGen(Sequence):
     """data generator class, a sub-class of  Keras' Sequence class"""
     def __init__(self, im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts', prob_lim=0.5):
-        self.im, self.label = im, label
+        self.im, self.label, self.n = im, label, len(datasetID)
         self.prob_lim = prob_lim
         self.datasetID, self.nBatch, self.isAug, self.coord_sys = datasetID, nBatch, isAug, coord_sys
-
+        self.j = np.mod(np.arange(nBatch), self.n)
+        
     def __len__(self):
         return int(np.ceil(len(self.datasetID) / self.nBatch))
 
     def __getitem__(self, item):
-        j = self.datasetID[np.random.randint(0, len(self.datasetID), self.nBatch)]
-        im_ = self.im[j, ...].copy()
+        j_ = self.datasetID[self.j]
+        im_ = self.im[j_, ...].copy()
         if self.label is not None:
-            label_ = self.label[j, ...].copy()
+            label_ = self.label[j_, ...].copy()
         else:
             label_ = None
         if self.isAug:
             im_, label_ = img_aug(im_, label_, self.coord_sys, self.prob_lim)
+        self.j = np.mod(self.j + self.nBatch, self.n)
         return im_, label_
 
 
@@ -324,32 +331,35 @@ class LoadBatchGenGPU(Sequence):
     def __init__(self, im, datasetID, nBatch, label, isAug=True, coord_sys='polar', prob_lim=0.5):
         self.prob_lim = prob_lim
         self.W, self.L = im.shape[-3:-1]
-        self.datasetID, self.nBatch, self.isAug = datasetID, nBatch, isAug
+        self.datasetID, self.nBatch, self.isAug, self.n = datasetID, nBatch, isAug, len(datasetID)
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9)
         config = tf.ConfigProto(gpu_options=gpu_options)
         config.gpu_options.allow_growth = True
         config.allow_soft_placement = True
+        self.im, self.label = im.astype('float32'), label.astype('float32')
         self.gpus = [x.name for x in device_lib.list_local_devices() if x.device_type == 'GPU']
         self.graph = tf.Graph()
+        self.nSubBatch = nBatch // len(self.gpus)
+        self.j = np.mod(np.arange(nBatch), self.n)
         with self.graph.as_default():
             self.sess = tf.Session(config=config)
-            self.im, self.label = tf.constant(im.astype('float32')), tf.constant(label.astype('float32'))
-            self.j = tf.placeholder(tf.int64, shape=[self.nBatch // len(self.gpus)])
-            self.im_ = tf.identity(tf.gather(self.im, self.j, axis=0))
-            self.label_ = tf.identity(tf.gather(self.label, self.j, axis=0))
+            self.im_ = tf.placeholder(tf.float32, shape=[None] + list(im.shape[1:]))
+            self.label_ = tf.placeholder(tf.float32, shape=[None] + list(label.shape[1:]))
             if self.isAug:
                 self.im_, self.label_ = self.polar_aug(self.im_, self.label_)
             print('Data loader is initialized.')
 
     def __len__(self):
-        return int(np.ceil(len(self.datasetID) / self.nBatch))
+        return self.n
 
     def __getitem__(self, item):
         out = []
-        for d in self.gpus:
-            with tf.device(d):
-                j_ = self.datasetID[np.random.randint(0, len(self.datasetID), self.nBatch // len(self.gpus))]
-                out.append(self.sess.run((self.im_, self.label_), feed_dict={self.j: j_}))
+        for i_gpu, gpu in enumerate(self.gpus):
+            with tf.device(gpu):
+                j_ = self.datasetID[self.j[(i_gpu * self.nSubBatch):((i_gpu + 1) * self.nSubBatch)]]
+                out.append(self.sess.run((self.im_, self.label_), feed_dict={self.im_: self.im[j_, ...],
+                                                                             self.label_: self.label[j_, ...]}))
+        self.j = np.mod(self.j + self.nBatch, self.n)
         return (np.concatenate([out[m][0] for m in range(len(self.gpus))], axis=0),
                 np.concatenate([out[m][1] for m in range(len(self.gpus))], axis=0))
 
