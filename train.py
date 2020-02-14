@@ -27,7 +27,8 @@ from keras.losses import get
 from unet.unet import unet_model
 from unet.loss import weighted_cross_entropy_with_boundary_fun
 from util.load_data import load_train_data
-from util.load_batch import load_batch_parallel, LoadBatchGen, LoadBatchGenGPU
+from util.load_batch import LoadBatchGenGPU
+from util.read_parameter_from_log_file import read_parameter_from_log_file
 
 
 def main():
@@ -75,12 +76,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-exp_def", type=str, default="test", help="experiment definition")
     parser.add_argument("-models_path", type=str, default="model/", help="path for saving models")
-    parser.add_argument("-lr", type=float, default=1e-3, help="learning rate")
+    parser.add_argument("-lr", type=float, default=1e-4, help="learning rate")
     parser.add_argument("-lr_decay", type=float, default=0.0, help="learning rate decay")
-    parser.add_argument("-data_path", type=str, default="C:\\MachineLearning\\Segmentation_NonIEL\\", help="data folder path")
+    parser.add_argument("-data_path", type=str, default="D:\\MLIntravascularPolarimetry\\MLCardioPullbacks\\",
+                        help="data folder path")
     parser.add_argument("-nEpoch", type=int, default=1000, help="number of epochs")
-    parser.add_argument("-nBatch", type=int, default=30, help="batch size")
-    parser.add_argument("-outCh", type=int, default=2, help="size of output channel")
+    parser.add_argument("-nBatch", type=int, default=10, help="batch size")
+    parser.add_argument("-outCh", type=int, default=4, help="size of output channel")
     parser.add_argument("-inCh", type=int, default=3, help="size of input channel")
     parser.add_argument("-nZ", type=int, default=1, help="size of input depth")
     parser.add_argument("-w", type=int, default=512, help="size of input width (# of columns)")
@@ -88,7 +90,8 @@ def main():
     parser.add_argument("-loss_w", type=str, default=".33, .33, .34", help="loss wights")
     parser.add_argument("-isAug", type=int, default=1, help="Is data augmentation")
     parser.add_argument("-isCarts", type=int, default=0, help="whether images should be converted into Cartesian")
-    parser.add_argument("-isTest", type=int, default=0, help="Is test run instead of train")
+    parser.add_argument("-isTest", type=int, default=0, help="Is test run instead of train. 1 when paramters are "
+                                                             "from arguments. 2 when paramters are from log file.")
     parser.add_argument("-testEpoch", type=int, default=10, help="epoch of the saved model for testing")
     parser.add_argument("-saveEpoch", type=int, default=100, help="epoch interval to save the model")
     parser.add_argument("-epochSize", type=int, default=10, help="number of samples per epoch as multiple of the "
@@ -98,19 +101,44 @@ def main():
     parser.add_argument("-gpu_id", type=str, default="*", help="ID of GPUs to be used. Use * for all and '' for none.")
     parser.add_argument("-optimizer", type=str, default="RMSprop", help="optimizer")
 
+    # assign the first part of args. The second part will ba assigned after reading parameter from log file
     args = parser.parse_args()
     experiment_def = args.exp_def
+    isTest = args.isTest
+    isTrain = 0 if args.isTest else 1
+    models_path = args.models_path
+
+    # prepare a folder for the saved models and log file
+    if not os.path.exists(models_path + experiment_def):
+        os.makedirs(models_path + experiment_def)
+    save_file_name = models_path + experiment_def + '/model-epoch%06d.h5'
+    log_file = models_path + experiment_def + '/log-' + experiment_def + '.csv'
+
+    # read parameter from log file
+    if args.isTest == 2:
+        args = read_parameter_from_log_file(args, log_file)
+
+    # assign the second part of args
     folder_path = args.data_path
     nEpoch = args.nEpoch
     nBatch = args.nBatch
     im_shape = (args.nZ, args.l, args.w, args.inCh)
     outCh = args.outCh
-    isTest = args.isTest
-    models_path = args.models_path
-    loss_weight = np.array([float(i) for i in args.loss_w.split(',')])
-    loss_weight = loss_weight / np.linalg.norm(loss_weight)
+    loss_weight = np.array([float(i) for i in args.loss_w.split(',')], dtype='float32')
+    loss_weight = loss_weight / np.sum(loss_weight)
     coord_sys = 'carts' if args.isCarts else 'polar'
-    isTrain = 1 - args.isTest
+
+    # initialize the log file or update the parameters
+    if isTrain:
+        if os.path.exists(log_file):
+            with open(log_file, 'r') as f:
+                L = f.readlines()
+            L[0] = 'epoch, Time (hr), Train_Loss, Valid_Loss, ' + str(args) + '\n'
+            with open(log_file, 'w') as f:
+                f.writelines(L)
+        else:
+            with open(log_file, 'w') as f:
+                f.write('epoch, Time (hr), Train_Loss, Valid_Loss, ' + str(args) + '\n')
 
     # GPU settings
     if '-' in args.gpu_id:
