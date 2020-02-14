@@ -25,7 +25,7 @@ from keras import backend as K
 from keras.losses import get
 
 from unet.unet import unet_model
-from unet.loss import weighted_cross_entropy_with_boundary_fun
+from unet.loss import multi_loss
 from util.load_data import load_train_data
 from util.load_batch import LoadBatchGenGPU
 from util.read_parameter_from_log_file import read_parameter_from_log_file
@@ -87,7 +87,7 @@ def main():
     parser.add_argument("-nZ", type=int, default=1, help="size of input depth")
     parser.add_argument("-w", type=int, default=512, help="size of input width (# of columns)")
     parser.add_argument("-l", type=int, default=512, help="size of input Length (# of rows)")
-    parser.add_argument("-loss_w", type=str, default=".33, .33, .34", help="loss wights")
+    parser.add_argument("-loss_w", type=str, default="1, 1, 1, 1, 1, 1", help="loss wights")
     parser.add_argument("-isAug", type=int, default=1, help="Is data augmentation")
     parser.add_argument("-isCarts", type=int, default=0, help="whether images should be converted into Cartesian")
     parser.add_argument("-isTest", type=int, default=0, help="Is test run instead of train. 1 when paramters are "
@@ -190,68 +190,31 @@ def main():
 
     optimizer = getattr(optimizers, args.optimizer)
     model.compile(optimizer=optimizer(lr=args.lr, decay=args.lr_decay),
-                  loss=get(weighted_cross_entropy_with_boundary_fun(loss_weight)))
-
+                  loss=get(multi_loss(loss_weight)))
 
     # load data
     data_file = os.path.join(folder_path, 'Dataset ' + coord_sys + ' Z%d-L%d-W%d-C%d.h5' % im_shape)
     if os.path.exists(data_file):
         with h5py.File(data_file, 'r') as f:
-            im, label, train_data_id, test_data_id, valid_data_id, sample_caseID = np.array(f.get('/im')), \
-                np.array(f.get('/label')), np.array(f.get('/train_data_id')),  np.array(f.get('/test_data_id')), \
-                np.array(f.get('/valid_data_id')), np.array(f.get('/sample_caseID'))
+            im, label_9class, train_data_id, test_data_id, valid_data_id, sample_caseID, sample_sliceID = \
+                np.array(f.get('/im')), np.array(f.get('/label')), np.array(f.get('/train_data_id')), \
+                np.array(f.get('/test_data_id')), np.array(f.get('/valid_data_id')), \
+                np.array(f.get('/sample_caseID')), np.array(f.get('/sample_sliceID'))
     else:
-        im, label, train_data_id, test_data_id, valid_data_id, sample_caseID = \
-            load_train_data(folder_path, im_shape, coord_sys)
-        with h5py.File(data_file, 'w') as f:
-            f.create_dataset('im', data=im)
-            f.create_dataset('label', data=label)
-            f.create_dataset('train_data_id', data=train_data_id)
-            f.create_dataset('test_data_id', data=test_data_id)
-            f.create_dataset('valid_data_id', data=valid_data_id)
-            f.create_dataset('sample_caseID', data=sample_caseID)
+        im, label_9class, train_data_id, test_data_id, valid_data_id, sample_caseID, sample_sliceID = \
+            load_train_data(folder_path, im_shape, coord_sys, saveOutput=True)
 
     # labels and masks
     # Todo: add an input method for classes and masks
-    # Intima layer
-    loss_mask_classes = [0, 1]
-    classes = [
-        [[0, 1, 2, 4], []],
-        [[3], [0]],
-    ]
+    label = np.zeros(label_9class.shape[:-1] + (outCh,))
+    # 4 channel: Ch1: Lumen - GW , Ch2: visible intima ,  Ch3: visible media ,
+    #            Ch0: others ,  note visible is without GW and nonIEL
+    nonIEL_GW_mask = np.logical_not(np.logical_or(label_9class[..., 0], label_9class[..., 1]))
+    label[..., 1] = label_9class[..., 2]
+    label[..., 2] = np.logical_and(label_9class[..., 3], nonIEL_GW_mask)
+    label[..., 3] = np.logical_and(label_9class[..., 4], nonIEL_GW_mask)
+    label[..., 0] = np.all(np.logical_not(label[..., 1:]), axis=-1)
 
-    # # Multi class
-    # loss_mask_classes = []
-    # classes = [
-    #     [[1], [0, 2]],
-    #     [[0], []],
-    #     [[2], [0]],
-    #     [[3], [0, 1]],
-    # ]
-
-    # # media
-    # loss_mask_classes = []
-    # classes = [
-    #     [[0, 1, 2, 3], []],
-    #     [[4], [0, 1]],
-    # ]
-
-    label_9class = label
-    if loss_mask_classes:
-        loss_mask = np.any(label_9class[..., loss_mask_classes], -1)
-    else:
-        loss_mask = np.zeros(label_9class.shape[:-1], dtype=np.bool)
-    label = np.zeros(label.shape[:-1] + (len(classes),))
-    label[..., 0] = np.all(np.logical_not(label_9class), axis=-1)
-    for i in range(len(classes)):
-        tmp = label[..., i]
-        for j in range(len(classes[i][0])):
-            tmp = np.logical_or(tmp, label_9class[..., classes[i][0][j]])
-        for j in range(len(classes[i][1])):
-            tmp = np.logical_and(tmp, np.logical_not(label_9class[..., classes[i][1][j]]))
-        tmp = tmp.astype('float32')
-        tmp[loss_mask] = 2
-        label[..., i] = tmp
 
     # training
     if isTrain:
