@@ -157,12 +157,12 @@ def mask_boundary_neighborhood(label, r=5):
 
 
 def weighted_categorical_crossentropy(loss_weight):
-        """ weighted categorical crossentropy
+    """ weighted categorical crossentropy
 
-        Args:
-             loss_weight: a list with three weights for all pixels outside the mask, foreground, and pixels close to the
-                            boundary, respectively.
-        """
+    Args:
+         loss_weight: a list with three weights for all pixels outside the mask, foreground, and pixels close to the
+                        boundary, respectively.
+    """
     loss_weight = tf.Variable(np.array(loss_weight).astype('float32'))
 
     def weighted_categorical_crossentropy_(label, target):
