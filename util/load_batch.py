@@ -219,7 +219,7 @@ def polar_zoom(im, scale, order=1):
     idx = np.clip(np.floor(idx), 0, w - 1).astype(np.int64)
     idx2 = np.clip(idx + 1, 0, w - 1)
     if order == 0:
-        idx = np.select(a.squeeze() < 0.5, idx, idx2)
+        idx = np.select([a.squeeze() < 0.5, a.squeeze() >= 0.5], [idx, idx2])
         out = im[..., idx, :, :]
     else:
         out = (1 - a) * im[..., idx, :, :] + a * im[..., idx2, :, :]
