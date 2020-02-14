@@ -91,10 +91,11 @@ def main():
     parser.add_argument("-isTest", type=int, default=0, help="Is test run instead of train")
     parser.add_argument("-testEpoch", type=int, default=10, help="epoch of the saved model for testing")
     parser.add_argument("-saveEpoch", type=int, default=100, help="epoch interval to save the model")
-    parser.add_argument("-epochSize", type=int, default=100, help="number of samples per epoch")
-    parser.add_argument("-nFeature", type=int, default=5, help="number of features in the first layer")
-    parser.add_argument("-nLayer", type=int, default=1, help="number of layers in the U-Nnet model")
-    parser.add_argument("-gpu_id", type=str, default="0,1", help="ID of GPUs to be used")
+    parser.add_argument("-epochSize", type=int, default=10, help="number of samples per epoch as multiple of the "
+                                                                 "training dataset size")
+    parser.add_argument("-nFeature", type=int, default=64, help="number of features in the first layer")
+    parser.add_argument("-nLayer", type=int, default=8, help="number of layers in the U-Net model")
+    parser.add_argument("-gpu_id", type=str, default="*", help="ID of GPUs to be used. Use * for all and '' for none.")
     parser.add_argument("-optimizer", type=str, default="RMSprop", help="optimizer")
 
     args = parser.parse_args()
@@ -232,7 +233,12 @@ def main():
 
     # training
     if isTrain:
-        train_data_gen = LoadBatchGenGPU(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys)
+        train_data_gen = LoadBatchGenGPU(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys,
+                                      prob_lim=0.5)
+        if args.epochSize == 0:
+            args.epochSize = np.ceil(train_data_id.size / nBatch).astype('int')
+        else:
+            args.epochSize = np.ceil(args.epochSize * train_data_id.size / nBatch).astype('int')
         print('Data is loaded. Training: %d, validation: %d' % (len(np.unique(sample_caseID[train_data_id])),
                                                                 len(np.unique(sample_caseID[valid_data_id]))))
 
