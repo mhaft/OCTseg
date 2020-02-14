@@ -266,8 +266,11 @@ def main():
         i = int(out.shape[1] // 2)
         label, out, im = label[:, i, ...].squeeze(), out[:, i, ...].squeeze(), im[:, i, ...].squeeze()
 
-    # double the label intensity of the training slices
-    label[train_data_id, ...] *= 2
+    # set the label intensity of the training slices background to the number of classes, which is one more than
+    # the last class value
+    i = label[train_data_id, ...]
+    i[i == 0] = outCh
+    label[train_data_id, ...] = i
 
     # write files
     tifffile.imwrite(models_path + experiment_def + '/a-label.tif', label[train_valid_data_id, ...].astype(np.uint8))
