@@ -37,7 +37,8 @@ def dice_loss(label, target):
          dice loss
 
     """
-    target = tf.nn.softmax(target)
+    eps = 1e-6
+    target = tf.clip_by_value(tf.nn.softmax(target), eps, 1 - eps)
     target, label = target[..., 1:], label[..., 1:]
     yy = tf.multiply(target, target)
     ll = tf.multiply(label, label)
