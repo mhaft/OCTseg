@@ -8,6 +8,7 @@
 """CNN related loss functions"""
 
 import tensorflow as tf
+import numpy as np
 
 
 def dice_loss(label, target):
@@ -66,7 +67,7 @@ def weighted_cross_entropy_fun(loss_weight):
     return weighted_cross_entropy
 
 
-def multi_loss_fun(loss_weight):
+def multi_loss(loss_weight):
     """Semantic loss function based on the weighted cross entropy and dice and wighted by the loss weights in the input
     argument
 
@@ -82,21 +83,30 @@ def multi_loss_fun(loss_weight):
         * :meth:`dice_loss`
 
     """
+    loss_weight = np.array(loss_weight)
 
-    def multi_loss(label, target):
+    def multi_loss_(label, target):
         shape = label.get_shape()
-        if len(shape) == 5 and shape[1].value is not None:
+        numClass = len(shape)
+        # just evaluate at the center slice in 3D inputs
+        if numClass == 5 and shape[1].value is not None:
             i = shape[1].value // 2
             label, target = label[:, i, ...], target[:, i, ...]
-        if loss_weight[0] == 0:
+        if loss_weight[0] != 0 and loss_weight.size < numClass:
+            print('Loss weight size is less than the number of class. Got %d and %d. Dice loss is selected.' %
+                  (loss_weight.size, numClass))
             return dice_loss(label, target)
-        elif loss_weight[2] == 0:
-            return weighted_cross_entropy_fun(loss_weight[1])(label, target)
+        elif loss_weight.size == numClass:
+            return weighted_cross_entropy_fun(loss_weight)(label, target)
+        elif loss_weight.size == numClass + 1:
+            return weighted_cross_entropy_with_boundary(loss_weight)(label, target)
+        elif loss_weight.size == numClass + 2:
+            return weighted_cross_entropy_with_boundary(loss_weight[:-1])(label, target) + \
+                   loss_weight[-1] * dice_loss(label, target)
         else:
-            return loss_weight[0] * weighted_cross_entropy_fun(loss_weight[1])(label, target) + \
-                   loss_weight[2] * dice_loss(label, target)
+            raise Exception('Loss weight has too many elements. Got %d' % loss_weight.size)
 
-    return multi_loss
+    return multi_loss_
 
 
 def weighted_cross_entropy_with_boundary(loss_weight, boundary_r=10):
