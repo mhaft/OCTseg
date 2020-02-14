@@ -43,8 +43,10 @@ def dice_loss(label, target):
     yy = tf.multiply(target, target)
     ll = tf.multiply(label, label)
     yl = tf.multiply(target, label)
-    #
-    return 1 - (2 * tf.reduce_sum(yl) + 1) / (tf.reduce_sum(ll) + tf.reduce_sum(yy) + 1)
+    axis_ = tf.range(1, tf.rank(label) - 1)
+    return tf.reduce_mean(1 - (2 * tf.reduce_sum(yl, axis=axis_, keepdims=True)) /
+                              (tf.reduce_sum(ll, axis=axis_, keepdims=True) +
+                               tf.reduce_sum(yy, axis=axis_, keepdims=True) + eps), axis=-1)
 
 
 def weighted_cross_entropy_fun(loss_weight):
