@@ -29,7 +29,7 @@ class TestPolar2cartesian:
         # r0 arg
         im_polar = np.zeros((10, 10))
         im_cartesian = polar2cartesian(im_polar, r0=5)
-        np.testing.assert_array_equal(im_cartesian.shape, [10, 10])
+        np.testing.assert_array_equal(im_cartesian.shape, [20, 20])
         # full arg
         im_polar = np.zeros((10, 10))
         im_cartesian = polar2cartesian(im_polar, full=False)
@@ -37,7 +37,7 @@ class TestPolar2cartesian:
         # negative radius
         im_polar = np.zeros((10, 10))
         im_cartesian = polar2cartesian(im_polar, r0=-2)
-        np.testing.assert_array_equal(im_cartesian.shape, [24, 24])
+        np.testing.assert_array_equal(im_cartesian.shape, [20, 20])
         # scale
         im_polar = np.zeros((10, 10))
         im_cartesian = polar2cartesian(im_polar, scale=0.25)

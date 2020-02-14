@@ -15,4 +15,7 @@ from ...util.process_oct_folder import process_oct_folder
 
 
 def test_process_oct_folder():
-    process_oct_folder(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', ''))
+    file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', '')
+    process_oct_folder(file_path)
+    os.remove(os.path.join(file_path, 'test_read_oct_roi_file-SegC.tif'))
+    os.remove(os.path.join(file_path, 'test_read_oct_roi_file-SegP.tif'))
