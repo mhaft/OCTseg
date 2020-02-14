@@ -27,8 +27,11 @@
     """
 
 import argparse
-
+import time
+import os
 import csv
+
+import visdom
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -91,20 +94,71 @@ def animate(i):
         pass
 
 
+def animate_vis():
+    """ a handle function to update at each ste
+
+    Args:
+        iEpoch: animation frame.  The argument will be used by :meth: animation.FuncAnimation
+
+    Returns:
+        updated axes within the figure, which all are defined in the outer scope.
+
+    See Also:
+        * :meth: animation.FuncAnimation
+
+    """
+    global numRecord
+    try:
+        with open(log_file, 'r') as f:
+            reader = csv.reader(f, delimiter=',', skipinitialspace=True)
+            _ = next(reader)  # header
+            data = []
+            for row in reader:
+                data.append([float(i) for i in row[:4]])
+
+        if len(data) != numRecord:
+            numRecord = len(data)
+            data = np.array(data)
+            iStart = 0
+            vis.line(Y=np.concatenate((smooth(data[iStart:, 2])[..., np.newaxis],
+                                      smooth(data[iStart:, 3])[..., np.newaxis]), axis=-1), X=data[iStart:, 0],
+                     env='main', win=args.exp_def, opts=dict(title=args.exp_def, xlabel='Epoch', ylabel='Loss',
+                                                             legend=['Training Loss', 'Validation Loss']))
+            iStart = -50 if data.shape[0] > 50 else 0
+            vis.line(Y=np.concatenate(((data[iStart:, 2] / data[iStart, 2])[..., np.newaxis],
+                                       (data[iStart:, 3] / data[iStart, 3])[..., np.newaxis]), axis=-1),
+                     X=data[iStart:, 0],
+                     env='main', win=args.exp_def+'-zoom', opts=dict(title=args.exp_def+' zoom', xlabel='Epoch',
+                                                                 ylabel='Loss',
+                                                             legend=['Training Loss', 'Validation Loss']))
+    except:
+        pass
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-exp_def", type=str, default="test", help="experiment definition")
     parser.add_argument("-models_path", type=str, default="../model/", help="path for saving models")
+    parser.add_argument("-render", type=str, default="visdom", help="plot environment: visdom (v) or pyplot (p)")
     args = parser.parse_args()
     log_file = args.models_path + args.exp_def + '/log-' + args.exp_def + '.csv'
-
-    fig = plt.figure()
-    ax1 = fig.add_subplot(2, 1, 1)
-    ax2 = fig.add_subplot(2, 1, 2)
-
+    nGPU = len(os.popen('nvidia-smi').read().split('+\n')) - 5
     numRecord = 0
-    animate(-1)
-    ani = animation.FuncAnimation(fig, animate, interval=5000)
-    plt.show()
+    if args.render[0].lower() == 'v':
+        vis = visdom.Visdom(env='main')
+        while True:
+            animate_vis()
+            smi = '<p style="color:blue;font-family:monospace;font-size:80%;">' + \
+                  '<br>'.join(os.popen('nvidia-smi').read().split('\n')[3:(7 + 3 * nGPU)]) + '</p>'
+            vis.text(smi, win='nvidia-smi')
+            time.sleep(5)
+    else:
+        fig = plt.figure()
+        ax1 = fig.add_subplot(2, 1, 1)
+        ax2 = fig.add_subplot(2, 1, 2)
+
+        animate(-1)
+        ani = animation.FuncAnimation(fig, animate, interval=5000)
+        plt.show()
 
 
