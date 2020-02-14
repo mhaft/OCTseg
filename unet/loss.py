@@ -99,14 +99,15 @@ def multi_loss_fun(loss_weight):
     return multi_loss
 
 
-def weighted_cross_entropy_with_boundary_fun(loss_weight):
-    """Weighted cross entropy with foreground pixels having ten times higher weights
+def weighted_cross_entropy_with_boundary(loss_weight, boundary_r=10):
+    """Weighted cross entropy with foreground and boundaries pixels having  higher weights
 
      Args:
-         loss_weight: a list with three weights for all pixels outside the mask, foreground, and pixels close to the
-                        boundary, respectively.
+         loss_weight: a list with of weights with length equal to the total number of classes plus one. The last
+                      value is the loss weight fot the boundary and other elements are classes weights
          label: 4D or 5D label tensor
          target: 4D or 5D target tensor
+         boundary_r: radius of boundary considered for the higher loss values
 
      returns:
          weighted cross entropy value
@@ -116,28 +117,21 @@ def weighted_cross_entropy_with_boundary_fun(loss_weight):
 
      """
 
-    def weighted_cross_entropy_with_boundary(label, target):
-        dist_mask = mask_boundary_neighborhood(label, r=10)
-        # dist_mask = dist_mask * tf.cast(tf.size(dist_mask), dtype=tf.float32) / tf.reduce_sum(dist_mask) # normalize
-        mask = tf.cast(tf.logical_not(tf.reduce_any(tf.math.equal(label[..., 1:], 2), axis=-1, keepdims=True)),
-                       dtype=tf.float32)
-        label2 = tf.multiply(label, mask)
-        target2 = tf.multiply(target, mask)
-        mask = mask * tf.cast(tf.size(mask), dtype=tf.float32) / tf.reduce_sum(mask)
-        cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=label2, logits=target2)
-        nonTN = tf.cast(tf.logical_or(tf.reduce_any(tf.math.equal(label[..., 1:], 1), axis=-1),
-                                      tf.math.greater(tf.argmax(target2, axis=-1), 0)), dtype=tf.float32)
-        loss = (loss_weight[0] + loss_weight[1] * nonTN + loss_weight[2] * dist_mask[..., -1])
-        return tf.multiply(cross_entropy, tf.multiply(mask[..., 0], loss))
+    def weighted_cross_entropy_with_boundary_(label, target):
+        with tf.name_scope('wCEb'):
+            dist_mask = mask_boundary_neighborhood(label, r=boundary_r, numClass=(loss_weight.size - 1))
+            cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=label, logits=target)
+        return (tf.multiply(cross_entropy, dist_mask) * loss_weight[-1]) + \
+                weighted_categorical_crossentropy(loss_weight[:-1])(label, target)
 
-    return weighted_cross_entropy_with_boundary
+    return weighted_cross_entropy_with_boundary_
 
 
-def mask_boundary_neighborhood(label, r=5):
+def mask_boundary_neighborhood(label, r=5, numClass=2):
     """ mask the neighborhood of the boundary between foreground and background.
 
     Args:
-        label: input label
+        label: input label_
         r: neighborhood radius
 
     Returns:
@@ -147,13 +141,24 @@ def mask_boundary_neighborhood(label, r=5):
          * :meth:`weighted_cross_entropy_with_boundary`
 
     """
-    fg = tf.reduce_any(tf.math.equal(label[..., 1:], 1), axis=-1, keepdims=True)
-    if tf.rank(fg) == 3:
-        tf.expand_dims(fg, axis=-1)
-    bg = tf.logical_not(fg)
-    before = tf.logical_xor(tf.nn.conv2d(tf.cast(bg, tf.float32), filter=tf.ones([r, r, 1, 1]), padding="SAME") > 0, bg)
-    after = tf.logical_xor(tf.nn.conv2d(tf.cast(fg, tf.float32), filter=tf.ones([r, r, 1, 1]), padding="SAME") > 0, fg)
-    return tf.cast(tf.logical_or(before, after), tf.float32)
+
+    def mask_boundary_neighborhood_(label_, class_id):
+        fg = label_[..., class_id:(class_id + 1)] > 0
+        if tf.rank(fg) == 3:
+            tf.expand_dims(fg, axis=-1)
+        bg = tf.logical_not(fg)
+        before = tf.logical_xor(tf.nn.conv2d(tf.cast(bg, tf.float32),
+                                             filter=tf.ones([r, 1, 1, 1]), padding="SAME") > 0, bg)
+        after = tf.logical_xor(tf.nn.conv2d(tf.cast(fg, tf.float32),
+                                            filter=tf.ones([r, 1, 1, 1]), padding="SAME") > 0, fg)
+        return tf.logical_or(before, after)
+
+    out = mask_boundary_neighborhood_(label, 1)
+    out = tf.logical_or(out, mask_boundary_neighborhood_(label, 2))
+    out = tf.logical_or(out, mask_boundary_neighborhood_(label, 3))
+    out = tf.cast(out[..., 0], tf.float32)
+    out = out * tf.cast(tf.size(out), dtype=tf.float32) / tf.reduce_sum(out)  # normalize
+    return out
 
 
 def weighted_categorical_crossentropy(loss_weight):
