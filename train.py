@@ -113,26 +113,20 @@ def main():
     isTrain = 1 - args.isTest
 
     # GPU settings
+    if '-' in args.gpu_id:
+        numGPU = args.gpu_id.split('-')
+        numGPU = int(numGPU[1]) - int(numGPU[0]) + 1
+    elif '*' in args.gpu_id:
+        numGPU = len(os.popen('nvidia-smi').read().split('+\n')) - 5
+        args.gpu_id = ','.join([str(i) for i in range(numGPU)])
+    else:
+        numGPU = len(args.gpu_id.split(','))
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9)
     config = tf.ConfigProto(gpu_options=gpu_options)
     config.gpu_options.allow_growth = True
     config.allow_soft_placement = True
     set_session(tf.Session(config=config))
-    if '-' in args.gpu_id:
-        numGPU = args.gpu_id.split('-')
-        numGPU = int(numGPU[1]) - int(numGPU[0]) + 1
-    else:
-        numGPU = len(args.gpu_id.split(','))
-
-    # prepare a folder for the saved models and log file
-    if not os.path.exists(models_path + experiment_def):
-        os.makedirs(models_path + experiment_def)
-    save_file_name = models_path + experiment_def + '/model-epoch%06d.h5'
-    log_file = models_path + experiment_def + '/log-' + experiment_def + '.csv'
-    if isTrain and not os.path.exists(log_file):
-        with open(log_file, 'w') as f:
-            f.write('epoch, Time (hr), Train_Loss, Valid_Loss, ' + str(args) + '\n')
 
     # build the model
     model_template = unet_model(im_shape, nFeature=args.nFeature, outCh=outCh, nLayer=args.nLayer)
