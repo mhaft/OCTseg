@@ -62,8 +62,7 @@ def weighted_cross_entropy_fun(loss_weight):
 
     """
     def weighted_cross_entropy(label, target):
-        return tf.reduce_mean(tf.nn.weighted_cross_entropy_with_logits(labels=label, logits=target,
-                                                                       pos_weight=loss_weight))
+        return tf.nn.weighted_cross_entropy_with_logits(labels=label, logits=target, pos_weight=loss_weight)
     return weighted_cross_entropy
 
 
