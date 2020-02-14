@@ -71,60 +71,74 @@ if __name__ == "__main__":
     parser.add_argument("-useMask", type=int, default=0, help="use guide wire and nonIEL masks")
     args = parser.parse_args()
 
-    label = tifffile.imread(args.models_path + args.exp_def + '/a-label.tif')
-    target = tifffile.imread(args.models_path + args.exp_def + '/a-out-epoch%06d.tif' % args.epoch)
     log_file = args.models_path + args.exp_def + '/log-' + args.exp_def + '.csv'
-
     with open(log_file) as fp:
         line = fp.readline().split(',')
     for x in line:
-        if x.startswith(" Namespace(data_path="):
-            dataset_path = x[22:-1]
-        elif x.startswith(" l="):
-            L = int(x[3:])
-        elif x.startswith(" w="):
-            w = int(x[3:-2])
-        elif x.startswith(" inCh="):
-            inCh = int(x[6:])
-        elif x.startswith(" nZ="):
-            nZ = int(x[4:])
-        elif x.startswith(" isCarts="):
-            isCarts = int(x[9:])
+        x = x.strip(' \t\n\r)')
+        if x.startswith("Namespace"):
+            x = x[10:]
+        if x.startswith("data_path="):
+            dataset_path = x[11:-1]
+        elif x.startswith("l="):
+            L = int(x[2:])
+        elif x.startswith("w="):
+            w = int(x[2:])
+        elif x.startswith("inCh="):
+            inCh = int(x[5:])
+        elif x.startswith("nZ="):
+            nZ = int(x[3:])
+        elif x.startswith("outCh="):
+            outCh = int(x[6:])
+        elif x.startswith("isCarts="):
+            isCarts = int(x[8:])
             coord_sys = 'carts' if isCarts else 'polar'
+
+    label = np.mod(tifffile.imread(args.models_path + args.exp_def + '/a-label.tif'), outCh)
+    target = tifffile.imread(args.models_path + args.exp_def + '/a-out-epoch%06d.tif' % args.epoch)
 
     data_file = os.path.join(dataset_path, 'Dataset ' + coord_sys + ' Z%d-L%d-W%d-C%d.h5' % (nZ, L, w, inCh))
     report_file = '../model/confusion_matrix.csv'
 
-    with h5py.File(data_file) as f:
+    with h5py.File(data_file, 'r') as f:
         train_data_id = np.array(f.get('/train_data_id'))
         valid_data_id = np.array(f.get('/valid_data_id'))
-        mask = np.array(f.get('/label')) > 0
-        if len(mask.shape) > 4:
-            mask = mask[:, mask.shape[1]//2, ...]
         if args.useMask:
+            mask = np.array(f.get('/label')) > 0
+            if len(mask.shape) > 4:
+                mask = mask[:, mask.shape[1]//2, ...]
             mask = np.logical_not(np.logical_or(mask[..., 0], mask[..., 1]))
         else:
-            mask = np.ones(mask.shape[:-1])
+            mask = 1
 
         isTrain = []
         for i in np.union1d(train_data_id, valid_data_id):
             isTrain.append(True if i in train_data_id else False)
 
-    train_confusion_matrix = confusion_matrix(label[isTrain, ...], target[isTrain, ...], mask[train_data_id, ...])
-    valid_confusion_matrix = confusion_matrix(label[np.logical_not(isTrain), ...],
-                                              target[np.logical_not(isTrain), ...], mask[valid_data_id, ...])
-
+    classes = [1] if outCh == 2 else range(outCh)
     if not os.path.exists(report_file):
         with open(report_file, 'w') as f:
             f.write('Model, Epoch, ' +
-                    'Train TP, TN, FP, FN, TPR, TNR, Acc, Dice, ' +
-                    'Valid TP, TN, FP, FN, TPR, TNR, Acc, Dice \n')
+                    (('Class %d Train TP, TN, FP, FN, TPR, TNR, Acc, Dice, ' +
+                     'Valid TP, TN, FP, FN, TPR, TNR, Acc, Dice, ') * len(classes)) % tuple(classes) + '\n')
 
     with open(report_file, 'a') as f:
-        f.write(('%s, %d' + 4 * ', %d' + 4 * ', %f' + 4 * ', %d' + 4 * ', %f' + '\n') % ((args.exp_def, args.epoch, ) +
-                train_confusion_matrix + valid_confusion_matrix))
+        f.write('%s, %d' % (args.exp_def, args.epoch,))
 
-    print('Summ.\t' + 4 * '%s\t' % ('TPR', 'TNR', 'Acc', 'Dice'))
-    print('Train\t' + 4 * '%.2f\t' % train_confusion_matrix[-4:])
-    print('Valid\t' + 4 * '%.2f\t' % valid_confusion_matrix[-4:])
+    for i_class in classes:
+        train_confusion_matrix = confusion_matrix(label[isTrain, ...] == i_class,
+                                                  target[isTrain, ...] == i_class, mask)
+        valid_confusion_matrix = confusion_matrix(label[np.logical_not(isTrain), ...] == i_class,
+                                                  target[np.logical_not(isTrain), ...] == i_class, mask)
+
+        with open(report_file, 'a') as f:
+            f.write((4 * ', %d' + 4 * ', %f' + 4 * ', %d' + 4 * ', %f') %
+                    (train_confusion_matrix + valid_confusion_matrix))
+
+        print('Summ.\t' + 4 * '%s\t' % ('TPR', 'TNR', 'Acc', 'Dice') + '\tClass %d' % i_class)
+        print('Train\t' + 4 * '%.2f\t' % train_confusion_matrix[-4:])
+        print('Valid\t' + 4 * '%.2f\t' % valid_confusion_matrix[-4:])
+
+    with open(report_file, 'a') as f:
+        f.write('\n')
     print('Saved in %s' % report_file)
