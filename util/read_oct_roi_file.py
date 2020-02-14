@@ -59,15 +59,16 @@ def roi_file_parser(file_path):
         * :meth:`read_oct_roi_file`
 
     """
-    obj_list, last_row, last_case = {'lumen': [], 'iel': [], 'eel': [], 'gw': [], 'noniel': []}, [''], ''
+    obj_list, last_row, last_case = {'lumen': [], 'iel': [], 'eel': [], 'gw': [], 'noniel': []}, [[''], ['']], ''
     lumen_label = ['lumen', 'fibro-fatty', 'fibrous', 'fc', 'fa', 'normal']
     gw_label = ['exclude', 'gw']
     ignore_label = ['', 'calcification', 'cap', 'calcium']
     with open(file_path, 'r') as f:
         reader = csv.reader(f, delimiter='\t')
-        for row in reader:
+        angle_label_balance = 0
+        for i_row, row in enumerate(reader, 1):
             if len(row) > 4 and row[4] != '':
-                row[4] = row[4].lower()
+                row[4] = row[4].lower().strip()
                 if row[4] in ['eel', 'iel', 'noniel']:
                     last_case = row[4]
                 elif row[4] in gw_label:
@@ -77,11 +78,32 @@ def roi_file_parser(file_path):
                 elif row[4] in ignore_label:
                     last_case = ''
                 else:
-                    raise Exception('unknown label %s was found in the file %s' % (row[4], file_path))
+                    raise Exception('Unknown label %s was found in the Line %d of file %s' % (row[4], i_row, file_path))
                 if last_case != '':
                     obj_list[last_case].append([])
+                if row[0] == 'Angle':
+                    angle_label_balance += 3
+            if row[0] in ['Line']:
+                raise Exception('Unknown object %s was found in the Line %d of file %s' % (row[0], i_row, file_path))
+            if i_row > 1 and last_row[0] != row[0] and (len(row) < 5 or row[4] == '') and \
+                    (row[0] not in ['closed', 'open']):
+                raise Exception('No label was found in the Line %d of file %s' % (i_row, file_path))
+            last_row = row
+            if row[0] == 'Angle':
+                angle_label_balance -= 1
+                if angle_label_balance < 0:
+                    raise Exception('The angle object has a missing label in the Line %d of file %s' %
+                                    (i_row, file_path))
             if last_case != '' and row[0] != 'closed' and row[0] != 'open':
                 obj_list[last_case][-1].append([float(i) for i in row[1:4]])
+            if last_case != '' and (row[0] == 'closed' or row[0] == 'open'):
+                # TODO if there is real close this has to be changed to just for closed cases
+                obj_list[last_case][-1].append(obj_list[last_case][-1][0])
+    # n = len(obj_list['lumen'])
+    # if len(obj_list['iel']) != n or len(obj_list['eel']) != n or len(obj_list['gw']) != n:
+    #     raise Warning('There are same number of lumen (%d), IEL (%d), EEL (%d), and GW (%d) in this file (note there '
+    #                   'is %d nonIEL): %s' % (len(obj_list['lumen']), len(obj_list['iel']), len(obj_list['eel']),
+    #                                          len(obj_list['gw']), len(obj_list['noniel']), file_path))
     return obj_list
 
 
@@ -104,44 +126,43 @@ def boundary_mask(obj_list, im_shape):
         * :meth:`read_oct_roi_file`
 
     """
-    out = np.zeros(im_shape[-2:], dtype='bool')
+    numPoint = len(obj_list)
+    out = np.zeros(im_shape[-2:], dtype='int')
     # corner case for a boundary with less than three point.
-    if len(obj_list) < 2:
+    if numPoint < 2:
         return out
 
     # match 1-index to 0-index
     obj_list = np.array(obj_list) - 1
 
-    # the boundary within [0, 2 pi] is copied to [- 2pi, 0] and [2 pi, 4 pi]
-    obj_list = np.concatenate((obj_list - [0, im_shape[-1], 0], obj_list, obj_list +
-                               [0, im_shape[-1], 0]), axis=0)
-
     # polar coordinate of each anchor point
     r, a = obj_list[:, 0],  obj_list[:, 1] * (2 * np.pi / im_shape[-1])
 
-    # minimum distance needed between interpolated points between consecutive pairs of anchor points
-    min_arc_dist = 1.0 / np.max((r[:-1] + r[1:]) / 2 * np.abs(a[:-1] - a[1:]) + 1)
+    # minimum number of points needed between consecutive pairs of anchor points
+    min_arc_point = np.ceil(np.max((r[:-1] + r[1:]) / 2 * np.abs(a[:-1] - a[1:]))).astype(dtype='int') + 1
 
     # cartesian coordinates of the anchor points
     x, y = r * np.cos(a), r * np.sin(a)
 
-    # rank order of the anchor points with 0 for the first recorder anchor point and -1 is the last anchor point but
-    # copied to the [- 2 pi, 0] span.
-    idx = np.arange(obj_list.shape[0]) - obj_list.shape[0] // 3
+    # rank order of the anchor points
+    idx = np.arange(numPoint)
 
     # interpolation along the path
     fx = interp1d(idx, x, kind='quadratic')
     fy = interp1d(idx, y, kind='quadratic')
-    x_ = fx(np.arange(0, obj_list.shape[0] // 3 + 1, min_arc_dist))
-    y_ = fy(np.arange(0, obj_list.shape[0] // 3 + 1, min_arc_dist))
+    x_ = fx(np.linspace(0, numPoint - 1, num=min_arc_point * numPoint))
+    y_ = fy(np.linspace(0, numPoint - 1, num=min_arc_point * numPoint))
     r_ = np.round(np.sqrt(x_ ** 2 + y_ ** 2)).clip(0, im_shape[-2] - 1).astype('int')
     a_ = np.round((np.arctan2(- y_, - x_) / 2 / np.pi + 0.5) * im_shape[-1]).clip(0, im_shape[-1] - 1).astype('int')
+    i = np.concatenate(([True], a_[:-2] != a_[1:-1], [(a_[0] != a[-1]) & (a_[-2] != a[-1])]))
+    r_, a_ = r_[i], a_[i]
 
     # fill the boundary based on the all the interpolated points
     for i in range(len(a_)):
-        out[:(r_[i] + 1), a_[i]] = True
+        out[:(r_[i] + 1), a_[i]] += 1
 
-    return out
+    return out > 0
+    # return np.logical_and(out > 0, np.mod(out, 2) == np.mod(np.max(out), 2))
 
 
 def read_oct_roi_file(file_path, im_shape):
