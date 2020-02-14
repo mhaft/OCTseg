@@ -36,15 +36,17 @@ def polar2cartesian(im, r0=0, full=True, deg=1, scale=1):
     assert deg in [0, 1], "deg should be 0 or 1. got %d" % deg
 
     r0 = int(r0)
-    if r0 >= 0:
-        im = im[..., int(r0):, :]
-    else:
-        im = np.concatenate((im[..., -int(r0 + 1)::-1, :], im), axis=-2)
 
     if full:
         w = int(2 * im.shape[-2] * scale)
     else:
         w = int(2 * np.floor(im.shape[-2] / np.sqrt(2)) * scale)
+
+    if r0 >= 0:
+        im = im[..., int(r0):, :]
+    else:
+        im = np.concatenate((im[..., -int(r0 + 1)::-1, :], im), axis=-2)
+
 
     if len(im.shape) == 2:
         out = np.zeros((w, w), dtype=im.dtype)
