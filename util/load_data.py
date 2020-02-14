@@ -135,13 +135,14 @@ def make_dataset(folder_path, im_shape, coord_sys, carts_w=512):
     return im, label, np.array(sample_caseID), np.array(sample_sliceID)
 
 
-def load_train_data(folder_path, im_shape, coord_sys):
+def load_train_data(folder_path, im_shape, coord_sys, saveOutput=False):
     """ loading the training data.
 
     Args:
         folder_path: the input folder path containing the data
         im_shape: shape of the images in the dataset in (depth,width,length,channel) format
         coord_sys: coordinate system (`polar` or `carts`)
+        saveOutput: save the output of the function to a h5 file
 
     Returns:
         :
@@ -163,7 +164,7 @@ def load_train_data(folder_path, im_shape, coord_sys):
         :meth:`make_dataset`
 
     """
-    im, label, sample_caseID = make_dataset(folder_path, im_shape, coord_sys)
+    im, label, sample_caseID, sample_sliceID = make_dataset(folder_path, im_shape, coord_sys)
     assert im.size > 0, "The data folder is empty: %s" % folder_path
     im = im.astype(np.float32) / 255
     label = np.unpackbits(label.astype(np.uint8), axis=-1)[..., ::-1]
@@ -174,7 +175,19 @@ def load_train_data(folder_path, im_shape, coord_sys):
     # test_data_id = np.nonzero(np.mod(sample_caseID, 4) == 2)[0]
     # valid_data_id = np.nonzero(np.mod(sample_caseID, 4) == 0)[0]
     # 80% - 10% - 10%
-    train_data_id = np.nonzero(np.mod(sample_caseID, 8) > 1)[0]
-    test_data_id = np.nonzero(np.mod(sample_caseID, 8) == 1)[0]
-    valid_data_id = np.nonzero(np.mod(sample_caseID, 8) == 0)[0]
-    return im, label, train_data_id, test_data_id, valid_data_id, sample_caseID
+    train_data_id = np.nonzero(np.mod(sample_caseID, 10) > 1)[0]
+    test_data_id = np.nonzero(np.mod(sample_caseID, 10) == 1)[0]
+    valid_data_id = np.nonzero(np.mod(sample_caseID, 10) == 0)[0]
+
+    if saveOutput:
+        data_file = os.path.join(folder_path, 'Dataset ' + coord_sys + ' Z%d-L%d-W%d-C%d.h5' % im_shape)
+        with h5py.File(data_file, 'w') as f:
+            f.create_dataset('im', data=im)
+            f.create_dataset('label', data=label)
+            f.create_dataset('train_data_id', data=train_data_id)
+            f.create_dataset('test_data_id', data=test_data_id)
+            f.create_dataset('valid_data_id', data=valid_data_id)
+            f.create_dataset('sample_caseID', data=sample_caseID)
+            f.create_dataset('sample_sliceID', data=sample_sliceID)
+
+    return im, label, train_data_id, test_data_id, valid_data_id, sample_caseID, sample_sliceID
