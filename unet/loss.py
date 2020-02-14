@@ -154,3 +154,23 @@ def mask_boundary_neighborhood(label, r=5):
     before = tf.logical_xor(tf.nn.conv2d(tf.cast(bg, tf.float32), filter=tf.ones([r, r, 1, 1]), padding="SAME") > 0, bg)
     after = tf.logical_xor(tf.nn.conv2d(tf.cast(fg, tf.float32), filter=tf.ones([r, r, 1, 1]), padding="SAME") > 0, fg)
     return tf.cast(tf.logical_or(before, after), tf.float32)
+
+
+def weighted_categorical_crossentropy(loss_weight):
+        """ weighted categorical crossentropy
+
+        Args:
+             loss_weight: a list with three weights for all pixels outside the mask, foreground, and pixels close to the
+                            boundary, respectively.
+        """
+    loss_weight = tf.Variable(np.array(loss_weight).astype('float32'))
+
+    def weighted_categorical_crossentropy_(label, target):
+        eps = 1e-6
+        target = tf.clip_by_value(tf.nn.softmax(target), eps, 1 - eps)
+        loss_ = - ((label * tf.log(target) + (1 - label) * tf.log(1 - target))
+                   * loss_weight * tf.cast(tf.size(label), dtype=tf.float32) /
+                   (tf.reduce_sum(label, axis=tf.range(tf.rank(label) - 1)) + 1))
+        return tf.reduce_sum(loss_, axis=-1)
+
+    return weighted_categorical_crossentropy_
