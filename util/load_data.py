@@ -10,11 +10,16 @@
 
 from __future__ import absolute_import, division, print_function
 
+import os
 import glob
+
+import h5py
 import tifffile
 from tqdm import tqdm
 import numpy as np
 from scipy.ndimage import zoom
+
+from .process_oct_folder import process_oct_folder
 
 
 def im_fix_width(im, w):
@@ -65,6 +70,8 @@ def make_dataset(folder_path, im_shape, coord_sys, carts_w=512):
     im = np.zeros((0,) + tuple(im_shape), dtype='uint8')
     label = np.zeros((0,) + tuple(im_shape[:-1]) + (1,), dtype='uint8')
     # grab the right segmentation based on the coordinate system
+    if not glob.glob(folder_path + '*-SegC.tif'):
+        process_oct_folder(folder_path)
     if coord_sys.lower() == 'carts':
         cases = glob.glob(folder_path + '*-SegC.tif')
     elif coord_sys.lower() == 'polar':
