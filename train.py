@@ -257,9 +257,13 @@ def main():
     # feed forward
     train_valid_data_id = np.union1d(train_data_id, valid_data_id)
     out = model.predict(im, batch_size=nBatch, verbose=1)
-    LOSS = np.zeros(label.shape[:-1], dtype='float32')
-    for i in tqdm(range(10)):  # train_valid_data_id), 'Loss'):
-        LOSS[[i], ...] = K.eval(model.loss(label[[i], ...].astype('float32'), (out[[i], ...]).astype('float32')))
+
+    # see the loss for the first 20 slices
+    LOSS = np.zeros((20, ) + label.shape[1:-1], dtype='float32')
+    for i in tqdm(range(LOSS.shape[0])):
+        LOSS[[i], ...] = K.eval(model.loss(tf.constant(label[[i], ...].astype('float32')),
+                                           tf.constant((out[[i], ...]).astype('float32'))))
+
     out = np.argmax(out, -1)
     label = np.argmax(label, -1)
     if len(out.shape) > 3:
