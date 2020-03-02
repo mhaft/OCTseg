@@ -273,7 +273,7 @@ def main():
                      out[train_valid_data_id, ...].astype(np.uint8))
     tifffile.imwrite(models_path + experiment_def + '/a-im.tif',
                      (im[train_valid_data_id, ...] * 255).astype(np.uint8).squeeze())
-    tifffile.imwrite(models_path + experiment_def + '/a-loss.tif', LOSS[train_valid_data_id, ...].astype('float32'))
+    tifffile.imwrite(models_path + experiment_def + '/a-loss.tif', LOSS.astype('float32'))
 
 
 if __name__ == '__main__':
