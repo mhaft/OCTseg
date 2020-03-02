@@ -2,15 +2,16 @@
 \indexentry{unet.loss (module)@\spxentry{unet.loss}\spxextra{module}|hyperpage}{5}
 \indexentry{dice\_loss() (in module unet.loss)@\spxentry{dice\_loss()}\spxextra{in module unet.loss}|hyperpage}{5}
 \indexentry{mask\_boundary\_neighborhood() (in module unet.loss)@\spxentry{mask\_boundary\_neighborhood()}\spxextra{in module unet.loss}|hyperpage}{5}
-\indexentry{multi\_loss\_fun() (in module unet.loss)@\spxentry{multi\_loss\_fun()}\spxextra{in module unet.loss}|hyperpage}{5}
+\indexentry{multi\_loss() (in module unet.loss)@\spxentry{multi\_loss()}\spxextra{in module unet.loss}|hyperpage}{5}
+\indexentry{weighted\_categorical\_crossentropy() (in module unet.loss)@\spxentry{weighted\_categorical\_crossentropy()}\spxextra{in module unet.loss}|hyperpage}{6}
 \indexentry{weighted\_cross\_entropy\_fun() (in module unet.loss)@\spxentry{weighted\_cross\_entropy\_fun()}\spxextra{in module unet.loss}|hyperpage}{6}
-\indexentry{weighted\_cross\_entropy\_with\_boundary\_fun() (in module unet.loss)@\spxentry{weighted\_cross\_entropy\_with\_boundary\_fun()}\spxextra{in module unet.loss}|hyperpage}{6}
+\indexentry{weighted\_cross\_entropy\_with\_boundary() (in module unet.loss)@\spxentry{weighted\_cross\_entropy\_with\_boundary()}\spxextra{in module unet.loss}|hyperpage}{6}
 \indexentry{unet.ops (module)@\spxentry{unet.ops}\spxextra{module}|hyperpage}{6}
 \indexentry{MaxPoolingND() (in module unet.ops)@\spxentry{MaxPoolingND()}\spxextra{in module unet.ops}|hyperpage}{6}
 \indexentry{accuracy() (in module unet.ops)@\spxentry{accuracy()}\spxextra{in module unet.ops}|hyperpage}{7}
 \indexentry{conv\_layer() (in module unet.ops)@\spxentry{conv\_layer()}\spxextra{in module unet.ops}|hyperpage}{7}
 \indexentry{placeholder\_inputs() (in module unet.ops)@\spxentry{placeholder\_inputs()}\spxextra{in module unet.ops}|hyperpage}{7}
-\indexentry{up\_conv() (in module unet.ops)@\spxentry{up\_conv()}\spxextra{in module unet.ops}|hyperpage}{7}
+\indexentry{up\_conv() (in module unet.ops)@\spxentry{up\_conv()}\spxextra{in module unet.ops}|hyperpage}{8}
 \indexentry{unet.unet (module)@\spxentry{unet.unet}\spxextra{module}|hyperpage}{8}
 \indexentry{unet\_model() (in module unet.unet)@\spxentry{unet\_model()}\spxextra{in module unet.unet}|hyperpage}{8}
 \indexentry{util.confusion\_matrix (module)@\spxentry{util.confusion\_matrix}\spxextra{module}|hyperpage}{9}

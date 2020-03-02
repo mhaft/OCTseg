@@ -79,7 +79,7 @@
 <li><p><strong>optimizer</strong> – keras optimizer. see <code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.optimizers()</span></code></p></li>
 <li><p><strong>Also</strong> (<em>See</em>) – <ul>
 <li><p><a class="reference internal" href="#unet.unet.unet_model" title="unet.unet.unet_model"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unet.unet.unet_model()</span></code></a></p></li>
-<li><p><a class="reference internal" href="#unet.loss.multi_loss_fun" title="unet.loss.multi_loss_fun"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unet.loss.multi_loss_fun()</span></code></a></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">unet.loss.multi_loss_fun()</span></code></p></li>
 <li><p><a class="reference internal" href="#util.load_data.load_train_data" title="util.load_data.load_train_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">util.load_data.load_train_data()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#util.load_batch.load_batch_parallel" title="util.load_batch.load_batch_parallel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">util.load_batch.load_batch_parallel()</span></code></a></p></li>
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">keras.utils.multi_gpu_model()</span></code></p></li>
@@ -127,12 +127,12 @@ probability instead of hard classification</p>
 
 <dl class="function">
 <dt id="unet.loss.mask_boundary_neighborhood">
-<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">mask_boundary_neighborhood</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">r=5</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.mask_boundary_neighborhood" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">mask_boundary_neighborhood</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">r=5</em>, <em class="sig-param">numClass=2</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.mask_boundary_neighborhood" title="Permalink to this definition">¶</a></dt>
 <dd><p>mask the neighborhood of the boundary between foreground and background.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>label</strong> – input label</p></li>
+<li><p><strong>label</strong> – input <a href="#id7"><span class="problematic" id="id8">label_</span></a></p></li>
 <li><p><strong>r</strong> – neighborhood radius</p></li>
 </ul>
 </dd>
@@ -143,14 +143,14 @@ probability instead of hard classification</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <ul class="simple">
-<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy_with_boundary()</span></code></p></li>
+<li><p><a class="reference internal" href="#unet.loss.weighted_cross_entropy_with_boundary" title="unet.loss.weighted_cross_entropy_with_boundary"><code class="xref py py-meth docutils literal notranslate"><span class="pre">weighted_cross_entropy_with_boundary()</span></code></a></p></li>
 </ul>
 </div>
 </dd></dl>
 
 <dl class="function">
-<dt id="unet.loss.multi_loss_fun">
-<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">multi_loss_fun</code><span class="sig-paren">(</span><em class="sig-param">loss_weight</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.multi_loss_fun" title="Permalink to this definition">¶</a></dt>
+<dt id="unet.loss.multi_loss">
+<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">multi_loss</code><span class="sig-paren">(</span><em class="sig-param">loss_weight</em>, <em class="sig-param">numClass</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.multi_loss" title="Permalink to this definition">¶</a></dt>
 <dd><p>Semantic loss function based on the weighted cross entropy and dice and wighted by the loss weights in the input
 argument</p>
 <dl class="field-list simple">
@@ -175,6 +175,18 @@ argument</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="unet.loss.weighted_categorical_crossentropy">
+<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">weighted_categorical_crossentropy</code><span class="sig-paren">(</span><em class="sig-param">loss_weight</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.weighted_categorical_crossentropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>weighted categorical crossentropy</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>loss_weight</strong> – a list with three weights for all pixels outside the mask, foreground, and pixels close to the
+boundary, respectively.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
 <dt id="unet.loss.weighted_cross_entropy_fun">
 <code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">weighted_cross_entropy_fun</code><span class="sig-paren">(</span><em class="sig-param">loss_weight</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.weighted_cross_entropy_fun" title="Permalink to this definition">¶</a></dt>
 <dd><p>Weighted cross entropy with foreground pixels having ten times higher weights</p>
@@ -193,16 +205,17 @@ argument</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="unet.loss.weighted_cross_entropy_with_boundary_fun">
-<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">weighted_cross_entropy_with_boundary_fun</code><span class="sig-paren">(</span><em class="sig-param">loss_weight</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.weighted_cross_entropy_with_boundary_fun" title="Permalink to this definition">¶</a></dt>
-<dd><p>Weighted cross entropy with foreground pixels having ten times higher weights</p>
+<dt id="unet.loss.weighted_cross_entropy_with_boundary">
+<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">weighted_cross_entropy_with_boundary</code><span class="sig-paren">(</span><em class="sig-param">loss_weight</em>, <em class="sig-param">boundary_r=10</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.weighted_cross_entropy_with_boundary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weighted cross entropy with foreground and boundaries pixels having  higher weights</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>loss_weight</strong> – a list with three weights for all pixels outside the mask, foreground, and pixels close to the
-boundary, respectively.</p></li>
+<li><p><strong>loss_weight</strong> – a list with of weights with length equal to the total number of classes plus one. The last
+value is the loss weight fot the boundary and other elements are classes weights</p></li>
 <li><p><strong>label</strong> – 4D or 5D label tensor</p></li>
 <li><p><strong>target</strong> – 4D or 5D target tensor</p></li>
+<li><p><strong>boundary_r</strong> – radius of boundary considered for the higher loss values</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -411,13 +424,13 @@ LeakyReLY.</p>
 <p>Creates batches of data randomly in serial or multi-thread parallel fashion.</p>
 <dl class="class">
 <dt id="util.load_batch.LoadBatchGen">
-<em class="property">class </em><code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">LoadBatchGen</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">datasetID</em>, <em class="sig-param">nBatch</em>, <em class="sig-param">label=None</em>, <em class="sig-param">isAug=False</em>, <em class="sig-param">coord_sys='carts'</em>, <em class="sig-param">prob_lim=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.LoadBatchGen" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">LoadBatchGen</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">datasetID</em>, <em class="sig-param">nBatch</em>, <em class="sig-param">label=None</em>, <em class="sig-param">isAug=False</em>, <em class="sig-param">coord_sys='carts'</em>, <em class="sig-param">prob_lim=0.5</em>, <em class="sig-param">isCritique=False</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.LoadBatchGen" title="Permalink to this definition">¶</a></dt>
 <dd><p>data generator class, a sub-class of  Keras’ Sequence class</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="util.load_batch.LoadBatchGenGPU">
-<em class="property">class </em><code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">LoadBatchGenGPU</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">datasetID</em>, <em class="sig-param">nBatch</em>, <em class="sig-param">label</em>, <em class="sig-param">isAug=True</em>, <em class="sig-param">coord_sys='polar'</em>, <em class="sig-param">prob_lim=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.LoadBatchGenGPU" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">LoadBatchGenGPU</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">datasetID</em>, <em class="sig-param">nBatch</em>, <em class="sig-param">label</em>, <em class="sig-param">isAug=True</em>, <em class="sig-param">coord_sys='polar'</em>, <em class="sig-param">prob_lim=0.5</em>, <em class="sig-param">isCritique=False</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.LoadBatchGenGPU" title="Permalink to this definition">¶</a></dt>
 <dd><p>data generator class, a sub-class of  Keras’ Sequence class</p>
 </dd></dl>
 
@@ -569,7 +582,7 @@ maintain the original image shape.  For interpolation close to the boundaries,  
 
 <dl class="function">
 <dt id="util.load_batch.load_batch_parallel">
-<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">load_batch_parallel</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">datasetID</em>, <em class="sig-param">nBatch</em>, <em class="sig-param">label=None</em>, <em class="sig-param">isAug=False</em>, <em class="sig-param">coord_sys='carts'</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.load_batch_parallel" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">load_batch_parallel</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">datasetID</em>, <em class="sig-param">nBatch</em>, <em class="sig-param">label=None</em>, <em class="sig-param">isAug=False</em>, <em class="sig-param">coord_sys='carts'</em>, <em class="sig-param">isCritique=False</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.load_batch_parallel" title="Permalink to this definition">¶</a></dt>
 <dd><p>load a batch of data from im and/or label based on dataset (e.g. test) using multi-thread.</p>
 <p>This function handel different coordinate system and image augmentation.</p>
 <dl class="field-list simple">
@@ -637,7 +650,7 @@ cartesian coordinate.</p>
 
 <dl class="function">
 <dt id="util.load_data.load_train_data">
-<code class="sig-prename descclassname">util.load_data.</code><code class="sig-name descname">load_train_data</code><span class="sig-paren">(</span><em class="sig-param">folder_path</em>, <em class="sig-param">im_shape</em>, <em class="sig-param">coord_sys</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_data.load_train_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">util.load_data.</code><code class="sig-name descname">load_train_data</code><span class="sig-paren">(</span><em class="sig-param">folder_path</em>, <em class="sig-param">im_shape</em>, <em class="sig-param">coord_sys</em>, <em class="sig-param">saveOutput=False</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_data.load_train_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>loading the training data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -645,6 +658,7 @@ cartesian coordinate.</p>
 <li><p><strong>folder_path</strong> – the input folder path containing the data</p></li>
 <li><p><strong>im_shape</strong> – shape of the images in the dataset in (depth,width,length,channel) format</p></li>
 <li><p><strong>coord_sys</strong> – coordinate system (<cite>polar</cite> or <cite>carts</cite>)</p></li>
+<li><p><strong>saveOutput</strong> – save the output of the function to a h5 file</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -773,9 +787,9 @@ boundary.  Default is True.</p></li>
 <span id="process-oct-folder"></span><h3>process oct folder<a class="headerlink" href="#module-util.process_oct_folder" title="Permalink to this headline">¶</a></h3>
 <p>process OCT folder to generate the segmentation labels of cases. Each case has all these three files</p>
 <ul class="simple">
-<li><p>* .PSTIF</p></li>
-<li><p>* .INI</p></li>
-<li><p>* ROI.txt</p></li>
+<li><p><a href="#id1"><span class="problematic" id="id2">**</span></a>.PSTIF</p></li>
+<li><p><a href="#id3"><span class="problematic" id="id4">**</span></a>.INI</p></li>
+<li><p><a href="#id5"><span class="problematic" id="id6">**</span></a>ROI.txt</p></li>
 </ul>
 <dl class="function">
 <dt id="util.process_oct_folder.process_oct_folder">
@@ -784,24 +798,31 @@ boundary.  Default is True.</p></li>
 <p>The <em>Cartesian</em> output file can be scale.  Each case should have all these three files</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>* .PSTIF</p></li>
-<li><p>* .INI</p></li>
-<li><p>* ROI.txt</p></li>
+<li><p>.PSTIF</p></li>
+<li><p>.INI</p></li>
+<li><p>ROI.txt</p></li>
 </ul>
 </div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>folder_path</strong> – </p></li>
-<li><p><strong>scale</strong> – </p></li>
+<li><p><strong>folder_path</strong> – the folder containing the file</p></li>
+<li><p><strong>scale</strong> – the scale of the Cartisian output file</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><p>It saves three files in the <cite>folder_path</cite> for each case with a suffix:</p>
+<dd class="field-even"><p><p>the case id and slice id for each sample
+: It saves three files in the <cite>folder_path</cite> for each case with a suffix:</p>
 <ul class="simple">
 <li><p><strong>-im.tif</strong>: the image in cartesian, possibly scaled.</p></li>
 <li><p><strong>-SegP.tif</strong>: The segmentation results in polar coordinate system.</p></li>
 <li><p><strong>-SegP.tif</strong>: The segmentation results in <em>Cartesian</em> coordinate system.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>case_slice_id</p></li>
 </ul>
 </p>
 </dd>
@@ -856,8 +877,16 @@ encode one the classes:</p>
 <li><p>bit 1 (2**0) encode <cite>gw</cite> (Guide Wire, where guide wire has shadow)</p></li>
 <li><p>bit 2 (2**1) encode <cite>noniel</cite> (NonIEL, where IEL is not visible)</p></li>
 <li><p>bit 2  (2**2) encode <cite>lumen</cite> area</p></li>
-<li><p>bit 3  (2**3) encode <cite>iel</cite> area (the correct term is <em>intima</em> layer), which is the between <cite>lumen</cite> and <cite>iel</cite>
-boundaries.</p></li>
+<li><dl class="simple">
+<dt>bit 3  (2**3) encode <cite>iel</cite> area (the <em>Tunica Intima</em> layer), which is the layer between <cite>lumen</cite> and <cite>iel</cite></dt><dd><p>boundaries.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>bit 4 (2**4) encode <cite>eel</cite> area (the <em>Tunica Media</em> layer), which is the layer between <cite>iel</cite> and <cite>eel</cite></dt><dd><p>boundaries</p>
+</dd>
+</dl>
+</li>
 <li><p>other bits are not utilized and can be used for other classes in future.</p></li>
 </ul>
 </div></blockquote>

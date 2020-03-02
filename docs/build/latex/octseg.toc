@@ -13,5 +13,5 @@
 \contentsline {section}{\numberline {4.5}polar to cartesian}{13}{section.4.5}% 
 \contentsline {section}{\numberline {4.6}process oct folder}{14}{section.4.6}% 
 \contentsline {section}{\numberline {4.7}read oct roi file}{15}{section.4.7}% 
-\contentsline {chapter}{Python Module Index}{19}{section*.33}% 
-\contentsline {chapter}{Index}{21}{section*.34}% 
+\contentsline {chapter}{Python Module Index}{19}{section*.34}% 
+\contentsline {chapter}{Index}{21}{section*.35}% 

@@ -72,7 +72,7 @@
 
 
 \title{OCTseg}
-\date{Oct 16, 2019}
+\date{Mar 02, 2020}
 \release{}
 \author{Mohammad Haft-Javaherian}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -189,7 +189,7 @@ Train or test a U-Net model to analyze OCT images.
 {\hyperref[\detokenize{index:unet.unet.unet_model}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{unet.unet.unet\_model()}}}}}
 
 \item {} 
-{\hyperref[\detokenize{index:unet.loss.multi_loss_fun}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{unet.loss.multi\_loss\_fun()}}}}}
+\sphinxcode{\sphinxupquote{unet.loss.multi\_loss\_fun()}}
 
 \item {} 
 {\hyperref[\detokenize{index:util.load_data.load_train_data}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{util.load\_data.load\_train\_data()}}}}}
@@ -260,12 +260,12 @@ dice loss
 \index{mask\_boundary\_neighborhood() (in module unet.loss)@\spxentry{mask\_boundary\_neighborhood()}\spxextra{in module unet.loss}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.loss.mask_boundary_neighborhood}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{mask\_boundary\_neighborhood}}}{\emph{label}, \emph{r=5}}{}
+\phantomsection\label{\detokenize{index:unet.loss.mask_boundary_neighborhood}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{mask\_boundary\_neighborhood}}}{\emph{label}, \emph{r=5}, \emph{numClass=2}}{}
 mask the neighborhood of the boundary between foreground and background.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{label}} \textendash{} input label
+\sphinxstyleliteralstrong{\sphinxupquote{label}} \textendash{} input {\color{red}\bfseries{}label\_}
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{r}} \textendash{} neighborhood radius
@@ -282,7 +282,7 @@ mask
 
 \begin{itemize}
 \item {} 
-\sphinxcode{\sphinxupquote{weighted\_cross\_entropy\_with\_boundary()}}
+{\hyperref[\detokenize{index:unet.loss.weighted_cross_entropy_with_boundary}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{weighted\_cross\_entropy\_with\_boundary()}}}}}
 
 \end{itemize}
 
@@ -290,10 +290,10 @@ mask
 
 \end{fulllineitems}
 
-\index{multi\_loss\_fun() (in module unet.loss)@\spxentry{multi\_loss\_fun()}\spxextra{in module unet.loss}}
+\index{multi\_loss() (in module unet.loss)@\spxentry{multi\_loss()}\spxextra{in module unet.loss}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.loss.multi_loss_fun}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{multi\_loss\_fun}}}{\emph{loss\_weight}}{}
+\phantomsection\label{\detokenize{index:unet.loss.multi_loss}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{multi\_loss}}}{\emph{loss\_weight}, \emph{numClass}}{}
 Semantic loss function based on the weighted cross entropy and dice and wighted by the loss weights in the input
 argument
 \begin{quote}\begin{description}
@@ -326,6 +326,20 @@ has label and target arguments
 
 \end{fulllineitems}
 
+\index{weighted\_categorical\_crossentropy() (in module unet.loss)@\spxentry{weighted\_categorical\_crossentropy()}\spxextra{in module unet.loss}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:unet.loss.weighted_categorical_crossentropy}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{weighted\_categorical\_crossentropy}}}{\emph{loss\_weight}}{}
+weighted categorical crossentropy
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\sphinxstyleliteralstrong{\sphinxupquote{loss\_weight}} \textendash{} a list with three weights for all pixels outside the mask, foreground, and pixels close to the
+boundary, respectively.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \index{weighted\_cross\_entropy\_fun() (in module unet.loss)@\spxentry{weighted\_cross\_entropy\_fun()}\spxextra{in module unet.loss}}
 
 \begin{fulllineitems}
@@ -351,22 +365,25 @@ weighted cross entropy value
 
 \end{fulllineitems}
 
-\index{weighted\_cross\_entropy\_with\_boundary\_fun() (in module unet.loss)@\spxentry{weighted\_cross\_entropy\_with\_boundary\_fun()}\spxextra{in module unet.loss}}
+\index{weighted\_cross\_entropy\_with\_boundary() (in module unet.loss)@\spxentry{weighted\_cross\_entropy\_with\_boundary()}\spxextra{in module unet.loss}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.loss.weighted_cross_entropy_with_boundary_fun}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{weighted\_cross\_entropy\_with\_boundary\_fun}}}{\emph{loss\_weight}}{}
-Weighted cross entropy with foreground pixels having ten times higher weights
+\phantomsection\label{\detokenize{index:unet.loss.weighted_cross_entropy_with_boundary}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{weighted\_cross\_entropy\_with\_boundary}}}{\emph{loss\_weight}, \emph{boundary\_r=10}}{}
+Weighted cross entropy with foreground and boundaries pixels having  higher weights
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{loss\_weight}} \textendash{} a list with three weights for all pixels outside the mask, foreground, and pixels close to the
-boundary, respectively.
+\sphinxstyleliteralstrong{\sphinxupquote{loss\_weight}} \textendash{} a list with of weights with length equal to the total number of classes plus one. The last
+value is the loss weight fot the boundary and other elements are classes weights
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{label}} \textendash{} 4D or 5D label tensor
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{target}} \textendash{} 4D or 5D target tensor
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{boundary\_r}} \textendash{} radius of boundary considered for the higher loss values
 
 \end{itemize}
 
@@ -654,7 +671,7 @@ Creates batches of data randomly in serial or multi-thread parallel fashion.
 \index{LoadBatchGen (class in util.load\_batch)@\spxentry{LoadBatchGen}\spxextra{class in util.load\_batch}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:util.load_batch.LoadBatchGen}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{LoadBatchGen}}}{\emph{im}, \emph{datasetID}, \emph{nBatch}, \emph{label=None}, \emph{isAug=False}, \emph{coord\_sys='carts'}, \emph{prob\_lim=0.5}}{}
+\phantomsection\label{\detokenize{index:util.load_batch.LoadBatchGen}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{LoadBatchGen}}}{\emph{im}, \emph{datasetID}, \emph{nBatch}, \emph{label=None}, \emph{isAug=False}, \emph{coord\_sys='carts'}, \emph{prob\_lim=0.5}, \emph{isCritique=False}}{}
 data generator class, a sub-class of  Keras’ Sequence class
 
 \end{fulllineitems}
@@ -662,7 +679,7 @@ data generator class, a sub-class of  Keras’ Sequence class
 \index{LoadBatchGenGPU (class in util.load\_batch)@\spxentry{LoadBatchGenGPU}\spxextra{class in util.load\_batch}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:util.load_batch.LoadBatchGenGPU}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{LoadBatchGenGPU}}}{\emph{im}, \emph{datasetID}, \emph{nBatch}, \emph{label}, \emph{isAug=True}, \emph{coord\_sys='polar'}, \emph{prob\_lim=0.5}}{}
+\phantomsection\label{\detokenize{index:util.load_batch.LoadBatchGenGPU}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{LoadBatchGenGPU}}}{\emph{im}, \emph{datasetID}, \emph{nBatch}, \emph{label}, \emph{isAug=True}, \emph{coord\_sys='polar'}, \emph{prob\_lim=0.5}, \emph{isCritique=False}}{}
 data generator class, a sub-class of  Keras’ Sequence class
 
 \end{fulllineitems}
@@ -900,7 +917,7 @@ a batch of data as tuple of (image, label)
 \index{load\_batch\_parallel() (in module util.load\_batch)@\spxentry{load\_batch\_parallel()}\spxextra{in module util.load\_batch}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:util.load_batch.load_batch_parallel}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{load\_batch\_parallel}}}{\emph{im}, \emph{datasetID}, \emph{nBatch}, \emph{label=None}, \emph{isAug=False}, \emph{coord\_sys='carts'}}{}
+\phantomsection\label{\detokenize{index:util.load_batch.load_batch_parallel}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{load\_batch\_parallel}}}{\emph{im}, \emph{datasetID}, \emph{nBatch}, \emph{label=None}, \emph{isAug=False}, \emph{coord\_sys='carts'}, \emph{isCritique=False}}{}
 load a batch of data from im and/or label based on dataset (e.g. test) using multi-thread.
 
 This function handel different coordinate system and image augmentation.
@@ -1000,7 +1017,7 @@ image with the \sphinxtitleref{w} width and length
 \index{load\_train\_data() (in module util.load\_data)@\spxentry{load\_train\_data()}\spxextra{in module util.load\_data}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:util.load_data.load_train_data}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_data.}}\sphinxbfcode{\sphinxupquote{load\_train\_data}}}{\emph{folder\_path}, \emph{im\_shape}, \emph{coord\_sys}}{}
+\phantomsection\label{\detokenize{index:util.load_data.load_train_data}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.load\_data.}}\sphinxbfcode{\sphinxupquote{load\_train\_data}}}{\emph{folder\_path}, \emph{im\_shape}, \emph{coord\_sys}, \emph{saveOutput=False}}{}
 loading the training data.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -1012,6 +1029,9 @@ loading the training data.
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{coord\_sys}} \textendash{} coordinate system (\sphinxtitleref{polar} or \sphinxtitleref{carts})
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{saveOutput}} \textendash{} save the output of the function to a h5 file
 
 \end{itemize}
 
@@ -1207,13 +1227,13 @@ The converted version of im in Cartesian coordinate system.  The final size depe
 process OCT folder to generate the segmentation labels of cases. Each case has all these three files
 \begin{itemize}
 \item {} 
-* .PSTIF
+{\color{red}\bfseries{}**}.PSTIF
 
 \item {} 
-* .INI
+{\color{red}\bfseries{}**}.INI
 
 \item {} 
-* ROI.txt
+{\color{red}\bfseries{}**}ROI.txt
 
 \end{itemize}
 \index{process\_oct\_folder() (in module util.process\_oct\_folder)@\spxentry{process\_oct\_folder()}\spxextra{in module util.process\_oct\_folder}}
@@ -1225,28 +1245,29 @@ process OCT folder to generate the segmentation labels of cases.
 The \sphinxstyleemphasis{Cartesian} output file can be scale.  Each case should have all these three files
 \begin{itemize}
 \item {} 
-* .PSTIF
+.PSTIF
 
 \item {} 
-* .INI
+.INI
 
 \item {} 
-* ROI.txt
+ROI.txt
 
 \end{itemize}
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{folder\_path}} \textendash{} 
+\sphinxstyleliteralstrong{\sphinxupquote{folder\_path}} \textendash{} the folder containing the file
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{scale}} \textendash{} 
+\sphinxstyleliteralstrong{\sphinxupquote{scale}} \textendash{} the scale of the Cartisian output file
 
 \end{itemize}
 
 \item[{Returns}] \leavevmode
 
-It saves three files in the \sphinxtitleref{folder\_path} for each case with a suffix:
+the case id and slice id for each sample
+: It saves three files in the \sphinxtitleref{folder\_path} for each case with a suffix:
 \begin{itemize}
 \item {} 
 \sphinxstylestrong{-im.tif}: the image in cartesian, possibly scaled.
@@ -1256,6 +1277,14 @@ It saves three files in the \sphinxtitleref{folder\_path} for each case with a s
 
 \item {} 
 \sphinxstylestrong{-SegP.tif}: The segmentation results in \sphinxstyleemphasis{Cartesian} coordinate system.
+
+\end{itemize}
+
+
+\item[{Return type}] \leavevmode
+\begin{itemize}
+\item {} 
+case\_slice\_id
 
 \end{itemize}
 
