@@ -52,6 +52,11 @@ def read_parameter_from_log_file(args, log_file):
             args.nLayer = int(x[7:])
         elif x.startswith("saveEpoch="):
             args.saveEpoch = int(x[10:])
+        elif x.startswith("critique_model="):
+            args.critique_model = x[16:-1]
+        elif x.startswith("critiqueEpoch="):
+            args.critique_model = int(x[14:])
+
     with open(log_file) as f:
         line = f.readline().split('\'')
     for i in range(len(line)):
