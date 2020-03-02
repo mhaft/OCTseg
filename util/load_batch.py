@@ -262,7 +262,7 @@ def load_batch(im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts'
         j = np.mod(j + nBatch, n)
 
 
-def load_batch_parallel(im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts'):
+def load_batch_parallel(im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts', isCritique=False):
     """ load a batch of data from im and/or label based on dataset (e.g. test) using multi-thread.
 
     This function handel different coordinate system and image augmentation.
@@ -298,15 +298,19 @@ def load_batch_parallel(im, datasetID, nBatch, label=None, isAug=False, coord_sy
             for i, res in enumerate(multiple_results):
                 im_[i, ...], label_[i, ...] = res.get()
             pool.close()
-        yield (im_, [label_, np.zeros((label_.shape[0], 1))])
+        if not isCritique:
+            yield (im_, label_)
+        else:
+            yield (im_, [label_, np.zeros((label_.shape[0], 1))])
         j = np.mod(j + nBatch, n)
 
 
 class LoadBatchGen(Sequence):
     """data generator class, a sub-class of  Keras' Sequence class"""
-    def __init__(self, im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts', prob_lim=0.5):
+    def __init__(self, im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts', prob_lim=0.5,
+                 isCritique=False):
         self.im, self.label, self.n = im, label, len(datasetID)
-        self.prob_lim = prob_lim
+        self.prob_lim, self.isCritique = prob_lim, isCritique
         self.datasetID, self.nBatch, self.isAug, self.coord_sys = datasetID, nBatch, isAug, coord_sys
         self.j = np.mod(np.arange(nBatch), self.n)
         
@@ -323,13 +327,16 @@ class LoadBatchGen(Sequence):
         if self.isAug:
             im_, label_ = img_aug(im_, label_, self.coord_sys, self.prob_lim)
         self.j = np.mod(self.j + self.nBatch, self.n)
-        return im_, label_
+        if not self.isCritique:
+            return im_, label_
+        else:
+            return im_, [label_, np.zeros((self.nBatch, 1))]
 
 
 class LoadBatchGenGPU(Sequence):
     """data generator class, a sub-class of  Keras' Sequence class"""
-    def __init__(self, im, datasetID, nBatch, label, isAug=True, coord_sys='polar', prob_lim=0.5):
-        self.prob_lim = prob_lim
+    def __init__(self, im, datasetID, nBatch, label, isAug=True, coord_sys='polar', prob_lim=0.5, isCritique=False):
+        self.prob_lim, self.isCritique = prob_lim, isCritique
         self.W, self.L = im.shape[-3:-1]
         self.datasetID, self.nBatch, self.isAug, self.n = datasetID, nBatch, isAug, len(datasetID)
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9)
@@ -360,8 +367,12 @@ class LoadBatchGenGPU(Sequence):
                 out.append(self.sess.run((self.im_, self.label_), feed_dict={self.im_: self.im[j_, ...],
                                                                              self.label_: self.label[j_, ...]}))
         self.j = np.mod(self.j + self.nBatch, self.n)
-        return (np.concatenate([out[m][0] for m in range(len(self.gpus))], axis=0),
-                np.concatenate([out[m][1] for m in range(len(self.gpus))], axis=0))
+        if not self.isCritique:
+            return (np.concatenate([out[m][0] for m in range(len(self.gpus))], axis=0),
+                    np.concatenate([out[m][1] for m in range(len(self.gpus))], axis=0))
+        else:
+            return (np.concatenate([out[m][0] for m in range(len(self.gpus))], axis=0),
+                    [np.concatenate([out[m][1] for m in range(len(self.gpus))], axis=0), np.zeros((self.nBatch, 1))])
 
     def polar_aug(self, im__, l__):
         im_out, label_out = tf.zeros([0] + im__.get_shape().as_list()[1:]), \
