@@ -103,17 +103,18 @@ if __name__ == "__main__":
     with h5py.File(data_file, 'r') as f:
         train_data_id = np.array(f.get('/train_data_id'))
         valid_data_id = np.array(f.get('/valid_data_id'))
+        train_valid_data_id = np.union1d(train_data_id, valid_data_id)
         if args.useMask:
-            mask = np.array(f.get('/label')) > 0
+            mask = np.array(f.get('/label'))[train_valid_data_id, ...] > 0
             if len(mask.shape) > 4:
                 mask = mask[:, mask.shape[1]//2, ...]
             mask = np.logical_not(np.logical_or(mask[..., 0], mask[..., 1]))
         else:
-            mask = 1
+            mask = np.ones((train_valid_data_id.size,) + (1,) * (label.ndim - 1))
 
-        isTrain = []
-        for i in np.union1d(train_data_id, valid_data_id):
-            isTrain.append(True if i in train_data_id else False)
+    isTrain = []
+    for i in train_valid_data_id:
+        isTrain.append(True if i in train_data_id else False)
 
     classes = [1] if outCh == 2 else range(outCh)
     if not os.path.exists(report_file):
@@ -127,9 +128,10 @@ if __name__ == "__main__":
 
     for i_class in classes:
         train_confusion_matrix = confusion_matrix(label[isTrain, ...] == i_class,
-                                                  target[isTrain, ...] == i_class, mask)
+                                                  target[isTrain, ...] == i_class, mask[isTrain, ...])
         valid_confusion_matrix = confusion_matrix(label[np.logical_not(isTrain), ...] == i_class,
-                                                  target[np.logical_not(isTrain), ...] == i_class, mask)
+                                                  target[np.logical_not(isTrain), ...] == i_class,
+                                                  mask[np.logical_not(isTrain), ...])
 
         with open(report_file, 'a') as f:
             f.write((4 * ', %d' + 4 * ', %f' + 4 * ', %d' + 4 * ', %f') %
