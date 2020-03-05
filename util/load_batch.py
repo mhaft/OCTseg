@@ -14,8 +14,6 @@
 from multiprocessing import cpu_count
 from multiprocessing.pool import ThreadPool
 
-import tensorflow as tf
-from tensorflow.python.client import device_lib
 import numpy as np
 from scipy.ndimage import zoom
 from keras.utils import Sequence
@@ -183,47 +181,18 @@ def img_aug_polar(image, label, prob_lim=0.5):
         if np.random.rand() > prob_lim:  # image scaling
             scale = 1 + 0.25 * (np.random.rand() - 0.5)
             if scale > 1:
-                tmp = np.zeros_like(im_)
-                tmp = zoom(tmp, (dim == 3) * (1,) + (scale - 1, 1, 1))
+                tmp = np.zeros(im_.shape[:-3] + (int(im_.shape[-3] * (scale - 1)),) + im_.shape[-2:])
                 im_ = np.concatenate((im_, tmp), axis=-3)
-                tmp = np.zeros_like(l_)
-                tmp = zoom(tmp, (dim == 3) * (1,) + (scale - 1, 1, 1))
-                l_ = np.concatenate((l_, tmp), axis=-3)
             else:
                 j = np.ceil(im_.shape[-3] * scale).astype('int64')
                 im_ = im_[..., :j, :, :]
-                l_ = l_[..., :j, :, :]
-            im_ = polar_zoom(im_, image.shape[-3] / im_.shape[-3], order=1)
-            l_ = polar_zoom(l_, label.shape[-3] / l_.shape[-3], order=0)
+            idx = np.arange(0, image.shape[-3]) * (im_.shape[-3] / image.shape[-3])
+            a = np.tile(np.mod(idx, 1)[..., np.newaxis, np.newaxis], (1,) + im_.shape[-2:])
+            idx_lo, idx_hi = np.clip(np.floor(idx), 0, im_.shape[-3] - 1), np.clip(np.ceil(idx), 0, im_.shape[-3] - 1)
+            im_ = (1 - a) * im_[..., idx_lo.astype(int), :, :] + a * im_[..., idx_hi.astype(int), :, :]
+            l_ = np.clip(l_ / scale, -1, 1)
         image[i, ...], label[i, ...] = im_, l_
     return image, label
-
-
-def polar_zoom(im, scale, order=1):
-    """ apply image scaling to polar images along the radius axis.
-
-    Args:
-        im: input image
-        scale: scaling factor
-        order: interpolation order.  0 for nearest and 1 for linear.
-
-    Returns:
-        scaled image.
-    """
-    assert order in [0, 1], "order should be 0 or 1. Got %d" % order
-    w = im.shape[-3]
-    idx = np.arange(0, np.round(w * scale)) / scale
-    a = (idx % 1)[np.newaxis, ..., np.newaxis, np.newaxis]
-    if im.ndim != a.ndim:
-        a = np.expand_dims(a, axis=0)
-    idx = np.clip(np.floor(idx), 0, w - 1).astype(np.int64)
-    idx2 = np.clip(idx + 1, 0, w - 1)
-    if order == 0:
-        idx = np.select(a.squeeze() < 0.5, idx, idx2)
-        out = im[..., idx, :, :]
-    else:
-        out = (1 - a) * im[..., idx, :, :] + a * im[..., idx2, :, :]
-    return out
 
 
 def load_batch(im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts'):
@@ -299,9 +268,8 @@ def load_batch_parallel(im, datasetID, nBatch, label=None, isAug=False, coord_sy
 
 class LoadBatchGen(Sequence):
     """data generator class, a sub-class of  Keras' Sequence class"""
-    def __init__(self, im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts', prob_lim=0.5):
+    def __init__(self, im, datasetID, nBatch, label=None, isAug=False, coord_sys='carts'):
         self.im, self.label = im, label
-        self.prob_lim = prob_lim
         self.datasetID, self.nBatch, self.isAug, self.coord_sys = datasetID, nBatch, isAug, coord_sys
 
     def __len__(self):
@@ -315,69 +283,5 @@ class LoadBatchGen(Sequence):
         else:
             label_ = None
         if self.isAug:
-            im_, label_ = img_aug(im_, label_, self.coord_sys, self.prob_lim)
+            im_, label_ = img_aug(im_, label_, self.coord_sys, 0.9)
         return im_, label_
-
-
-class LoadBatchGenGPU(Sequence):
-    """data generator class, a sub-class of  Keras' Sequence class"""
-    def __init__(self, im, datasetID, nBatch, label, isAug=True, coord_sys='polar', prob_lim=0.5):
-        self.prob_lim = prob_lim
-        self.W, self.L = im.shape[-3:-1]
-        self.datasetID, self.nBatch, self.isAug = datasetID, nBatch, isAug
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9)
-        config = tf.ConfigProto(gpu_options=gpu_options)
-        config.gpu_options.allow_growth = True
-        config.allow_soft_placement = True
-        self.gpus = [x.name for x in device_lib.list_local_devices() if x.device_type == 'GPU']
-        self.graph = tf.Graph()
-        with self.graph.as_default():
-            self.sess = tf.Session(config=config)
-            self.im, self.label = tf.constant(im.astype('float32')), tf.constant(label.astype('float32'))
-            self.j = tf.placeholder(tf.int64, shape=[self.nBatch // len(self.gpus)])
-            self.im_ = tf.identity(tf.gather(self.im, self.j, axis=0))
-            self.label_ = tf.identity(tf.gather(self.label, self.j, axis=0))
-            if self.isAug:
-                self.im_, self.label_ = self.polar_aug(self.im_, self.label_)
-            print('Data loader is initialized.')
-
-    def __len__(self):
-        return int(np.ceil(len(self.datasetID) / self.nBatch))
-
-    def __getitem__(self, item):
-        out = []
-        for d in self.gpus:
-            with tf.device(d):
-                j_ = self.datasetID[np.random.randint(0, len(self.datasetID), self.nBatch // len(self.gpus))]
-                out.append(self.sess.run((self.im_, self.label_), feed_dict={self.j: j_}))
-        return (np.concatenate([out[m][0] for m in range(len(self.gpus))], axis=0),
-                np.concatenate([out[m][1] for m in range(len(self.gpus))], axis=0))
-
-    def polar_aug(self, im__, l__):
-        im_out, label_out = tf.zeros([0] + im__.get_shape().as_list()[1:]), \
-                                tf.zeros([0] + l__.get_shape().as_list()[1:])
-        for i in range(self.nBatch // len(self.gpus)):
-            im_, l_ =im__[tf.newaxis, i, ...], l__[tf.newaxis, i, ...]
-            if np.random.rand() > self.prob_lim:  # random rotation
-                j = np.floor(np.random.rand() * self.L).astype('int64')
-                im_ = tf.concat((im_[..., j:, :], im_[..., :j, :]), -2)
-                l_ = tf.concat((l_[..., j:, :], l_[..., :j, :]), -2)
-            if np.random.rand() > self.prob_lim:  # random reflection
-                j = np.floor(np.random.rand() * self.L).astype('int64')
-                im_ = tf.concat((im_[..., :j:-1, :], im_[..., j::-1, :]), -2)
-                l_ = tf.concat((l_[..., :j:-1, :], l_[..., j::-1, :]), -2)
-            if np.random.rand() > self.prob_lim:  # intensity scaling
-                im_ = tf.clip_by_value(im_ * (1 + 0.5 * (np.random.rand() - 0.5)), 0, 1)
-            if np.random.rand() > self.prob_lim:  # image scaling
-                scale = 1 + 0.25 * (np.random.rand() - 0.5)
-                idx = scale * np.arange(0, self.W)
-                idx0 = np.clip(np.round(idx), 0, self.W - 1).astype(np.int64)
-                idx1 = np.clip(np.floor(idx), 0, self.W - 1).astype(np.int64)
-                idx2 = np.clip(idx + 1, 0, self.W - 1).astype(np.int64)
-                a = tf.constant((idx % 1)[np.newaxis, ..., np.newaxis, np.newaxis], dtype=tf.float32)
-                l_ = tf.gather(l_, idx0, axis=-3)
-                im_ = (1 - a) * tf.gather(im_, idx1, axis=-3) + a * tf.gather(im_, idx2, axis=-3)
-            im_out = tf.concat((im_out, im_), 0)
-            label_out = tf.concat((label_out, l_), 0)
-        return im_out, label_out
-
