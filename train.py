@@ -26,9 +26,9 @@ from keras.backend.tensorflow_backend import set_session
 from keras.losses import get
 
 from boundary.boundary import boundary_model
-from boundary.loss import weighted_cross_entropy_with_boundary, masked_mean_absolute_error, masked_mean_square_error
+from boundary.loss import dice_loss, masked_mean_absolute_error, masked_mean_square_error
 from util.load_data import load_train_data
-from util.load_batch import load_batch_parallel, LoadBatchGen, LoadBatchGenGPU
+from util.load_batch import load_batch_parallel, LoadBatchGenGPU
 from util.segmentation2boundary import segmentation2boundary_multi_class, boundary2segmentation
 
 
@@ -77,25 +77,26 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-exp_def", type=str, default="test", help="experiment definition")
     parser.add_argument("-models_path", type=str, default="model/", help="path for saving models")
-    parser.add_argument("-lr", type=float, default=1e-4, help="learning rate")
+    parser.add_argument("-lr", type=float, default=1e-5, help="learning rate")
     parser.add_argument("-lr_decay", type=float, default=0.0, help="learning rate decay")
-    parser.add_argument("-data_path", type=str, default="C:\\MachineLearning\\Segmentation_NonIEL\\", help="data folder path")
-    parser.add_argument("-nEpoch", type=int, default=2000, help="number of epochs")
-    parser.add_argument("-nBatch", type=int, default=4, help="batch size")
-    parser.add_argument("-outCh", type=int, default=2, help="size of output channel")
+    parser.add_argument("-data_path", type=str, default="D:\\MLIntravascularPolarimetry\\MLCardioPullbacks",
+                        help="data folder path")
+    parser.add_argument("-nEpoch", type=int, default=1000, help="number of epochs")
+    parser.add_argument("-nBatch", type=int, default=40, help="batch size")
+    parser.add_argument("-outCh", type=int, default=4, help="size of output channel")
     parser.add_argument("-inCh", type=int, default=3, help="size of input channel")
     parser.add_argument("-nZ", type=int, default=1, help="size of input depth")
     parser.add_argument("-w", type=int, default=512, help="size of input width (# of columns)")
     parser.add_argument("-l", type=int, default=512, help="size of input Length (# of rows)")
     parser.add_argument("-loss_w", type=str, default="1, 100", help="loss wights")
-    parser.add_argument("-isAug", type=int, default=0, help="Is data augmentation")
+    parser.add_argument("-isAug", type=int, default=1, help="Is data augmentation")
     parser.add_argument("-isCarts", type=int, default=0, help="whether images should be converted into Cartesian")
     parser.add_argument("-isTest", type=int, default=0, help="Is test run instead of train")
     parser.add_argument("-testEpoch", type=int, default=0, help="epoch of the saved model for testing")
-    parser.add_argument("-saveEpoch", type=int, default=2500, help="epoch interval to save the model")
-    parser.add_argument("-epochSize", type=int, default=100, help="number of samples per epoch")
-    parser.add_argument("-nFeature", type=int, default=32, help="number of features in the first layer")
-    parser.add_argument("-nLayer", type=int, default=9, help="number of layers in the U-Nnet model")
+    parser.add_argument("-saveEpoch", type=int, default=100, help="epoch interval to save the model")
+    parser.add_argument("-epochSize", type=int, default=1, help="number of samples per epoch")
+    parser.add_argument("-nFeature", type=int, default=8, help="number of features in the first layer")
+    parser.add_argument("-nLayer", type=int, default=8, help="number of layers in the U-Nnet model")
     parser.add_argument("-gpu_id", type=str, default="0,1", help="ID of GPUs to be used")
     parser.add_argument("-optimizer", type=str, default="Adam", help="optimizer")
 
@@ -171,7 +172,7 @@ def main():
     if outCh == 2:
         loss = 'mean_absolute_error'
     else:
-        loss = get(masked_mean_square_error)
+        loss = get(dice_loss)  # lambda a, b: dice_loss(a, b) + masked_mean_square_error(a, b))
     model.compile(optimizer=optimizer(lr=args.lr, decay=args.lr_decay), loss=loss)
 
 
@@ -200,13 +201,17 @@ def main():
 
     mask = (segmentation2boundary_multi_class(label, mask_classes) < 0.5).astype('single')
     label = segmentation2boundary_multi_class(label, classes)
-    mask[..., 1, :] = np.logical_and(mask[..., 0, :], mask[..., 1, :])
+    mask[..., 1:, :] = np.logical_and(mask[..., 0:1, :], mask[..., 1:, :])
     if label.shape[-2] != outCh:
         label = np.concatenate((label, mask), axis=-2)
 
     # training
     if isTrain:
-        train_data_gen = load_batch_parallel(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys)
+        train_data_gen = LoadBatchGenGPU(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys)
+        if args.epochSize == 0:
+            args.epochSize = np.ceil(train_data_id.size / nBatch).astype('int')
+        else:
+            args.epochSize = np.ceil(args.epochSize * train_data_id.size / nBatch).astype('int')
         print('Data is loaded. Training: %d, validation: %d' % (len(np.unique(sample_caseID[train_data_id])),
                                                                 len(np.unique(sample_caseID[valid_data_id]))))
 
@@ -239,14 +244,17 @@ def main():
         out = np.logical_and(boundary2segmentation(out[..., [1], :], im_shape[1]),
                              np.logical_not(boundary2segmentation(out[..., [0], :], im_shape[1])))
     else:
-        filt_size = (out.ndim - 1) * (1,) + (21,)
-        m1 = median_filter(out[..., [3], :], size=filt_size) > 0.5
-        m2 = median_filter(out[..., [2], :], size=filt_size) > 0.5
-        x1 = median_filter(out[..., [1], :], size=filt_size)
-        x1 = boundary2segmentation(x1 * m2 - (1 - m2), im_shape[1])
-        x2 = median_filter(out[..., [0], :], size=filt_size)
-        x2 = boundary2segmentation(x2 * m2 - (1 - m2), im_shape[1])
-        out = np.logical_and(x1, np.logical_not(x2))
+        # filt_size = (out.ndim - 1) * (1,) + (21,)
+        # m1 = median_filter(out[..., [3], :], size=filt_size) > 0.5
+        # m2 = median_filter(out[..., [2], :], size=filt_size) > 0.5
+        # x1 = median_filter(out[..., [1], :], size=filt_size)
+        # x1 = boundary2segmentation(x1 * m2 - (1 - m2), im_shape[1])
+        # x2 = median_filter(out[..., [0], :], size=filt_size)
+        # x2 = boundary2segmentation(x2 * m2 - (1 - m2), im_shape[1])
+        # out = np.logical_and(x1, np.logical_not(x2))
+        out = boundary2segmentation(out[..., [0], :], im_shape[1]) * 1.0 + \
+              boundary2segmentation(out[..., [1], :], im_shape[1]) * 2.0
+
 
     label, out, im = label.astype(np.uint8), out.astype(np.uint8), (im * 255).astype(np.uint8).squeeze()
     if len(out.shape) > 3:
