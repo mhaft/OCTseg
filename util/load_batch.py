@@ -14,6 +14,8 @@
 from multiprocessing import cpu_count
 from multiprocessing.pool import ThreadPool
 
+import tensorflow as tf
+from tensorflow.python.client import device_lib
 import numpy as np
 from scipy.ndimage import zoom
 from keras.utils import Sequence
@@ -171,13 +173,13 @@ def img_aug_polar(image, label, prob_lim=0.5):
         if np.random.rand() > prob_lim:  # random rotation
             j = np.floor(np.random.rand() * im_.shape[-2]).astype('int64')
             im_ = np.concatenate((im_[..., j:, :], im_[..., :j, :]), axis=-2)
-            l_ = np.concatenate((l_[..., j:, :], l_[..., :j, :]), axis=-2)
+            l_ = np.concatenate((l_[..., j:], l_[..., :j]), axis=-1)
         if np.random.rand() > prob_lim:  # random reflection
             j = np.floor(np.random.rand() * im_.shape[-2]).astype('int64')
             im_ = np.concatenate((im_[..., :j:-1, :], im_[..., j::-1, :]), axis=-2)
-            l_ = np.concatenate((l_[..., :j:-1, :], l_[..., j::-1, :]), axis=-2)
+            l_ = np.concatenate((l_[..., :j:-1], l_[..., j::-1]), axis=-1)
         if np.random.rand() > prob_lim:  # intensity scaling
-            im_ = np.clip(im_ * (1 + 0.5 * (np.random.rand() - 0.5)), 0, 1)
+            im_ = np.clip(0.1 * (np.random.rand() - 0.5) + im_ * (1 + 0.20 * (np.random.rand() - 0.5)), 0, 1)
         if np.random.rand() > prob_lim:  # image scaling
             scale = 1 + 0.25 * (np.random.rand() - 0.5)
             if scale > 1:
@@ -249,8 +251,9 @@ def load_batch_parallel(im, datasetID, nBatch, label=None, isAug=False, coord_sy
 
     """
 
+    n = len(datasetID)
+    j = np.mod(np.arange(nBatch), n)
     while True:
-        j = np.random.randint(0, len(datasetID), nBatch)
         im_ = im[datasetID[j], ...].copy()
         if label is not None:
             label_ = label[datasetID[j], ...].copy()
@@ -264,6 +267,7 @@ def load_batch_parallel(im, datasetID, nBatch, label=None, isAug=False, coord_sy
                 im_[i, ...], label_[i, ...] = res.get()
             pool.close()
         yield (im_, label_)
+        j = np.mod(j + nBatch, n)
 
 
 class LoadBatchGen(Sequence):
@@ -285,3 +289,70 @@ class LoadBatchGen(Sequence):
         if self.isAug:
             im_, label_ = img_aug(im_, label_, self.coord_sys, 0.9)
         return im_, label_
+
+
+class LoadBatchGenGPU(Sequence):
+    """data generator class, a sub-class of  Keras' Sequence class"""
+    def __init__(self, im, datasetID, nBatch, label, isAug=True, coord_sys='polar', prob_lim=0.5, isCritique=False):
+        self.prob_lim, self.isCritique = prob_lim, isCritique
+        self.W, self.L = im.shape[-3:-1]
+        self.datasetID, self.nBatch, self.isAug, self.n = datasetID, nBatch, isAug, len(datasetID)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9)
+        config = tf.ConfigProto(gpu_options=gpu_options)
+        config.gpu_options.allow_growth = True
+        config.allow_soft_placement = True
+        self.im, self.label = im.astype('float32'), label.astype('float32')
+        self.gpus = [x.name for x in device_lib.list_local_devices() if x.device_type == 'GPU']
+        self.graph = tf.Graph()
+        self.nSubBatch = nBatch // len(self.gpus)
+        self.j = np.mod(np.arange(nBatch), self.n)
+        with self.graph.as_default():
+            self.sess = tf.Session(config=config)
+            self.im_ = tf.placeholder(tf.float32, shape=[None] + list(im.shape[1:]))
+            self.label_ = tf.placeholder(tf.float32, shape=[None] + list(label.shape[1:]))
+            if self.isAug:
+                self.im_, self.label_ = self.polar_aug(self.im_, self.label_)
+            print('Data loader is initialized.')
+
+    def __len__(self):
+        return self.n
+
+    def __getitem__(self, item):
+        out = []
+        for i_gpu, gpu in enumerate(self.gpus):
+            with tf.device(gpu):
+                j_ = self.datasetID[self.j[(i_gpu * self.nSubBatch):((i_gpu + 1) * self.nSubBatch)]]
+                out.append(self.sess.run((self.im_, self.label_), feed_dict={self.im_: self.im[j_, ...],
+                                                                             self.label_: self.label[j_, ...]}))
+        self.j = np.mod(self.j + self.nBatch, self.n)
+        return (np.concatenate([out[m][0] for m in range(len(self.gpus))], axis=0),
+                np.concatenate([out[m][1] for m in range(len(self.gpus))], axis=0))
+
+    def polar_aug(self, im__, l__):
+        im_out, label_out = tf.zeros([0] + im__.get_shape().as_list()[1:]), \
+                                tf.zeros([0] + l__.get_shape().as_list()[1:])
+        for i in range(self.nBatch // len(self.gpus)):
+            im_, l_ =im__[tf.newaxis, i, ...], l__[tf.newaxis, i, ...]
+            if np.random.rand() > self.prob_lim:  # random rotation
+                j = np.floor(np.random.rand() * self.L).astype('int64')
+                im_ = tf.concat((im_[..., j:, :], im_[..., :j, :]), -2)
+                l_ = tf.concat((l_[..., j:], l_[..., :j]), -1)
+            if np.random.rand() > self.prob_lim:  # random reflection
+                j = np.floor(np.random.rand() * self.L).astype('int64')
+                im_ = tf.concat((im_[..., :j:-1, :], im_[..., j::-1, :]), -2)
+                l_ = tf.concat((l_[..., :j:-1], l_[..., j::-1]), -1)
+            if np.random.rand() > self.prob_lim:  # intensity scaling
+                im_ = tf.clip_by_value(0.1 * (np.random.rand() - 0.5) +
+                                       im_ * (1 + 0.20 * (np.random.rand() - 0.5)), 0, 1)
+            if np.random.rand() > self.prob_lim:  # image scaling
+                scale = 1 + 0.25 * (np.random.rand() - 0.5)
+                idx = scale * np.arange(0, self.W)
+                idx0 = np.clip(np.round(idx), 0, self.W - 1).astype(np.int64)
+                idx1 = np.clip(np.floor(idx), 0, self.W - 1).astype(np.int64)
+                idx2 = np.clip(idx + 1, 0, self.W - 1).astype(np.int64)
+                a = tf.constant((idx % 1)[np.newaxis, ..., np.newaxis, np.newaxis], dtype=tf.float32)
+                l_ = tf.clip_by_value(l_ / scale, -1, 1)
+                im_ = (1 - a) * tf.gather(im_, idx1, axis=-3) + a * tf.gather(im_, idx2, axis=-3)
+            im_out = tf.concat((im_out, im_), 0)
+            label_out = tf.concat((label_out, l_), 0)
+        return im_out, label_out
