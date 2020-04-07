@@ -39,13 +39,32 @@ def dice_loss(label, target):
          dice loss
 
     """
-    target = tf.nn.softmax(target)
-    target, label = target[..., 1:], label[..., 1:]
-    yy = tf.multiply(target, target)
-    ll = tf.multiply(label, label)
-    yl = tf.multiply(target, label)
-    #
-    return 1 - (2 * tf.reduce_sum(yl) + 1) / (tf.reduce_sum(ll) + tf.reduce_sum(yy) + 1)
+    # target = tf.nn.softmax(target)
+    # target, label = target[..., 1:], label[..., 1:]
+    # yy = tf.multiply(target, target)
+    # ll = tf.multiply(label, label)
+    # yl = tf.multiply(target, label)
+    # #
+    # return 1 - (2 * tf.reduce_sum(yl) + 1) / (tf.reduce_sum(ll) + tf.reduce_sum(yy) + 1)
+
+    i = label.shape[-2].value
+    i = i//2 if i else 2
+    w = 512
+    I = tf.tile(tf.cast(tf.range(w), tf.float32)[tf.newaxis, tf.newaxis, tf.newaxis, ...], (1, 1, w, 1))
+    mask = tf.tile(label[:, i:, :, tf.newaxis] * tf.cast(w, tf.float32), (1, 1, 1, w))
+    label_ = tf.tile(label[:, :i, :, tf.newaxis] * tf.cast(w, tf.float32), (1, 1, 1, w))
+    target_ = tf.tile(target[:, :i, :, tf.newaxis] * tf.cast(w, tf.float32), (1, 1, 1, w))
+    label_ = tf.multiply(mask, tf.sigmoid(label_ - I))
+    target_ = tf.multiply(mask, tf.sigmoid(target_ - I))
+
+    yy = tf.multiply(target_, target_)
+    ll = tf.multiply(label_, label_)
+    yl = tf.multiply(target_, label_)
+
+    eps = 1e-7
+    return tf.reduce_mean(1 - (2 * tf.reduce_sum(yl, axis=[-1, -2])) /
+                              (tf.reduce_sum(ll, axis=[-1, -2]) + tf.reduce_sum(yy, axis=[-1, -2]) + eps), axis=-1)
+
 
 
 def weighted_cross_entropy(label, target):
