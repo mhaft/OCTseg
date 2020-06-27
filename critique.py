@@ -9,6 +9,7 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import csv
+import time
 
 import h5py
 import numpy as np
@@ -24,16 +25,15 @@ from keras.utils import multi_gpu_model
 from tensorflow.python.client import device_lib
 from multiprocessing import cpu_count
 from multiprocessing.pool import ThreadPool
-import visdom
 
 from util.load_batch import img_aug
 
 # parameters
-exp_def = "critique-lr1e-4"
+exp_def = "critique-outCh6_v6"
 lr = 1e-6
-outCh = 4
-nBatch = 50
-nEpoch = 10000
+outCh = 6
+nBatch = 30
+nEpoch = 1000
 lastEpoch = 0
 dataset = 'Dataset polar Z1-L512-W512-C3.h5'
 good_data = 'D:\\MLIntravascularPolarimetry\\MLCardioPullbacks-Batch1-Ver1\\' + dataset
@@ -107,7 +107,6 @@ def loss(y_, y):
 
 
 # GPU settings
-# os.environ["CUDA_VISIBLE_DEVICES"] = " "
 gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9)
 config = tf.ConfigProto(gpu_options=gpu_options)
 config.gpu_options.allow_growth = True
@@ -116,10 +115,10 @@ set_session(tf.Session(config=config))
 numGPU = len([x.name for x in device_lib.list_local_devices() if x.device_type == 'GPU'])
 
 model_ = critique()
-vis = visdom.Visdom(env='main')
 
 if lastEpoch:
     model_.load_weights('model/' + exp_def + '/model-epoch%06d.h5' % lastEpoch)
+    print('model %d  is loaded.' % lastEpoch)
     with open(log_file, 'r') as f:
         reader = csv.reader(f, delimiter=',', skipinitialspace=True)
         _ = next(reader)  # header
@@ -127,10 +126,6 @@ if lastEpoch:
         for row in reader:
             data.append([float(i) for i in row])
         data = np.array(data)
-    vis.line(data[:, 1:3], data[:, [0, 0]], win=(exp_def + '_loss'),
-             opts=dict(title=exp_def, xlabel='Epoch', ylabel='Loss', legend=['Training Loss', 'Validation Loss']))
-    vis.line(data[:, 3:5], data[:, [0, 0]], win=(exp_def + '_acc'),
-             opts=dict(title=exp_def, xlabel='Epoch', ylabel='Acc', legend=['Training Acc', 'Validation Acc']))
 
 with h5py.File(good_data, 'r') as f:
     im, label_good, train_data_id, valid_data_id = np.array(f.get('/im')), np.array(f.get('/label')), \
@@ -185,56 +180,27 @@ def load_batch_parallel(im, datasetID, nBatch, label=None, out=None, isAug=False
             yield ([im_, label_], out[datasetID[j], :])
         j = np.mod(j + nBatch, n)
 
+
+start = time.time()
 for iEpoch in range(lastEpoch, nEpoch):
     print('Epoch %d / %d' % (iEpoch + 1, nEpoch))
-    his = model.fit(x=list(img_aug(im_train.copy(), label_train.copy(), 'polar', 1 - iEpoch / nEpoch)),
-                    y=out_train, batch_size=nBatch, epochs=1, shuffle=True,
-                    validation_data=([im_valid, label_valid], out_valid), verbose=1)
-    loss_t = model.evaluate(x=[im_train, label_train], y=out_train, verbose=0, batch_size=nBatch)
-    loss_v = model.evaluate(x=[im_valid, label_valid], y=out_valid, verbose=0, batch_size=nBatch)
-    vis.line(np.array([[loss_t], [loss_v]]).T, np.array([[iEpoch + 1], [iEpoch + 1]]).T, win=(exp_def + '_loss'),
-             update='append' if iEpoch > 0 else 'replace', opts=dict(title=exp_def, xlabel='Epoch', ylabel='Loss',
-                                                                     legend=['Training Loss', 'Validation Loss']))
-    u0t = model.predict(x=[im_train, label_train], batch_size=nBatch)
-    u0v = model.predict(x=[im_valid, label_valid], batch_size=nBatch)
-    j = 0
-    acc_t = (np.mean(u0t[out_train == 1] >= j) + np.mean(u0t[out_train == -1] < j)) / 2
-    j = 0
-    acc_v = (np.mean(u0v[out_valid == 1] >= j) + np.mean(u0v[out_valid == -1] < j)) / 2
-    vis.line(np.array([[acc_t], [acc_v]]).T, np.array([[iEpoch + 1], [iEpoch + 1]]).T, win=(exp_def + '_acc'),
-             update='append' if iEpoch > 0 else 'replace', opts=dict(title=exp_def, xlabel='Epoch', ylabel='Acc',
-                                                                     legend=['Training Acc', 'Validation Acc']))
-    smi = '<p style="color:blue;font-family:monospace;font-size:80%;">' + \
-          '<br>'.join(os.popen('nvidia-smi').read().split('\n')[3:13]) + '</p>'
-    vis.text(smi, win='nvidia-smi')
-    with open(log_file, 'a') as f:
-        f.write("%d, %f, %f, %f, %f \n" % (iEpoch + 1, loss_t, loss_v, acc_t, acc_v))
+    train_data_gen = load_batch_parallel(im_train, np.arange(im_train.shape[0]), nBatch, label_train, out_train,
+                                         isAug=True, coord_sys='polar', prob_lim=(1 - iEpoch / nEpoch), isCritique=True)
+    model.fit_generator(train_data_gen, steps_per_epoch=np.ceil(im_train.shape[0] / nBatch), verbose=1)
+    if iEpoch % 10 == 9:
+        loss_t = model.evaluate(x=[im_train, label_train], y=out_train, verbose=0, batch_size=nBatch)
+        loss_v = model.evaluate(x=[im_valid, label_valid], y=out_valid, verbose=0, batch_size=nBatch)
+        u0t = model.predict(x=[im_train, label_train], batch_size=nBatch)
+        u0v = model.predict(x=[im_valid, label_valid], batch_size=nBatch)
+        j = 0
+        acc_t = (np.mean(u0t[out_train == 1] >= j) + np.mean(u0t[out_train == -1] < j)) / 2
+        j = 0
+        acc_v = (np.mean(u0v[out_valid == 1] >= j) + np.mean(u0v[out_valid == -1] < j)) / 2
+        with open(log_file, 'a') as f:
+            txt = "%d, %.2f, %f, %f, %f, %f \n" % (iEpoch + 1, (time.time() - start) / 3600.0, loss_t, loss_v, acc_t, acc_v)
+            f.write(txt)
+            print(txt)
 
     if iEpoch % 100 == 99:
         model_.save('model/' + exp_def + '/model-epoch%06d.h5' % (iEpoch + 1))
-
-    vis.scatter(np.concatenate((np.arange(u0t.size)[..., np.newaxis],
-                                np.concatenate((u0t[out_train == 1],
-                                                u0t[out_train == -1]))[..., np.newaxis]), axis=1),
-                win=(exp_def + '_prediction1'),
-                opts=dict(title='train prediction', xlabel='sample', ylabel='value', markersize=5))
-    vis.scatter(np.concatenate((np.arange(u0v.size)[..., np.newaxis],
-                                np.concatenate((u0v[out_valid == 1],
-                                                u0v[out_valid == -1]))[..., np.newaxis]), axis=1),
-                win=(exp_def + '_prediction2'),
-                opts = dict(title='valid prediction', xlabel='sample', ylabel='value', markersize=5))
-    # plt.plot(u0t[out_train == 1] - u0t[out_train == -1], 'r*')
-    # plt.plot(u0t, 'r*')
-    # plt.show()
-
-
-# clipvalue
-0.5
-# clipnorm
-0.7619047619047619
-0.7857142857142857
-# clipnorm with weight regularizer
-0.8809523809523809
-# nothing
-0.7142857142857143
 
