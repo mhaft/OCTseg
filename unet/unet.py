@@ -12,7 +12,7 @@ from keras.models import Model
 from unet.ops import conv_layer, up_conv, MaxPoolingND
 
 
-def unet_model(im_shape, nFeature=32, outCh=2, nLayer=3):
+def unet_model(im_shape, nFeature=32, outCh=2, nLayer=3, pool_scale=2):
     """ Build U-Net model.
 
         Args:
@@ -29,13 +29,18 @@ def unet_model(im_shape, nFeature=32, outCh=2, nLayer=3):
     out = [x]
     for iLayer in range(nLayer):
         h = conv_layer(out[-1], (2 ** (iLayer // 2)) * nFeature)
-        out.append(MaxPoolingND(h))
+        out.append(MaxPoolingND(h, s=pool_scale))
 
     out.append(conv_layer(out[-1], (2 ** (nLayer // 2)) * nFeature))
     out.append(conv_layer(out[-1], (2 ** (nLayer // 2)) * nFeature))
 
     for iLayer in range(nLayer - 1, -1, -1):
-        u = up_conv(out[-1])
+        u = up_conv(out[-1], s=pool_scale)
+        if iLayer == 0:
+            u = KL.Cropping2D(cropping=((0, (im_shape[-3] + pool_scale - 1) // pool_scale * pool_scale - im_shape[-3]),
+                                        (0, (im_shape[-2] + pool_scale - 1) // pool_scale * pool_scale - im_shape[-2])),
+                              data_format=None)(u)
+
         c = KL.Concatenate()([out[iLayer], u])
         out.append(conv_layer(c, (2 ** (iLayer // 2)) * nFeature))
 
