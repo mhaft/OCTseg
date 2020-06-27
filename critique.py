@@ -103,10 +103,7 @@ def make_iel_label(label_9class, outCh):
 
 
 def loss(y_, y):
-    # return - tf.reduce_mean(y * (1 + y_)) \
-    #        + tf.reduce_mean(y * (1 - y_)) \
-    #        + 10 * tf.reduce_mean(tf.square(y))  # +  0.01 * gradient_penalty
-    return tf.reduce_mean(tf.abs(1 - y_ * y))
+    return tf.reduce_mean(- y_ * y) + 10 * tf.reduce_mean(tf.square(1 - gradients))
 
 
 # GPU settings
@@ -152,9 +149,8 @@ label_valid = np.concatenate((label_good[valid_data_id, ...], label_bad[valid_da
 print('Data is loaded. Training: %d, validation: %d' % (label_train.shape[0], label_valid.shape[0]))
 
 
-gradients = tf.concat(tf.gradients(model_.output, model_.input), axis=-1)
-slopes = tf.sqrt(tf.reduce_sum(tf.square(gradients), reduction_indices=[-1]))
-gradient_penalty = tf.reduce_mean((slopes-1)**2)
+gradients_i = tf.concat(tf.gradients(model_.outputs[0], model_.inputs), axis=-1)
+gradients = tf.sqrt(tf.clip_by_value(tf.reduce_sum(tf.square(gradients_i), reduction_indices=[-1]), 1e-6, 1e6))
 
 
 if numGPU > 1:
