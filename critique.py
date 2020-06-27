@@ -139,7 +139,7 @@ with h5py.File(bad_data, 'r') as f:
     label_bad = np.array(f.get('/label'))
 
 
-label_good, label_bad = make_iel_label(label_good), make_iel_label(label_bad)
+label_good, label_bad = make_iel_label(label_good, outCh), make_iel_label(label_bad, outCh)
 out_train = np.concatenate((np.ones((train_data_id.shape[0], 1)), -1 * np.ones((train_data_id.shape[0], 1))), axis=0)
 out_valid = np.concatenate((np.ones((valid_data_id.shape[0], 1)), -1 * np.ones((valid_data_id.shape[0], 1))), axis=0)
 im_train = np.tile(im[train_data_id, ...], (2, 1, 1, 1))
@@ -147,6 +147,8 @@ im_valid = np.tile(im[valid_data_id, ...], (2, 1, 1, 1))
 label_train = np.concatenate((label_good[train_data_id, ...], label_bad[train_data_id, ...]), axis=0)
 label_valid = np.concatenate((label_good[valid_data_id, ...], label_bad[valid_data_id, ...]), axis=0)
 print('Data is loaded. Training: %d, validation: %d' % (label_train.shape[0], label_valid.shape[0]))
+im_train, label_train = np.tile(im_train, (10, 1, 1, 1)), np.tile(label_train, (10, 1, 1, 1))
+out_train = np.tile(out_train, (10, 1))
 
 
 gradients_i = tf.concat(tf.gradients(model_.outputs[0], model_.inputs), axis=-1)
