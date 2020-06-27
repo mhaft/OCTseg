@@ -185,9 +185,9 @@ def weighted_categorical_crossentropy(loss_weight):
     def weighted_categorical_crossentropy_(label, target):
         eps = 1e-6
         target = tf.clip_by_value(tf.nn.softmax(target), eps, 1 - eps)
-        loss_ = - ((label * tf.log(target) + (1 - label) * tf.log(1 - target))
-                   * loss_weight * tf.cast(tf.size(label), dtype=tf.float32) /
+        loss_ = - ((label * tf.log(target))
+                   * loss_weight * tf.cast(tf.size(label[..., 0]), dtype=tf.float32) /
                    (tf.reduce_sum(label, axis=tf.range(tf.rank(label) - 1)) + 1))
-        return tf.reduce_sum(loss_, axis=-1)
+        return tf.reduce_mean(loss_, axis=-1)
 
     return weighted_categorical_crossentropy_
