@@ -39,7 +39,7 @@ def conv_layer(x, ChOut):
     return KL.add([h_conv3, h_conv1])
 
 
-def MaxPoolingND(x):
+def MaxPoolingND(x, s=2):
     """Maxpooling in x and y direction for 2D and 3D inputs
 
     Args:
@@ -56,10 +56,10 @@ def MaxPoolingND(x):
     """
     ndims = len(x.get_shape()) - 2
     MaxPoolingND = getattr(KL, 'MaxPooling%dD' % ndims)
-    return MaxPoolingND(pool_size=(1,) * (ndims == 3) + (2, 2))(x)
+    return MaxPoolingND(pool_size=(1,) * (ndims == 3) + (s, s), padding='same')(x)
 
 
-def up_conv(x):
+def up_conv(x, s=2):
     """upscaling of input tensor in x and y direction using transpose convolution in 2D or 3D.
 
     Args:
@@ -77,7 +77,7 @@ def up_conv(x):
     x_shape = x.get_shape()
     ndims = len(x_shape) - 2
     ConvNDTranspose = getattr(KL, 'Conv%dDTranspose' % ndims)
-    return ConvNDTranspose(x_shape[-1].value, (1,) * (ndims == 3) + (3, 3), strides=(1,) * (ndims == 3) + (2, 2),
+    return ConvNDTranspose(x_shape[-1].value, (1,) * (ndims == 3) + (s, s), strides=(1,) * (ndims == 3) + (s, s),
                            padding='same',)(x)
 
 
