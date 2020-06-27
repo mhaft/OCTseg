@@ -21,7 +21,9 @@ from keras.initializers import truncated_normal
 from keras.backend.tensorflow_backend import set_session
 from keras.losses import get
 from keras.utils import multi_gpu_model
-import matplotlib.pyplot as plt
+from tensorflow.python.client import device_lib
+from multiprocessing import cpu_count
+from multiprocessing.pool import ThreadPool
 import visdom
 
 from util.load_batch import img_aug
@@ -114,6 +116,7 @@ config = tf.ConfigProto(gpu_options=gpu_options)
 config.gpu_options.allow_growth = True
 config.allow_soft_placement = True
 set_session(tf.Session(config=config))
+numGPU = len([x.name for x in device_lib.list_local_devices() if x.device_type == 'GPU'])
 
 model_ = critique()
 vis = visdom.Visdom(env='main')
@@ -154,9 +157,12 @@ slopes = tf.sqrt(tf.reduce_sum(tf.square(gradients), reduction_indices=[-1]))
 gradient_penalty = tf.reduce_mean((slopes-1)**2)
 
 
-numGPU = len(os.popen('nvidia-smi').read().split('+\n')) - 5
-model = multi_gpu_model(model_, gpus=numGPU)
-model.compile(loss=get(loss), optimizer=optimizers.rmsprop(lr=lr, clipnorm=1.0))
+if numGPU > 1:
+    model = multi_gpu_model(model_, gpus=numGPU)
+else:
+    model = model_
+model.compile(loss=get(loss), optimizer=optimizers.rmsprop(lr=lr, clipnorm=1.0, clipvalue=1.0))  #
+
 
 # i1 = [0, im_train.shape[0] // 2]
 # im_train, label_train, out_train = im_train[i1, ...], label_train[i1, ...], out_train[i1, ...]
