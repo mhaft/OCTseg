@@ -73,17 +73,30 @@ def critique():
         return Model(inputs=[x, y], outputs=out[-1], name='critique')
 
 
-def make_iel_label(label_9class):
-    # return L[..., [3]] * (1 - L[..., [0]]) * (1 - L[..., [1]])
-
-    # 4 channel: Ch1: Lumen - GW , Ch2: visible intima ,  Ch3: visible media ,
-    #            Ch0: others ,  note visible is without GW and nonIEL
+def make_iel_label(label_9class, outCh):
     label = np.zeros(label_9class.shape[:-1] + (outCh,))
-    nonIEL_GW_mask = np.logical_not(np.logical_or(label_9class[..., 0], label_9class[..., 1]))
-    label[..., 1] = label_9class[..., 2]
-    label[..., 2] = np.logical_and(label_9class[..., 3], nonIEL_GW_mask)
-    label[..., 3] = np.logical_and(label_9class[..., 4], nonIEL_GW_mask)
-    label[..., 0] = np.all(np.logical_not(label[..., 1:]), axis=-1)
+    if outCh == 4:
+        # 4 channel: Ch1: Lumen , Ch2: visible intima ,  Ch3: visible media ,
+        #            Ch0: others ,  note visible is without GW and nonIEL
+        nonIEL_GW_mask = np.logical_not(np.logical_or(label_9class[..., 0], label_9class[..., 1]))
+        label[..., 1] = label_9class[..., 2]
+        label[..., 2] = np.logical_and(label_9class[..., 3], nonIEL_GW_mask)
+        label[..., 3] = np.logical_and(label_9class[..., 4], nonIEL_GW_mask)
+        label[..., 0] = np.all(np.logical_not(label[..., 1:]), axis=-1)
+
+    elif outCh == 6:
+        # 6 channel: Ch1: Lumen  , Ch2: visible intima ,  Ch3: visible media ,
+        #            Ch4 : GW outside Lumen ,  Ch5: nonIEL outside Lumen and GW,
+        #            Ch0: others ,  note visible is without GW and nonIEL
+        nonIEL_GW_mask = np.logical_not(np.logical_or(label_9class[..., 0], label_9class[..., 1]))
+        label[..., 1] = label_9class[..., 2]
+        label[..., 2] = np.logical_and(label_9class[..., 3], nonIEL_GW_mask)
+        label[..., 3] = np.logical_and(label_9class[..., 4], nonIEL_GW_mask)
+        outside_mask = np.all(np.logical_not(label[..., 1:4]), axis=-1)
+        label[..., 4] = np.logical_and(label_9class[..., 0], outside_mask)
+        nonIEL_withoutGW = np.logical_and(label_9class[..., 1], np.logical_not(label[..., 0]))
+        label[..., 5] = np.logical_and(nonIEL_withoutGW, outside_mask)
+        label[..., 0] = np.all(np.logical_not(label[..., 1:]), axis=-1)
     return label
 
 
