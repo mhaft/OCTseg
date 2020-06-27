@@ -183,12 +183,9 @@ def img_aug_polar(image, label, prob_lim=0.5):
         if np.random.rand() > prob_lim:  # image scaling
             scale = 1 + 0.25 * (np.random.rand() - 0.5)
             if scale > 1:
-                tmp = np.zeros_like(im_)
-                tmp = zoom(tmp, (dim == 3) * (1,) + (scale - 1, 1, 1))
-                im_ = np.concatenate((im_, tmp), axis=-3)
-                tmp = np.zeros_like(l_)
-                tmp = zoom(tmp, (dim == 3) * (1,) + (scale - 1, 1, 1))
-                l_ = np.concatenate((l_, tmp), axis=-3)
+                j = np.zeros(np.ceil(im_.shape[-3] * (scale - 1)).astype('int'), dtype='int')
+                im_ = np.concatenate((im_, 0 * im_[..., j, :, :]), axis=-3)
+                l_ = np.concatenate((l_, 0 * l_[..., j, :, :]), axis=-3)
             else:
                 j = np.ceil(im_.shape[-3] * scale).astype('int64')
                 im_ = im_[..., :j, :, :]
@@ -301,7 +298,7 @@ def load_batch_parallel(im, datasetID, nBatch, label=None, isAug=False, coord_sy
         if not isCritique:
             yield (im_, label_)
         else:
-            yield (im_, [label_, np.zeros((label_.shape[0], 1))])
+            yield (im_, [label_, datasetID[j][:, np.newaxis]])
         j = np.mod(j + nBatch, n)
 
 
@@ -318,7 +315,7 @@ class LoadBatchGen(Sequence):
         return int(np.ceil(len(self.datasetID) / self.nBatch))
 
     def __getitem__(self, item):
-        j_ = self.datasetID[self.j]
+        j_ = self.datasetID[self.j].copy()
         im_ = self.im[j_, ...].copy()
         if self.label is not None:
             label_ = self.label[j_, ...].copy()
@@ -330,15 +327,16 @@ class LoadBatchGen(Sequence):
         if not self.isCritique:
             return im_, label_
         else:
-            return im_, [label_, np.zeros((self.nBatch, 1))]
+            return im_, [label_, j_[:, np.newaxis]]
 
 
 class LoadBatchGenGPU(Sequence):
     """data generator class, a sub-class of  Keras' Sequence class"""
-    def __init__(self, im, datasetID, nBatch, label, isAug=True, coord_sys='polar', prob_lim=0.5, isCritique=False):
-        self.prob_lim, self.isCritique = prob_lim, isCritique
+    def __init__(self, im, datasetID, nBatch, label, isAug=True, coord_sys='polar', prob_lim=0.5, isCritique=False,
+                 error_list=[]):
+        self.prob_lim, self.isCritique, self.error_list = prob_lim, isCritique, np.array(error_list)
         self.W, self.L = im.shape[-3:-1]
-        self.datasetID, self.nBatch, self.isAug, self.n = datasetID, nBatch, isAug, len(datasetID)
+        self.datasetID, self.nBatch, self.isAug, self.n = np.array(datasetID), nBatch, isAug, len(datasetID)
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9)
         config = tf.ConfigProto(gpu_options=gpu_options)
         config.gpu_options.allow_growth = True
@@ -363,16 +361,23 @@ class LoadBatchGenGPU(Sequence):
         out = []
         for i_gpu, gpu in enumerate(self.gpus):
             with tf.device(gpu):
-                j_ = self.datasetID[self.j[(i_gpu * self.nSubBatch):((i_gpu + 1) * self.nSubBatch)]]
+                if self.error_list.size:
+                    j_ = np.concatenate((
+                        self.datasetID[np.random.randint(0, self.n, self.nSubBatch - self.nSubBatch//2)],
+                        self.error_list[np.random.randint(0, len(self.error_list), self.nSubBatch//2)]))
+                    print(j_)
+                else:
+                    j_ = self.datasetID[self.j[(i_gpu * self.nSubBatch):((i_gpu + 1) * self.nSubBatch)]]
                 out.append(self.sess.run((self.im_, self.label_), feed_dict={self.im_: self.im[j_, ...],
                                                                              self.label_: self.label[j_, ...]}))
+        j_ = self.datasetID[self.j][:, np.newaxis].copy()
         self.j = np.mod(self.j + self.nBatch, self.n)
         if not self.isCritique:
             return (np.concatenate([out[m][0] for m in range(len(self.gpus))], axis=0),
                     np.concatenate([out[m][1] for m in range(len(self.gpus))], axis=0))
         else:
             return (np.concatenate([out[m][0] for m in range(len(self.gpus))], axis=0),
-                    [np.concatenate([out[m][1] for m in range(len(self.gpus))], axis=0), np.zeros((self.nBatch, 1))])
+                    [np.concatenate([out[m][1] for m in range(len(self.gpus))], axis=0), j_])
 
     def polar_aug(self, im__, l__):
         im_out, label_out = tf.zeros([0] + im__.get_shape().as_list()[1:]), \
