@@ -164,10 +164,28 @@ else:
 model.compile(loss=get(loss), optimizer=optimizers.rmsprop(lr=lr, clipnorm=1.0, clipvalue=1.0))  #
 
 
-# i1 = [0, im_train.shape[0] // 2]
-# im_train, label_train, out_train = im_train[i1, ...], label_train[i1, ...], out_train[i1, ...]
-# i1 = [0, im_valid.shape[0] // 2]
-# im_valid, label_valid, out_valid = im_valid[i1, ...], label_valid[i1, ...], out_valid[i1, ...]
+def load_batch_parallel(im, datasetID, nBatch, label=None, out=None, isAug=False, coord_sys='carts', isCritique=False,
+                        prob_lim=0.5):
+    n = len(datasetID)
+    j = np.mod(np.arange(nBatch), n)
+    while True:
+        im_ = im[datasetID[j], ...].copy()
+        if label is not None:
+            label_ = label[datasetID[j], ...].copy()
+        else:
+            label_ = None
+        if isAug:
+            pool = ThreadPool(processes=cpu_count())
+            multiple_results = [pool.apply_async(img_aug, (im_[[i], ...], label_[[i], ...], coord_sys, prob_lim))
+                                for i in range(nBatch)]
+            for i, res in enumerate(multiple_results):
+                im_[i, ...], label_[i, ...] = res.get()
+            pool.close()
+        if not isCritique:
+            yield (im_, label_)
+        else:
+            yield ([im_, label_], out[datasetID[j], :])
+        j = np.mod(j + nBatch, n)
 
 for iEpoch in range(lastEpoch, nEpoch):
     print('Epoch %d / %d' % (iEpoch + 1, nEpoch))
