@@ -44,6 +44,7 @@ Returns:
 
 import argparse
 import os
+import time
 
 import tifffile
 import h5py
@@ -147,11 +148,10 @@ if __name__ == "__main__":
         with open(report_file, 'w') as f:
             f.write('Model, Epoch, ' +
                     (('Class %d Train TP, TN, FP, FN, TPR, TNR, Acc, Dice, ' +
-                     'Valid TP, TN, FP, FN, TPR, TNR, Acc, Dice, ') * len(classes)) % tuple(classes) + '\n')
+                     'Valid TP, TN, FP, FN, TPR, TNR, Acc, Dice, ') * len(classes)) % tuple(classes) +
+                     'Boundary MHD, Median, 90%, 95%, Max' + '\n')
 
-    with open(report_file, 'a') as f:
-        f.write('%s, %d' % (args.exp_def, args.epoch,))
-
+    report_out = '%s, %d' % (args.exp_def, args.epoch,)
     for i_class in classes:
         train_confusion_matrix = confusion_matrix(label[isTrain, ...] == i_class,
                                                   target[isTrain, ...] == i_class, mask[isTrain, ...])
@@ -159,10 +159,7 @@ if __name__ == "__main__":
                                                   target[np.logical_not(isTrain), ...] == i_class,
                                                   mask[np.logical_not(isTrain), ...])
 
-        with open(report_file, 'a') as f:
-            f.write((4 * ', %d' + 4 * ', %f' + 4 * ', %d' + 4 * ', %f') %
-                    (train_confusion_matrix + valid_confusion_matrix))
-
+        report_out += (4 * ', %d' + 4 * ', %f' + 4 * ', %d' + 4 * ', %f') % (train_confusion_matrix + valid_confusion_matrix)
         print('Summ.\t' + 4 * '%s\t' % ('TPR', 'TNR', 'Acc', 'Dice') + '\tClass %d' % i_class)
         print('Train\t' + 4 * '%.2f\t' % train_confusion_matrix[-4:])
         print('Valid\t' + 4 * '%.2f\t' % valid_confusion_matrix[-4:])
@@ -171,14 +168,20 @@ if __name__ == "__main__":
     valid_boundary_accuracy = boundary_accuracy(label[np.logical_not(isTrain), ...],
                                                 target[np.logical_not(isTrain), ...])
 
-    with open(report_file, 'a') as f:
-        f.write((10 * ', %f') % (tuple(train_boundary_accuracy) + tuple(valid_boundary_accuracy)))
+    report_out += (10 * ', %f') % (tuple(train_boundary_accuracy) + tuple(valid_boundary_accuracy))
 
     print('Boundary Accuracy')
     print('Summ.\t' + 5 * '%s\t' % ('MHD', '50%', '90%', '95%', 'Max'))
     print('Train\t' + 5 * '%.2f\t' % tuple(train_boundary_accuracy))
     print('Valid\t' + 5 * '%.2f\t' % tuple(valid_boundary_accuracy))
 
-    with open(report_file, 'a') as f:
-        f.write('\n')
+    report_out += '\n'
+    try:
+        with open(report_file, 'a') as f:
+            f.write(report_out)
+    except IOError:
+        time.sleep(3)
+        with open(report_file, 'a') as f:
+            f.write(report_out)
+
     print('Saved in %s' % report_file)
