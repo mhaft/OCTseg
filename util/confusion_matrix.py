@@ -48,6 +48,7 @@ import os
 import tifffile
 import h5py
 import numpy as np
+from scipy.ndimage.morphology import  distance_transform_edt
 
 
 def confusion_matrix(label, target, mask):
@@ -61,6 +62,27 @@ def confusion_matrix(label, target, mask):
     Acc = (TP + TN) / (TP + TN + FP + FN)
     Dice = 2 * TP / (2 * TP + FP + FN)
     return TP, TN, FP, FN, TPR, TNR, Acc, Dice
+
+
+def boundary_accuracy(label, target):
+
+    def boundary_mask(im_2d):
+        im_2d = np.pad(im_2d, ((0, 1), (0, 1)), mode='edge')
+        return distance_transform_edt(np.logical_and(im_2d[:-1, :-1] == im_2d[1:, :-1],
+                                                    im_2d[:-1, :-1] == im_2d[:-1, 1:]).astype('float'))
+
+    def boundary_error_2d(label, target):
+        label, target = boundary_mask(label), boundary_mask(target)
+        return np.concatenate(([np.max([np.mean(label[target == 0]), np.mean(target[label == 0])])],
+                               np.percentile(label[target == 0], [50, 90, 95, 100])))
+
+    out = np.zeros(5)
+    for i in range(label.shape[0]):
+        out += boundary_error_2d(label[i, ...], target[i, ...])
+    out /= label.shape[0]
+    return out
+
+
 
 
 if __name__ == "__main__":
@@ -98,6 +120,10 @@ if __name__ == "__main__":
     target = tifffile.imread(args.models_path + args.exp_def + '/a-out-epoch%06d.tif' % args.epoch)
 
     data_file = os.path.join(dataset_path, 'Dataset ' + coord_sys + ' Z%d-L%d-W%d-C%d.h5' % (nZ, L, w, inCh))
+    if not os.path.exists(data_file):
+        dataset_path = "D:\\MLIntravascularPolarimetry\\MLCardioPullbacks\\"
+    data_file = os.path.join(dataset_path, 'Dataset ' + coord_sys + ' Z%d-L%d-W%d-C%d.h5' % (nZ, L, w, inCh))
+
     report_file = '../model/confusion_matrix.csv'
 
     with h5py.File(data_file, 'r') as f:
@@ -140,6 +166,18 @@ if __name__ == "__main__":
         print('Summ.\t' + 4 * '%s\t' % ('TPR', 'TNR', 'Acc', 'Dice') + '\tClass %d' % i_class)
         print('Train\t' + 4 * '%.2f\t' % train_confusion_matrix[-4:])
         print('Valid\t' + 4 * '%.2f\t' % valid_confusion_matrix[-4:])
+
+    train_boundary_accuracy = boundary_accuracy(label[isTrain, ...], target[isTrain, ...])
+    valid_boundary_accuracy = boundary_accuracy(label[np.logical_not(isTrain), ...],
+                                                target[np.logical_not(isTrain), ...])
+
+    with open(report_file, 'a') as f:
+        f.write((10 * ', %f') % (tuple(train_boundary_accuracy) + tuple(valid_boundary_accuracy)))
+
+    print('Boundary Accuracy')
+    print('Summ.\t' + 5 * '%s\t' % ('MHD', '50%', '90%', '95%', 'Max'))
+    print('Train\t' + 5 * '%.2f\t' % tuple(train_boundary_accuracy))
+    print('Valid\t' + 5 * '%.2f\t' % tuple(valid_boundary_accuracy))
 
     with open(report_file, 'a') as f:
         f.write('\n')

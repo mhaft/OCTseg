@@ -9,6 +9,6 @@
 
 for i in {100..1000..100}
 do
-	echo '*******************   Model '$1'   Epoch   '$i'   ***********************'
+	echo '*******   Model '$1'   Epoch   '$i'   *******'
 	python confusion_matrix.py -epoch $i -exp_def $1 ;
 done
