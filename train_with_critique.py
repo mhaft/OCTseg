@@ -104,8 +104,8 @@ def main():
     parser.add_argument("-gpu_id", type=str, default="*", help="ID of GPUs to be used. Use * for all and '' for none.")
     parser.add_argument("-optimizer", type=str, default="RMSprop", help="optimizer")
     parser.add_argument("-is_critique", type=int, default=1, help="If critique model is used")
-    parser.add_argument("-critique_model", type=str, default="critique-outCh6_v9", help="critique definition")
-    parser.add_argument("-critiqueEpoch", type=int, default=1000, help="epoch of the critique model")
+    parser.add_argument("-critique_model", type=str, default="critique-outCh6_v10", help="critique definition")
+    parser.add_argument("-critiqueEpoch", type=int, default=20000, help="epoch of the critique model")
     parser.add_argument("-is_error_list", type=int, default=0, help="use the error_list.txt file")
     parser.add_argument("--mode", type=str)
     parser.add_argument("--port", type=int)
@@ -238,33 +238,34 @@ def main():
     else:
         error_list = []
 
-        # labels and masks
-        # Todo: add an input method for classes and masks
-        label = np.zeros(label_9class.shape[:-1] + (outCh,))
+    # labels and masks
+    # Todo: add an input method for classes and masks
+    label = np.zeros(label_9class.shape[:-1] + (outCh,))
 
-        if outCh == 4:
-            # 4 channel: Ch1: Lumen , Ch2: visible intima ,  Ch3: visible media ,
-            #            Ch0: others ,  note visible is without GW and nonIEL
-            nonIEL_GW_mask = np.logical_not(np.logical_or(label_9class[..., 0], label_9class[..., 1]))
-            label[..., 1] = label_9class[..., 2]
-            label[..., 2] = np.logical_and(label_9class[..., 3], nonIEL_GW_mask)
-            label[..., 3] = np.logical_and(label_9class[..., 4], nonIEL_GW_mask)
-            label[..., 0] = np.all(np.logical_not(label[..., 1:]), axis=-1)
+    if outCh == 4:
+        # 4 channel: Ch1: Lumen , Ch2: visible intima ,  Ch3: visible media ,
+        #            Ch0: others ,  note visible is without GW and nonIEL
+        nonIEL_GW_mask = np.logical_not(np.logical_or(label_9class[..., 0], label_9class[..., 1]))
+        label[..., 1] = label_9class[..., 2]
+        label[..., 2] = np.logical_and(label_9class[..., 3], nonIEL_GW_mask)
+        label[..., 3] = np.logical_and(label_9class[..., 4], nonIEL_GW_mask)
+        label[..., 0] = np.all(np.logical_not(label[..., 1:]), axis=-1)
 
-        elif outCh == 6:
-            # 6 channel: Ch1: Lumen  , Ch2: visible intima ,  Ch3: visible media ,
-            #            Ch4 : GW outside Lumen ,  Ch5: nonIEL outside Lumen and GW,
-            #            Ch0: others ,  note visible is without GW and nonIEL
-            nonIEL_GW_mask = np.logical_not(np.logical_or(label_9class[..., 0], label_9class[..., 1]))
-            label[..., 1] = label_9class[..., 2]
-            label[..., 2] = np.logical_and(label_9class[..., 3], nonIEL_GW_mask)
-            label[..., 3] = np.logical_and(label_9class[..., 4], nonIEL_GW_mask)
-            outside_mask = np.all(np.logical_not(label[..., 1:4]), axis=-1)
-            IEL_EEL = np.any(label_9class[..., 3:5], axis=-1)
-            label[..., 4] = np.logical_and(label_9class[..., 0], outside_mask)
-            nonIEL_withoutGW = np.logical_and(label_9class[..., 1], np.logical_not(label[..., 0]))
-            label[..., 5] = np.logical_and(nonIEL_withoutGW, outside_mask)
-            label[..., 0] = np.all(np.logical_not(label[..., 1:]), axis=-1)
+    elif outCh == 6:
+        # 6 channel: Ch1: Lumen  , Ch2: visible intima ,  Ch3: visible media ,
+        #            Ch4 : GW outside Lumen ,  Ch5: nonIEL outside Lumen and GW,
+        #            Ch0: others ,  note visible is without GW and nonIEL
+        nonIEL_GW_mask = np.logical_not(np.logical_or(label_9class[..., 0], label_9class[..., 1]))
+        label[..., 1] = label_9class[..., 2]
+        label[..., 2] = np.logical_and(label_9class[..., 3], nonIEL_GW_mask)
+        label[..., 3] = np.logical_and(label_9class[..., 4], nonIEL_GW_mask)
+        IEL_EEL = np.any(label_9class[..., 3:5], axis=-1)
+        # outside_mask = np.all(np.logical_not(label[..., 1:4]), axis=-1)
+        outside_mask = IEL_EEL
+        label[..., 4] = np.logical_and(label_9class[..., 0], outside_mask)
+        nonIEL_withoutGW = np.logical_and(label_9class[..., 1], np.logical_not(label_9class[..., 0]))
+        label[..., 5] = np.logical_and(nonIEL_withoutGW, outside_mask)
+        label[..., 0] = np.all(np.logical_not(label[..., 1:]), axis=-1)
 
     # training
     if isTrain:

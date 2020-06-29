@@ -103,6 +103,11 @@ def multi_loss(loss_weight, numClass):
             elif loss_weight.size == numClass + 2:
                 return weighted_cross_entropy_with_boundary(loss_weight[:-1])(label, target) + \
                        loss_weight[-1] * dice_loss(label, target)
+            elif loss_weight.size == numClass + 3:
+                return weighted_cross_entropy_with_boundary(loss_weight[:-2])(label, target) + \
+                       loss_weight[-2] * dice_loss(label, target) + \
+                       loss_weight[-1] * boundary_transition_loss()(label, target)
+
             else:
                 raise Exception('Loss weight has too many elements. Got %d' % loss_weight.size)
 
@@ -126,6 +131,8 @@ def weighted_cross_entropy_with_boundary(loss_weight, boundary_r=10):
          * :meth:`mask_boundary_neighborhood`
 
      """
+
+    loss_weight = np.array(loss_weight).astype('float32')
 
     def weighted_cross_entropy_with_boundary_(label, target):
         with tf.name_scope('wCEb'):
@@ -191,3 +198,22 @@ def weighted_categorical_crossentropy(loss_weight):
         return tf.reduce_mean(loss_, axis=-1)
 
     return weighted_categorical_crossentropy_
+
+
+def boundary_transition_loss():
+    """
+    Compare the number of boundaries along the columns.
+
+    """
+    def boundary_transition_loss_(label, target):
+        eps = 1e-6
+
+        def num_boundary(b):
+            b = 1 + tf.tanh((100 / eps) * (b - tf.reduce_max(b, axis=-1, keepdims=True)))
+            return 0.5 * tf.reduce_sum(tf.reduce_sum(tf.abs(b[..., 1:, :, :] - b[..., :-1, :, :]),
+                                                     axis=-1), axis=-2, keepdims=True)
+
+        target = tf.clip_by_value(tf.nn.softmax(target), eps, 1 - eps)
+        return tf.abs(num_boundary(label) - num_boundary(target))
+
+    return boundary_transition_loss_
