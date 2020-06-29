@@ -122,13 +122,13 @@ def animate_vis():
             iStart = 0
             vis.line(Y=np.concatenate((smooth(data[iStart:, 2])[..., np.newaxis],
                                       smooth(data[iStart:, 3])[..., np.newaxis]), axis=-1), X=data[iStart:, 0],
-                     env='main', win=args.exp_def, opts=dict(title=args.exp_def, xlabel='Epoch', ylabel='Loss',
+                     env=vis_env, win=args.exp_def, opts=dict(title=args.exp_def, xlabel='Epoch', ylabel='Loss',
                                                              legend=['Training Loss', 'Validation Loss']))
             iStart = -50 if data.shape[0] > 50 else 0
             vis.line(Y=np.concatenate(((data[iStart:, 2] / data[iStart, 2])[..., np.newaxis],
                                        (data[iStart:, 3] / data[iStart, 3])[..., np.newaxis]), axis=-1),
                      X=data[iStart:, 0],
-                     env='main', win=args.exp_def+'-zoom', opts=dict(title=args.exp_def+' zoom', xlabel='Epoch',
+                     env=vis_env, win=args.exp_def+'-zoom', opts=dict(title=args.exp_def+' zoom', xlabel='Epoch',
                                                                  ylabel='Loss',
                                                              legend=['Training Loss', 'Validation Loss']))
     except:
@@ -145,12 +145,13 @@ if __name__ == "__main__":
     nGPU = len(os.popen('nvidia-smi').read().split('+\n')) - 5
     numRecord = 0
     if args.render[0].lower() == 'v':
-        vis = visdom.Visdom(env='main')
+        vis_env = 'haft'
+        vis = visdom.Visdom(env=vis_env)
         while True:
             animate_vis()
             smi = '<p style="color:blue;font-family:monospace;font-size:80%;">' + \
                   '<br>'.join(os.popen('nvidia-smi').read().split('\n')[3:(7 + 3 * nGPU)]) + '</p>'
-            vis.text(smi, win='nvidia-smi')
+            vis.text(smi, env=vis_env, win='nvidia-smi')
             time.sleep(5)
     else:
         fig = plt.figure()
