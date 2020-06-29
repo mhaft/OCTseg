@@ -190,7 +190,7 @@ def main():
 
     optimizer = getattr(optimizers, args.optimizer)
     model.compile(optimizer=optimizer(lr=args.lr, decay=args.lr_decay),
-                  loss=get(multi_loss(loss_weight)))
+                  loss=get(multi_loss(loss_weight, outCh)))
 
     # load data
     data_file = os.path.join(folder_path, 'Dataset ' + coord_sys + ' Z%d-L%d-W%d-C%d.h5' % im_shape)
@@ -207,13 +207,29 @@ def main():
     # labels and masks
     # Todo: add an input method for classes and masks
     label = np.zeros(label_9class.shape[:-1] + (outCh,))
-    # 4 channel: Ch1: Lumen - GW , Ch2: visible intima ,  Ch3: visible media ,
-    #            Ch0: others ,  note visible is without GW and nonIEL
-    nonIEL_GW_mask = np.logical_not(np.logical_or(label_9class[..., 0], label_9class[..., 1]))
-    label[..., 1] = label_9class[..., 2]
-    label[..., 2] = np.logical_and(label_9class[..., 3], nonIEL_GW_mask)
-    label[..., 3] = np.logical_and(label_9class[..., 4], nonIEL_GW_mask)
-    label[..., 0] = np.all(np.logical_not(label[..., 1:]), axis=-1)
+
+    if outCh == 4:
+        # 4 channel: Ch1: Lumen , Ch2: visible intima ,  Ch3: visible media ,
+        #            Ch0: others ,  note visible is without GW and nonIEL
+        nonIEL_GW_mask = np.logical_not(np.logical_or(label_9class[..., 0], label_9class[..., 1]))
+        label[..., 1] = label_9class[..., 2]
+        label[..., 2] = np.logical_and(label_9class[..., 3], nonIEL_GW_mask)
+        label[..., 3] = np.logical_and(label_9class[..., 4], nonIEL_GW_mask)
+        label[..., 0] = np.all(np.logical_not(label[..., 1:]), axis=-1)
+
+    elif outCh == 6:
+        # 6 channel: Ch1: Lumen  , Ch2: visible intima ,  Ch3: visible media ,
+        #            Ch4 : GW outside Lumen ,  Ch5: nonIEL outside Lumen and GW,
+        #            Ch0: others ,  note visible is without GW and nonIEL
+        nonIEL_GW_mask = np.logical_not(np.logical_or(label_9class[..., 0], label_9class[..., 1]))
+        label[..., 1] = label_9class[..., 2]
+        label[..., 2] = np.logical_and(label_9class[..., 3], nonIEL_GW_mask)
+        label[..., 3] = np.logical_and(label_9class[..., 4], nonIEL_GW_mask)
+        outside_mask = np.all(np.logical_not(label[..., 1:4]), axis=-1)
+        label[..., 4] = np.logical_and(label_9class[..., 0], outside_mask)
+        nonIEL_withoutGW = np.logical_and(label_9class[..., 1], np.logical_not(label_9class[..., 0]))
+        label[..., 5] = np.logical_and(nonIEL_withoutGW, outside_mask)
+        label[..., 0] = np.all(np.logical_not(label[..., 1:]), axis=-1)
 
 
     # training
@@ -252,8 +268,8 @@ def main():
     # see the loss for the first 20 slices
     LOSS = np.zeros((20, ) + label.shape[1:-1], dtype='float32')
     for i in tqdm(range(LOSS.shape[0])):
-        LOSS[[i], ...] = K.eval(model.loss(tf.constant(label[[i], ...].astype('float32')),
-                                           tf.constant((out[[i], ...]).astype('float32'))))
+        LOSS[[i], ...] = K.eval(model.loss(tf.constant(label[[train_valid_data_id[i]], ...].astype('float32')),
+                                           tf.constant((out[[train_valid_data_id[i]], ...]).astype('float32'))))
 
     out = np.argmax(out, -1)
     label = np.argmax(label, -1)
