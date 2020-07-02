@@ -1,0 +1,10 @@
+# OCTseg requirements
+tensorflow_gpu == 1.14.0
+Keras == 2.2.4
+numpy == 1.16.2
+h5py == 2.9.0
+scipy == 1.2.1
+tifffile == 2019.7.20
+tqdm == 4.31.1
+matplotlib == 3.0.3
+visdom == 0.1.8.9
