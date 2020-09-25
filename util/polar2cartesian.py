@@ -22,7 +22,7 @@ def polar2cartesian(im, r0=0, full=True, deg=1, scale=1):
     The final image can be scale by a factor and the interpolation can be done in zero or one order.
 
     Args:
-        im: input polar 2D or 3D image. The 3D is in cylindrical coordinate system.
+        im: input polar 2D or 3D image. Single multi-channel. The 3D is in cylindrical coordinate system.
         r0: the row index of zero radius. The rows with lower index will be removed.  Default is 0.
         full: True if the output boundary inscribes the resulted circular boundary or be inscribed by the circular
                 boundary.  Default is True.
@@ -47,11 +47,13 @@ def polar2cartesian(im, r0=0, full=True, deg=1, scale=1):
     else:
         im = np.concatenate((im[..., -int(r0 + 1)::-1, :], im), axis=-2)
 
-
     if len(im.shape) == 2:
         out = np.zeros((w, w), dtype=im.dtype)
-    else:
+    elif len(im.shape) == 3:
         out = np.zeros((im.shape[0], w, w), dtype=im.dtype)
+    elif len(im.shape) == 4:
+        return np.concatenate(tuple((np.expand_dims(polar2cartesian(im[..., i], r0=r0, full=full, deg=deg,
+                              scale=scale), -1)) for i in range(im.shape[-1])), axis=-1)
 
     c = w / 2 - 0.5
     x, y = np.unravel_index((np.arange(w * w)).astype(int), (w, w))
