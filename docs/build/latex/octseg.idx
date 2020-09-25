@@ -1,13 +1,14 @@
 \indexentry{main() (in module train)@\spxentry{main()}\spxextra{in module train}|hyperpage}{3}
 \indexentry{unet.loss (module)@\spxentry{unet.loss}\spxextra{module}|hyperpage}{5}
+\indexentry{boundary\_transition\_loss() (in module unet.loss)@\spxentry{boundary\_transition\_loss()}\spxextra{in module unet.loss}|hyperpage}{5}
 \indexentry{dice\_loss() (in module unet.loss)@\spxentry{dice\_loss()}\spxextra{in module unet.loss}|hyperpage}{5}
 \indexentry{mask\_boundary\_neighborhood() (in module unet.loss)@\spxentry{mask\_boundary\_neighborhood()}\spxextra{in module unet.loss}|hyperpage}{5}
-\indexentry{multi\_loss() (in module unet.loss)@\spxentry{multi\_loss()}\spxextra{in module unet.loss}|hyperpage}{5}
+\indexentry{multi\_loss() (in module unet.loss)@\spxentry{multi\_loss()}\spxextra{in module unet.loss}|hyperpage}{6}
 \indexentry{weighted\_categorical\_crossentropy() (in module unet.loss)@\spxentry{weighted\_categorical\_crossentropy()}\spxextra{in module unet.loss}|hyperpage}{6}
 \indexentry{weighted\_cross\_entropy\_fun() (in module unet.loss)@\spxentry{weighted\_cross\_entropy\_fun()}\spxextra{in module unet.loss}|hyperpage}{6}
 \indexentry{weighted\_cross\_entropy\_with\_boundary() (in module unet.loss)@\spxentry{weighted\_cross\_entropy\_with\_boundary()}\spxextra{in module unet.loss}|hyperpage}{6}
-\indexentry{unet.ops (module)@\spxentry{unet.ops}\spxextra{module}|hyperpage}{6}
-\indexentry{MaxPoolingND() (in module unet.ops)@\spxentry{MaxPoolingND()}\spxextra{in module unet.ops}|hyperpage}{6}
+\indexentry{unet.ops (module)@\spxentry{unet.ops}\spxextra{module}|hyperpage}{7}
+\indexentry{MaxPoolingND() (in module unet.ops)@\spxentry{MaxPoolingND()}\spxextra{in module unet.ops}|hyperpage}{7}
 \indexentry{accuracy() (in module unet.ops)@\spxentry{accuracy()}\spxextra{in module unet.ops}|hyperpage}{7}
 \indexentry{conv\_layer() (in module unet.ops)@\spxentry{conv\_layer()}\spxextra{in module unet.ops}|hyperpage}{7}
 \indexentry{placeholder\_inputs() (in module unet.ops)@\spxentry{placeholder\_inputs()}\spxextra{in module unet.ops}|hyperpage}{7}
@@ -30,11 +31,11 @@
 \indexentry{load\_train\_data() (in module util.load\_data)@\spxentry{load\_train\_data()}\spxextra{in module util.load\_data}|hyperpage}{12}
 \indexentry{make\_dataset() (in module util.load\_data)@\spxentry{make\_dataset()}\spxextra{in module util.load\_data}|hyperpage}{13}
 \indexentry{util.plot\_log\_file (module)@\spxentry{util.plot\_log\_file}\spxextra{module}|hyperpage}{13}
-\indexentry{util.polar2cartesian (module)@\spxentry{util.polar2cartesian}\spxextra{module}|hyperpage}{13}
-\indexentry{polar2cartesian() (in module util.polar2cartesian)@\spxentry{polar2cartesian()}\spxextra{in module util.polar2cartesian}|hyperpage}{13}
+\indexentry{util.polar2cartesian (module)@\spxentry{util.polar2cartesian}\spxextra{module}|hyperpage}{14}
+\indexentry{polar2cartesian() (in module util.polar2cartesian)@\spxentry{polar2cartesian()}\spxextra{in module util.polar2cartesian}|hyperpage}{14}
 \indexentry{polar2cartesian\_large\_3d\_file() (in module util.polar2cartesian)@\spxentry{polar2cartesian\_large\_3d\_file()}\spxextra{in module util.polar2cartesian}|hyperpage}{14}
 \indexentry{util.process\_oct\_folder (module)@\spxentry{util.process\_oct\_folder}\spxextra{module}|hyperpage}{14}
-\indexentry{process\_oct\_folder() (in module util.process\_oct\_folder)@\spxentry{process\_oct\_folder()}\spxextra{in module util.process\_oct\_folder}|hyperpage}{14}
+\indexentry{process\_oct\_folder() (in module util.process\_oct\_folder)@\spxentry{process\_oct\_folder()}\spxextra{in module util.process\_oct\_folder}|hyperpage}{15}
 \indexentry{util.read\_oct\_roi\_file (module)@\spxentry{util.read\_oct\_roi\_file}\spxextra{module}|hyperpage}{15}
 \indexentry{boundary\_mask() (in module util.read\_oct\_roi\_file)@\spxentry{boundary\_mask()}\spxextra{in module util.read\_oct\_roi\_file}|hyperpage}{15}
 \indexentry{read\_oct\_roi\_file() (in module util.read\_oct\_roi\_file)@\spxentry{read\_oct\_roi\_file()}\spxextra{in module util.read\_oct\_roi\_file}|hyperpage}{15}

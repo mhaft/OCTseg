@@ -98,6 +98,12 @@
 <span id="loss"></span><h3>loss<a class="headerlink" href="#module-unet.loss" title="Permalink to this headline">¶</a></h3>
 <p>CNN related loss functions</p>
 <dl class="function">
+<dt id="unet.loss.boundary_transition_loss">
+<code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">boundary_transition_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.boundary_transition_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare the number of boundaries along the columns.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="unet.loss.dice_loss">
 <code class="sig-prename descclassname">unet.loss.</code><code class="sig-name descname">dice_loss</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.loss.dice_loss" title="Permalink to this definition">¶</a></dt>
 <dd><p>Soft Dice coefficient loss</p>
@@ -236,7 +242,7 @@ value is the loss weight fot the boundary and other elements are classes weights
 <p>CNN related operations</p>
 <dl class="function">
 <dt id="unet.ops.MaxPoolingND">
-<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">MaxPoolingND</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.MaxPoolingND" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">MaxPoolingND</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">s=2</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.MaxPoolingND" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maxpooling in x and y direction for 2D and 3D inputs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -333,7 +339,7 @@ LeakyReLY.</p>
 
 <dl class="function">
 <dt id="unet.ops.up_conv">
-<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">up_conv</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.up_conv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">unet.ops.</code><code class="sig-name descname">up_conv</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">s=2</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.ops.up_conv" title="Permalink to this definition">¶</a></dt>
 <dd><p>upscaling of input tensor in x and y direction using transpose convolution in 2D or 3D.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -359,7 +365,7 @@ LeakyReLY.</p>
 <p>Build U-Net model</p>
 <dl class="function">
 <dt id="unet.unet.unet_model">
-<code class="sig-prename descclassname">unet.unet.</code><code class="sig-name descname">unet_model</code><span class="sig-paren">(</span><em class="sig-param">im_shape</em>, <em class="sig-param">nFeature=32</em>, <em class="sig-param">outCh=2</em>, <em class="sig-param">nLayer=3</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.unet.unet_model" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">unet.unet.</code><code class="sig-name descname">unet_model</code><span class="sig-paren">(</span><em class="sig-param">im_shape</em>, <em class="sig-param">nFeature=32</em>, <em class="sig-param">outCh=2</em>, <em class="sig-param">nLayer=3</em>, <em class="sig-param">pool_scale=2</em><span class="sig-paren">)</span><a class="headerlink" href="#unet.unet.unet_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Build U-Net model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -430,7 +436,7 @@ LeakyReLY.</p>
 
 <dl class="class">
 <dt id="util.load_batch.LoadBatchGenGPU">
-<em class="property">class </em><code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">LoadBatchGenGPU</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">datasetID</em>, <em class="sig-param">nBatch</em>, <em class="sig-param">label</em>, <em class="sig-param">isAug=True</em>, <em class="sig-param">coord_sys='polar'</em>, <em class="sig-param">prob_lim=0.5</em>, <em class="sig-param">isCritique=False</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.LoadBatchGenGPU" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">util.load_batch.</code><code class="sig-name descname">LoadBatchGenGPU</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">datasetID</em>, <em class="sig-param">nBatch</em>, <em class="sig-param">label</em>, <em class="sig-param">isAug=True</em>, <em class="sig-param">coord_sys='polar'</em>, <em class="sig-param">prob_lim=0.5</em>, <em class="sig-param">isCritique=False</em>, <em class="sig-param">error_list=()</em>, <em class="sig-param">error_case_ratio=0.1</em><span class="sig-paren">)</span><a class="headerlink" href="#util.load_batch.LoadBatchGenGPU" title="Permalink to this definition">¶</a></dt>
 <dd><p>data generator class, a sub-class of  Keras’ Sequence class</p>
 </dd></dl>
 
@@ -746,7 +752,7 @@ The final image can be scale by a factor and the interpolation can be done in ze
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>im</strong> – input polar 2D or 3D image. The 3D is in cylindrical coordinate system.</p></li>
+<li><p><strong>im</strong> – input polar 2D or 3D image. Single multi-channel. The 3D is in cylindrical coordinate system.</p></li>
 <li><p><strong>r0</strong> – the row index of zero radius. The rows with lower index will be removed.  Default is 0.</p></li>
 <li><p><strong>full</strong> – True if the output boundary inscribes the resulted circular boundary or be inscribed by the circular
 boundary.  Default is True.</p></li>
@@ -762,7 +768,7 @@ boundary.  Default is True.</p></li>
 
 <dl class="function">
 <dt id="util.polar2cartesian.polar2cartesian_large_3d_file">
-<code class="sig-prename descclassname">util.polar2cartesian.</code><code class="sig-name descname">polar2cartesian_large_3d_file</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">r0=0</em>, <em class="sig-param">full=True</em>, <em class="sig-param">deg=1</em>, <em class="sig-param">scale=1</em><span class="sig-paren">)</span><a class="headerlink" href="#util.polar2cartesian.polar2cartesian_large_3d_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">util.polar2cartesian.</code><code class="sig-name descname">polar2cartesian_large_3d_file</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">r0=0</em>, <em class="sig-param">full=True</em>, <em class="sig-param">deg=1</em>, <em class="sig-param">scale=1</em>, <em class="sig-param">chunk_size=100</em><span class="sig-paren">)</span><a class="headerlink" href="#util.polar2cartesian.polar2cartesian_large_3d_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>polar to Cartesian conversion for big files.</p>
 <p>Similar to <a class="reference internal" href="#util.polar2cartesian.polar2cartesian" title="util.polar2cartesian.polar2cartesian"><code class="xref py py-meth docutils literal notranslate"><span class="pre">polar2cartesian()</span></code></a> but convert chunk by chunk to handle very large images.</p>
 <dl class="field-list simple">

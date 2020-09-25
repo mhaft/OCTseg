@@ -72,7 +72,7 @@
 
 
 \title{OCTseg}
-\date{Mar 02, 2020}
+\date{Sep 25, 2020}
 \release{}
 \author{Mohammad Haft-Javaherian}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -220,6 +220,14 @@ Train or test a U-Net model to analyze OCT images.
 \section{loss}
 \label{\detokenize{index:module-unet.loss}}\label{\detokenize{index:loss}}\index{unet.loss (module)@\spxentry{unet.loss}\spxextra{module}}
 CNN related loss functions
+\index{boundary\_transition\_loss() (in module unet.loss)@\spxentry{boundary\_transition\_loss()}\spxextra{in module unet.loss}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:unet.loss.boundary_transition_loss}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{boundary\_transition\_loss}}}{}{}
+Compare the number of boundaries along the columns.
+
+\end{fulllineitems}
+
 \index{dice\_loss() (in module unet.loss)@\spxentry{dice\_loss()}\spxextra{in module unet.loss}}
 
 \begin{fulllineitems}
@@ -413,7 +421,7 @@ CNN related operations
 \index{MaxPoolingND() (in module unet.ops)@\spxentry{MaxPoolingND()}\spxextra{in module unet.ops}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.ops.MaxPoolingND}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{MaxPoolingND}}}{\emph{x}}{}
+\phantomsection\label{\detokenize{index:unet.ops.MaxPoolingND}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{MaxPoolingND}}}{\emph{x}, \emph{s=2}}{}
 Maxpooling in x and y direction for 2D and 3D inputs
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode
@@ -547,7 +555,7 @@ image and label placeholders
 \index{up\_conv() (in module unet.ops)@\spxentry{up\_conv()}\spxextra{in module unet.ops}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.ops.up_conv}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{up\_conv}}}{\emph{x}}{}
+\phantomsection\label{\detokenize{index:unet.ops.up_conv}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.ops.}}\sphinxbfcode{\sphinxupquote{up\_conv}}}{\emph{x}, \emph{s=2}}{}
 upscaling of input tensor in x and y direction using transpose convolution in 2D or 3D.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode
@@ -585,7 +593,7 @@ Build U-Net model
 \index{unet\_model() (in module unet.unet)@\spxentry{unet\_model()}\spxextra{in module unet.unet}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.unet.unet_model}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.unet.}}\sphinxbfcode{\sphinxupquote{unet\_model}}}{\emph{im\_shape}, \emph{nFeature=32}, \emph{outCh=2}, \emph{nLayer=3}}{}
+\phantomsection\label{\detokenize{index:unet.unet.unet_model}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.unet.}}\sphinxbfcode{\sphinxupquote{unet\_model}}}{\emph{im\_shape}, \emph{nFeature=32}, \emph{outCh=2}, \emph{nLayer=3}, \emph{pool\_scale=2}}{}
 Build U-Net model.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -679,7 +687,7 @@ data generator class, a sub-class of  Keras’ Sequence class
 \index{LoadBatchGenGPU (class in util.load\_batch)@\spxentry{LoadBatchGenGPU}\spxextra{class in util.load\_batch}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:util.load_batch.LoadBatchGenGPU}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{LoadBatchGenGPU}}}{\emph{im}, \emph{datasetID}, \emph{nBatch}, \emph{label}, \emph{isAug=True}, \emph{coord\_sys='polar'}, \emph{prob\_lim=0.5}, \emph{isCritique=False}}{}
+\phantomsection\label{\detokenize{index:util.load_batch.LoadBatchGenGPU}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{util.load\_batch.}}\sphinxbfcode{\sphinxupquote{LoadBatchGenGPU}}}{\emph{im}, \emph{datasetID}, \emph{nBatch}, \emph{label}, \emph{isAug=True}, \emph{coord\_sys='polar'}, \emph{prob\_lim=0.5}, \emph{isCritique=False}, \emph{error\_list=()}, \emph{error\_case\_ratio=0.1}}{}
 data generator class, a sub-class of  Keras’ Sequence class
 
 \end{fulllineitems}
@@ -1162,7 +1170,7 @@ The final image can be scale by a factor and the interpolation can be done in ze
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{im}} \textendash{} input polar 2D or 3D image. The 3D is in cylindrical coordinate system.
+\sphinxstyleliteralstrong{\sphinxupquote{im}} \textendash{} input polar 2D or 3D image. Single multi-channel. The 3D is in cylindrical coordinate system.
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{r0}} \textendash{} the row index of zero radius. The rows with lower index will be removed.  Default is 0.
@@ -1189,7 +1197,7 @@ The converted version of im in Cartesian coordinate system.  The final size depe
 \index{polar2cartesian\_large\_3d\_file() (in module util.polar2cartesian)@\spxentry{polar2cartesian\_large\_3d\_file()}\spxextra{in module util.polar2cartesian}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:util.polar2cartesian.polar2cartesian_large_3d_file}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.polar2cartesian.}}\sphinxbfcode{\sphinxupquote{polar2cartesian\_large\_3d\_file}}}{\emph{im}, \emph{r0=0}, \emph{full=True}, \emph{deg=1}, \emph{scale=1}}{}
+\phantomsection\label{\detokenize{index:util.polar2cartesian.polar2cartesian_large_3d_file}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{util.polar2cartesian.}}\sphinxbfcode{\sphinxupquote{polar2cartesian\_large\_3d\_file}}}{\emph{im}, \emph{r0=0}, \emph{full=True}, \emph{deg=1}, \emph{scale=1}, \emph{chunk\_size=100}}{}
 polar to Cartesian conversion for big files.
 
 Similar to {\hyperref[\detokenize{index:util.polar2cartesian.polar2cartesian}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{polar2cartesian()}}}}} but convert chunk by chunk to handle very large images.
