@@ -107,6 +107,7 @@ def main():
     parser.add_argument("-critique_model", type=str, default="critique-outCh6_v10", help="critique definition")
     parser.add_argument("-critiqueEpoch", type=int, default=20000, help="epoch of the critique model")
     parser.add_argument("-is_error_list", type=int, default=0, help="use the error_list.txt file")
+    parser.add_argument("-error_case_ratio", type=float, default=0.1, help="error case ratio in the batch")
     parser.add_argument("--mode", type=str)
     parser.add_argument("--port", type=int)
 
@@ -232,7 +233,7 @@ def main():
     if args.is_error_list:
         with open('error_list.txt', 'r') as f:
             error_list = f.readlines()
-        error_list = [int(i) for i in error_list]
+        error_list = [int(i) - 1 for i in error_list]
         error_list = np.union1d(train_data_id, valid_data_id)[error_list]
         error_list = np.intersect1d(train_data_id, error_list)
     else:
@@ -270,7 +271,8 @@ def main():
     # training
     if isTrain:
         train_data_gen = LoadBatchGenGPU(im, train_data_id, nBatch, label, isAug=args.isAug, coord_sys=coord_sys,
-                                         prob_lim=0.5, isCritique=args.is_critique, error_list=error_list)
+                                         prob_lim=0.5, isCritique=args.is_critique,
+                                         error_list=error_list, error_case_ratio=args.error_case_ratio)
         if args.epochSize == 0:
             args.epochSize = np.ceil(train_data_id.size / nBatch).astype('int')
         else:
