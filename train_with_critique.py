@@ -76,7 +76,7 @@ def main():
     # parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("-exp_def", type=str, default="test", help="experiment definition")
-    parser.add_argument("-models_path", type=str, default="model/", help="path for saving models")
+    parser.add_argument("-models_path", type=str, default="model", help="path for saving models")
     parser.add_argument("-lr", type=float, default=1e-4, help="learning rate")
     parser.add_argument("-lr_decay", type=float, default=0.0, help="learning rate decay")
     parser.add_argument("-data_path", type=str, default="D:\\MLIntravascularPolarimetry\\MLCardioPullbacks\\",
@@ -117,12 +117,13 @@ def main():
     isTest = args.isTest
     isTrain = 0 if args.isTest else 1
     models_path = args.models_path
+    experiment_path = os.path.join(models_path, experiment_def)
 
     # prepare a folder for the saved models and log file
-    if not os.path.exists(models_path + experiment_def):
-        os.makedirs(models_path + experiment_def)
-    save_file_name = models_path + experiment_def + '/model-epoch%06d.h5'
-    log_file = models_path + experiment_def + '/log-' + experiment_def + '.csv'
+    if not os.path.exists(experiment_path):
+        os.makedirs(experiment_path)
+    save_file_name = os.path.join(experiment_path, 'model-epoch%06d.h5')
+    log_file = os.path.join(experiment_path, 'log-' + experiment_def + '.csv')
 
     # read parameter from log file
     if args.isTest == 2:
@@ -160,7 +161,7 @@ def main():
     else:
         numGPU = len(args.gpu_id.split(','))
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9)
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=1.0)
     config = tf.ConfigProto(gpu_options=gpu_options)
     config.gpu_options.allow_growth = True
     config.allow_soft_placement = True
@@ -172,7 +173,8 @@ def main():
 
     # critique loss
     if args.is_critique:
-        critique = load_model(models_path + args.critique_model + '/model-epoch%06d.h5' % args.critiqueEpoch,
+        critique = load_model(os.path.join(models_path, args.critique_model,
+                                           'model-epoch%06d.h5' % args.critiqueEpoch),
                               custom_objects={'loss': get(lambda y_, y: tf.reduce_mean(tf.abs(1 - y_ * y)))})
         critique.name = 'critique'
         for L in critique.layers:
@@ -184,7 +186,7 @@ def main():
 
     if isTrain:
         # load the last saved model if exists
-        f = glob.glob(models_path + experiment_def + '/model-epoch*.h5')
+        f = glob.glob(os.path.join(experiment_path, 'model-epoch*.h5'))
         f.sort()
         if len(f):
             iEpochStart = int(f[-1][-9:-3])
@@ -339,12 +341,13 @@ def main():
         label[train_data_id, ...] = i
 
         # write files
-        tifffile.imwrite(models_path + experiment_def + '/a-label.tif', label[train_valid_data_id, ...].astype(np.uint8))
-        tifffile.imwrite(models_path + experiment_def + '/a-out-epoch%06d.tif' % iEpoch,
+        tifffile.imwrite(os.path.join(experiment_path, 'a-label.tif'), label[train_valid_data_id, ...].astype(
+            np.uint8))
+        tifffile.imwrite(os.path.join(experiment_path, 'a-out-epoch%06d.tif' % iEpoch),
                          out[train_valid_data_id, ...].astype(np.uint8))
-        tifffile.imwrite(models_path + experiment_def + '/a-im.tif',
+        tifffile.imwrite(os.path.join(experiment_path, 'a-im.tif'),
                          (im[train_valid_data_id, ...] * 255).astype(np.uint8).squeeze())
-        tifffile.imwrite(models_path + experiment_def + '/a-loss.tif', LOSS.astype('float32'))
+        tifffile.imwrite(os.path.join(experiment_path, 'a-loss.tif'), LOSS.astype('float32'))
     else:
         files = glob.glob(os.path.join(args.testDir, '*.pstif'))
         for f in tqdm(files):
