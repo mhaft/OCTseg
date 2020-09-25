@@ -138,8 +138,8 @@ def weighted_cross_entropy_with_boundary(loss_weight, boundary_r=10):
         with tf.name_scope('wCEb'):
             dist_mask = mask_boundary_neighborhood(label, r=boundary_r, numClass=(loss_weight.size - 1))
             eps = 1e-6
-            target = tf.clip_by_value(tf.nn.softmax(target), eps, 1 - eps)
-            cross_entropy = tf.reduce_mean(- label * tf.log(target), axis=-1)
+            target_ = tf.clip_by_value(tf.nn.softmax(target), eps, 1 - eps)
+            cross_entropy = tf.reduce_mean(- label * tf.log(target_), axis=-1)
         return (tf.multiply(cross_entropy, dist_mask) * loss_weight[-1]) + \
                 weighted_categorical_crossentropy(loss_weight[:-1])(label, target)
 
