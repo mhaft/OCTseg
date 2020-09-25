@@ -1,5 +1,5 @@
 # OCTseg requirements
-tensorflow_gpu == 1.14.0
+tensorflow-gpu == 1.14.0
 Keras == 2.2.4
 numpy == 1.16.2
 h5py == 2.9.0
