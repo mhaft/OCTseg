@@ -140,6 +140,7 @@ if __name__ == "__main__":
     parser.add_argument("-exp_def", type=str, default="test", help="experiment definition")
     parser.add_argument("-models_path", type=str, default="../model/", help="path for saving models")
     parser.add_argument("-render", type=str, default="visdom", help="plot environment: visdom (v) or pyplot (p)")
+    parser.add_argument("-nvidia_smi", type=int, default=0, help="print output of nvidia-smi")
     args = parser.parse_args()
     log_file = args.models_path + args.exp_def + '/log-' + args.exp_def + '.csv'
     nGPU = len(os.popen('nvidia-smi').read().split('+\n')) - 5
@@ -149,9 +150,10 @@ if __name__ == "__main__":
         vis = visdom.Visdom(env=vis_env)
         while True:
             animate_vis()
-            smi = '<p style="color:blue;font-family:monospace;font-size:80%;">' + \
-                  '<br>'.join(os.popen('nvidia-smi').read().split('\n')[3:(7 + 3 * nGPU)]) + '</p>'
-            vis.text(smi, env=vis_env, win='nvidia-smi')
+            if args.nvidia_smi:
+                smi = '<p style="color:blue;font-family:monospace;font-size:80%;">' + \
+                      '<br>'.join(os.popen('nvidia-smi').read().split('\n')[3:(7 + 3 * nGPU)]) + '</p>'
+                vis.text(smi, env=vis_env, win='nvidia-smi')
             time.sleep(5)
     else:
         fig = plt.figure()
