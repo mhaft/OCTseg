@@ -7,6 +7,9 @@
 
 """Read parameters from the header line of the log file"""
 
+import re
+import warnings
+
 
 def read_parameter_from_log_file(args, log_file):
     """
@@ -20,47 +23,22 @@ def read_parameter_from_log_file(args, log_file):
 
     """
 
-    with open(log_file) as f:
-        line = f.readline().split(',')
-    for x in line:
-        x = x.strip(' \t\n\r)')
-        if x.startswith("Namespace"):
-            x = x[10:]
-        if x.startswith("data_path="):
-            args.data_path = x[11:-1]
-        elif x.startswith("l="):
-            args.l = int(x[2:])
-        elif x.startswith("w="):
-            args.w = int(x[2:])
-        elif x.startswith("inCh="):
-            args.inCh = int(x[5:])
-        elif x.startswith("nZ="):
-            args.nZ = int(x[3:])
-        elif x.startswith("outCh="):
-            args.outCh = int(x[6:])
-        elif x.startswith("isCarts="):
-            args.isCarts = int(x[8:])
-        elif x.startswith("epochSize="):
-            args.epochSize = int(x[10:])
-        elif x.startswith("nBatch="):
-            args.nBatch = int(x[7:])
-        elif x.startswith("nEpoch="):
-            args.nEpoch = int(x[7:])
-        elif x.startswith("nFeature="):
-            args.nFeature = int(x[9:])
-        elif x.startswith("nLayer="):
-            args.nLayer = int(x[7:])
-        elif x.startswith("saveEpoch="):
-            args.saveEpoch = int(x[10:])
-        elif x.startswith("critique_model="):
-            args.critique_model = x[16:-1]
-        elif x.startswith("critiqueEpoch="):
-            args.critique_model = int(x[14:])
+    f = open(log_file, 'r')
+    params = re.findall(r"\b[\w-]+\=\'.*?\'[,)]|\b[\w-]+\=.*?[,)]", f.readline())
+    f.close()
+    testEpoch = args.testEpoch  # it should not get updated.
 
-    with open(log_file) as f:
-        line = f.readline().split('\'')
-    for i in range(len(line)):
-        if line[i].endswith("loss_w="):
-            args.loss_w = line[i + 1]
-            break
+    for param in params:
+        a, v = param.split("=")
+        v = v.strip('\'",)')
+        if v.isnumeric() or (v[0] == '-' and v[1:].isnumeric()):
+            v = int(v)
+        elif ''.join(re.split(r'[.eE\-]', v)).isnumeric():
+            v = float(v)
+        if hasattr(args, a):
+            setattr(args, a, v)
+        else:
+            warnings.warn('The parameter %s in the log file is deprecated. log file: %s ' % (a, log_file))
+
+    args.testEpoch = testEpoch
     return args
