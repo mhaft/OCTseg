@@ -333,8 +333,9 @@ class LoadBatchGen(Sequence):
 class LoadBatchGenGPU(Sequence):
     """data generator class, a sub-class of  Keras' Sequence class"""
     def __init__(self, im, datasetID, nBatch, label, isAug=True, coord_sys='polar', prob_lim=0.5, isCritique=False,
-                 error_list=[]):
-        self.prob_lim, self.isCritique, self.error_list = prob_lim, isCritique, np.array(error_list)
+                 error_list=(), error_case_ratio=0.1):
+        self.prob_lim, self.isCritique, = prob_lim, isCritique
+        self.error_list, self.error_case_ratio = np.array(error_list), error_case_ratio
         self.W, self.L = im.shape[-3:-1]
         self.datasetID, self.nBatch, self.isAug, self.n = np.array(datasetID), nBatch, isAug, len(datasetID)
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9)
@@ -362,10 +363,11 @@ class LoadBatchGenGPU(Sequence):
         for i_gpu, gpu in enumerate(self.gpus):
             with tf.device(gpu):
                 if self.error_list.size:
+                    n_error = int(np.ceil(self.nSubBatch * self.error_case_ratio))
+                    n_normal = self.nSubBatch - n_error
                     j_ = np.concatenate((
-                        self.datasetID[np.random.randint(0, self.n, self.nSubBatch - self.nSubBatch//2)],
-                        self.error_list[np.random.randint(0, len(self.error_list), self.nSubBatch//2)]))
-                    print(j_)
+                        self.datasetID[np.random.randint(0, self.n, n_normal)],
+                        self.error_list[np.random.randint(0, len(self.error_list), n_error)]))
                 else:
                     j_ = self.datasetID[self.j[(i_gpu * self.nSubBatch):((i_gpu + 1) * self.nSubBatch)]]
                 out.append(self.sess.run((self.im_, self.label_), feed_dict={self.im_: self.im[j_, ...],
