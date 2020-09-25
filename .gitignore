@@ -5,3 +5,4 @@ model/**
 *.pyc
 .coverage
 __pycache__
+sample/**
