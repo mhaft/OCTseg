@@ -51,7 +51,7 @@ import h5py
 import numpy as np
 from scipy.ndimage.morphology import distance_transform_edt
 
-from util.read_parameter_from_log_file import read_parameter_from_log_file
+from read_parameter_from_log_file import read_parameter_from_log_file
 
 
 def confusion_matrix(label, target, mask):
@@ -82,7 +82,7 @@ def boundary_accuracy(label, target):
                                [np.mean(label[target == 0])])) \
             if np.any(target == 0) else np.zeros(6) + np.inf
 
-    out = np.zeros(5)
+    out = np.zeros(6)
     for i in range(label.shape[0]):
         out += boundary_error_2d(label[i, ...], target[i, ...])
     out /= label.shape[0]
@@ -96,13 +96,15 @@ if __name__ == "__main__":
     parser.add_argument("-testEpoch", type=int, default=1000, help="model saved at this epoch")
     parser.add_argument("-useMask", type=int, default=0, help="use guide wire and nonIEL masks")
     args = parser.parse_args()
+    args.nZ, args.l, args.w, args.inCh, args.outCh, args.isCarts, args.data_path = 0, 0, 0, 0, 0, 0, ''
 
-    log_file = os.path.join(args.models_path, args.exp_def, 'log-' + args.exp_def + '.csv')
+    models_path = args.models_path
+    log_file = os.path.join(models_path, args.exp_def, 'log-' + args.exp_def + '.csv')
     args = read_parameter_from_log_file(args, log_file)
     coord_sys = 'carts' if args.isCarts else 'polar'
 
-    label = np.mod(tifffile.imread(args.models_path + args.exp_def + '/a-label.tif'), args.outCh)
-    target = tifffile.imread(args.models_path + args.exp_def + '/a-out-epoch%06d.tif' % args.testEpoch)
+    label = np.mod(tifffile.imread(models_path + args.exp_def + '/a-label.tif'), args.outCh)
+    target = tifffile.imread(models_path + args.exp_def + '/a-out-epoch%06d.tif' % args.testEpoch)
 
     data_file = os.path.join(args.data_path, 'Dataset ' + coord_sys + ' Z%d-L%d-W%d-C%d.h5' % (args.nZ, args.l, args.w,
                                                                                                args.inCh))
