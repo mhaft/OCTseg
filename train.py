@@ -30,6 +30,7 @@ from unet.loss import multi_loss
 from util.load_data import load_train_data
 from util.load_batch import LoadBatchGenGPU, polar_zoom
 from util.read_parameter_from_log_file import read_parameter_from_log_file
+from util.postprocessing import postprocessing
 
 
 def main():
@@ -375,6 +376,7 @@ def main():
                 out_[..., j] = out[:, :, np.r_[(512 - shift[j]):im_shape[2], 0:(512 - shift[j])]]
             out = np.median(out_, axis=3)
             tifffile.imwrite(f[:-6] + '-fwd.tif', out.astype(np.uint8))
+            tifffile.imwrite(f[:-6] + '-fwd-post.tif', postprocessing(out.astype(np.uint8)))
             tifffile.imwrite(f[:-6] + '-im.tif', (im * 255).astype(np.uint8).squeeze())
 
 
