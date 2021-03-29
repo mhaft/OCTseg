@@ -84,8 +84,8 @@ def boundary_accuracy(label, target):
 
         return np.concatenate(([np.max([np.mean(label[target == 0]), np.mean(target[label == 0])])],
                                np.percentile(label[target == 0], [50, 90, 95, 100]),
-                               [np.mean(label[target == 0])])) \
-            if np.any(target == 0) else np.zeros(6) + np.inf
+                               [np.mean(target[label == 0])])) \
+            if np.any(target == 0) and np.any(label == 0) else np.zeros(6)
 
     out = np.zeros(6)
     for i in range(label.shape[0]):
