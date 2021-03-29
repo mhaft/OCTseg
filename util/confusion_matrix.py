@@ -50,16 +50,21 @@ import tifffile
 import h5py
 import numpy as np
 from scipy.ndimage.morphology import distance_transform_edt
+import pandas as pd
+import seaborn as sns
+import cv2
+import matplotlib.pyplot as plt
 
-from read_parameter_from_log_file import read_parameter_from_log_file
+from util.read_parameter_from_log_file import read_parameter_from_log_file
 
 
 def confusion_matrix(label, target, mask):
     label, target = np.logical_and(label > 0, mask), np.logical_and(target > 0, mask)
-    TP = np.sum(np.logical_and(label, target))
-    TN = np.sum(np.logical_and(np.logical_not(label), np.logical_not(target))) - np.sum(np.logical_not(mask))
-    FP = np.sum(np.logical_and(np.logical_not(label), target))
-    FN = np.sum(np.logical_and(label, np.logical_not(target)))
+    TP = np.sum(np.logical_and(label, target)).astype('float')
+    TN = np.sum(np.logical_and(np.logical_not(label), np.logical_not(target))) - \
+         np.sum(np.logical_not(mask)).astype('float')
+    FP = np.sum(np.logical_and(np.logical_not(label), target)).astype('float')
+    FN = np.sum(np.logical_and(label, np.logical_not(target))).astype('float')
     TPR = TP / (TP + FN)
     TNR = TN / (TN + FP)
     Acc = (TP + TN) / (TP + TN + FP + FN)
@@ -112,12 +117,13 @@ def boundary_accuracy_column_wise(label, target, mask=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-exp_def", type=str, default="1z", help="experiment definition")
+    parser.add_argument("-exp_def", type=str, default="test", help="experiment definition")
     parser.add_argument("-models_path", type=str, default='../model/', help="experiment definition")
     parser.add_argument("-testEpoch", type=int, default=1000, help="model saved at this epoch")
     parser.add_argument("-useMask", type=int, default=0, help="use guide wire and nonIEL masks")
     args = parser.parse_args()
     args.nZ, args.l, args.w, args.inCh, args.outCh, args.isCarts, args.data_path = 0, 0, 0, 0, 0, 0, ''
+    args.isTest, args.testDir = 2, '-'
 
     models_path = args.models_path
     log_file = os.path.join(models_path, args.exp_def, 'log-' + args.exp_def + '.csv')
@@ -129,10 +135,6 @@ if __name__ == "__main__":
 
     data_file = os.path.join(args.data_path, 'Dataset ' + coord_sys + ' Z%d-L%d-W%d-C%d.h5' % (args.nZ, args.l, args.w,
                                                                                                args.inCh))
-    if not os.path.exists(data_file):
-        args.data_path = "D:\\MLIntravascularPolarimetry\\MLCardioPullbacks\\"
-        data_file = os.path.join(args.data_path, 'Dataset ' + coord_sys + ' Z%d-L%d-W%d-C%d.h5' %
-                                 (args.nZ, args.l, args.w, args.inCh))
 
     report_file = '../model/confusion_matrix.csv'
 
@@ -148,9 +150,7 @@ if __name__ == "__main__":
         else:
             mask = np.ones((train_valid_data_id.size,) + (1,) * (label.ndim - 1))
 
-    isTrain = []
-    for i in train_valid_data_id:
-        isTrain.append(True if i in train_data_id else False)
+    isTrain = [True if i in train_data_id else False for i in train_valid_data_id]
 
     classes = [1] if args.outCh == 2 else range(args.outCh)
     if not os.path.exists(report_file):
