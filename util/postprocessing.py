@@ -72,3 +72,7 @@ def clean_6label(label, filterSize=(5, 15)):
          np.logical_and(np.logical_not(np.any(c2, axis=-2, keepdims=True)), np.logical_not(c0 + c1 + c4))
     c3 = np.logical_not(c0 + c1 + c2 + c4 + c5)
     return (c1 + 2 * c2 + 3 * c3 + 4 * c4 + 5 * c5).astype(label.dtype)
+
+
+def postprocessing(label, filterSize=(5, 15)):
+    return clean_6label(label, filterSize=filterSize)
