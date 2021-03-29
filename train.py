@@ -355,11 +355,16 @@ def main():
             im = im.astype(np.float32) / 255
             im = np.moveaxis(np.reshape(im, (-1, 3,) + im.shape[1:]), 1, -1)
             im = polar_zoom(im, scale=im_shape[1] / im.shape[1])
-            out = model.predict(im, batch_size=nBatch, verbose=1)
-            if args.is_critique:
-                out = np.array(out[0])
-            out = np.argmax(out, -1)
-            tifffile.imwrite(f[:-6] + '-carpet.tif', np.sum(out == 2, axis=1).astype(np.uint8))
+            shift = (0, 128, 256, 384)
+            out_ = np.zeros(im.shape[:-1] + (len(shift),))
+            for j in range(len(shift)):
+                im_ = im[:, :, np.r_[shift[j]:im_shape[2], 0:shift[j]]]
+                out = model.predict(im_, batch_size=nBatch, verbose=1)
+                if args.is_critique:
+                    out = np.array(out[0])
+                out = np.argmax(out, -1)
+                out_[..., j] = out[:, :, np.r_[(512 - shift[j]):im_shape[2], 0:(512 - shift[j])]]
+            out = np.median(out_, axis=3)
             tifffile.imwrite(f[:-6] + '-fwd.tif', out.astype(np.uint8))
             tifffile.imwrite(f[:-6] + '-im.tif', (im * 255).astype(np.uint8).squeeze())
 
