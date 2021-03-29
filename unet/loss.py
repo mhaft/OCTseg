@@ -200,7 +200,7 @@ def weighted_categorical_crossentropy(loss_weight):
     return weighted_categorical_crossentropy_
 
 
-def boundary_transition_loss():
+def boundary_transition_loss(isPixel = False):
     """
     Compare the number of boundaries along the columns.
 
@@ -213,7 +213,18 @@ def boundary_transition_loss():
             return 0.5 * tf.reduce_sum(tf.reduce_sum(tf.abs(b[..., 1:, :, :] - b[..., :-1, :, :]),
                                                      axis=-1), axis=-2, keepdims=True)
 
+        # apply the loss just to the boundary instead of the whole column
+        def num_boundary_pixel(b, keepdims):
+            seg_prob_sat = tf.tanh((100 / eps) * (b - tf.reduce_max(b, axis=-1, keepdims=True)))
+            b = 1 - 0.5 * tf.reduce_sum(tf.abs(seg_prob_sat[..., 1:, :, :] - seg_prob_sat[..., :-1, :, :]), axis=-1)
+            b_c = tf.concat([b[..., :1, :] * 0, 1 - b[..., :-1, :] * b[..., 1:, :], b[..., :1, :] * 0], -2)
+            return b_c if keepdims else tf.reduce_sum(b_c, axis=-2, keepdims=True)
+
         target = tf.clip_by_value(tf.nn.softmax(target), eps, 1 - eps)
-        return tf.abs(num_boundary(label) - num_boundary(target))
+        if isPixel:
+            return tf.abs(num_boundary_pixel(label, False) - num_boundary_pixel(target, False)) * \
+                   num_boundary_pixel(target, True)
+        else:
+            tf.abs(num_boundary(label) - num_boundary(target))
 
     return boundary_transition_loss_
