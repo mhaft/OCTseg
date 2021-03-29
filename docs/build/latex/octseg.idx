@@ -4,6 +4,7 @@
 \indexentry{dice\_loss() (in module unet.loss)@\spxentry{dice\_loss()}\spxextra{in module unet.loss}|hyperpage}{5}
 \indexentry{mask\_boundary\_neighborhood() (in module unet.loss)@\spxentry{mask\_boundary\_neighborhood()}\spxextra{in module unet.loss}|hyperpage}{5}
 \indexentry{multi\_loss() (in module unet.loss)@\spxentry{multi\_loss()}\spxextra{in module unet.loss}|hyperpage}{6}
+\indexentry{new\_loss2x3ch() (in module unet.loss)@\spxentry{new\_loss2x3ch()}\spxextra{in module unet.loss}|hyperpage}{6}
 \indexentry{weighted\_categorical\_crossentropy() (in module unet.loss)@\spxentry{weighted\_categorical\_crossentropy()}\spxextra{in module unet.loss}|hyperpage}{6}
 \indexentry{weighted\_cross\_entropy\_fun() (in module unet.loss)@\spxentry{weighted\_cross\_entropy\_fun()}\spxextra{in module unet.loss}|hyperpage}{6}
 \indexentry{weighted\_cross\_entropy\_with\_boundary() (in module unet.loss)@\spxentry{weighted\_cross\_entropy\_with\_boundary()}\spxextra{in module unet.loss}|hyperpage}{6}

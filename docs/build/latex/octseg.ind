@@ -45,6 +45,10 @@
   \item \spxentry{multi\_loss()}\spxextra{in module unet.loss}, \hyperpage{6}
 
   \indexspace
+  \bigletter N
+  \item \spxentry{new\_loss2x3ch()}\spxextra{in module unet.loss}, \hyperpage{6}
+
+  \indexspace
   \bigletter P
   \item \spxentry{placeholder\_inputs()}\spxextra{in module unet.ops}, \hyperpage{7}
   \item \spxentry{polar2cartesian()}\spxextra{in module util.polar2cartesian}, \hyperpage{14}

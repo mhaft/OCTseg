@@ -72,7 +72,7 @@
 
 
 \title{OCTseg}
-\date{Sep 25, 2020}
+\date{Mar 29, 2021}
 \release{}
 \author{Mohammad Haft-Javaherian}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -223,8 +223,9 @@ CNN related loss functions
 \index{boundary\_transition\_loss() (in module unet.loss)@\spxentry{boundary\_transition\_loss()}\spxextra{in module unet.loss}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:unet.loss.boundary_transition_loss}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{boundary\_transition\_loss}}}{}{}
-Compare the number of boundaries along the columns.
+\phantomsection\label{\detokenize{index:unet.loss.boundary_transition_loss}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{boundary\_transition\_loss}}}{\emph{isPixel=False}}{}
+Compare the number of boundaries along the columns. The value can be assinged to all the pixels in the A-line or
+can be assigned to the pixels at the boundary.
 
 \end{fulllineitems}
 
@@ -331,6 +332,19 @@ has label and target arguments
 \end{itemize}
 
 
+
+\end{fulllineitems}
+
+\index{new\_loss2x3ch() (in module unet.loss)@\spxentry{new\_loss2x3ch()}\spxextra{in module unet.loss}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:unet.loss.new_loss2x3ch}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{unet.loss.}}\sphinxbfcode{\sphinxupquote{new\_loss2x3ch}}}{\emph{loss\_weight}}{}~\begin{description}
+\item[{Loss function for a particular label definition, which has two separate set of labels and each set has}] \leavevmode
+three classes. One is for wall structures and one is for artifacts. For the dataset compiled in 2020,
+
+\end{description}
+
+weights are {[}0.02, 0.18, 0.80, 0.09, 0.75, 0.16,  0.1{]}.
 
 \end{fulllineitems}
 
