@@ -202,7 +202,8 @@ def weighted_categorical_crossentropy(loss_weight):
 
 def boundary_transition_loss(isPixel = False):
     """
-    Compare the number of boundaries along the columns.
+    Compare the number of boundaries along the columns. The value can be assinged to all the pixels in the A-line or
+    can be assigned to the pixels at the boundary.
 
     """
     def boundary_transition_loss_(label, target):
@@ -228,3 +229,23 @@ def boundary_transition_loss(isPixel = False):
             tf.abs(num_boundary(label) - num_boundary(target))
 
     return boundary_transition_loss_
+
+
+def new_loss2x3ch(loss_weight):
+    """Loss function for a particular label definition, which has two separate set of labels and each set has
+         three classes. One is for wall structures and one is for artifacts. For the dataset compiled in 2020,
+        weights are [0.02, 0.18, 0.80, 0.09, 0.75, 0.16,  0.1].
+    """
+
+    def loss_(label, target):
+        target1, target2 = target[..., :3], target[..., 3:]
+        label1, label2, mask1 = label[..., :3], label[..., 3:], label[..., 3]
+        mask2 = tf.cast(tf.logical_and(
+                        tf.reduce_sum(label[..., 1], axis=-3, keepdims=True) <= 34,
+                        tf.reduce_sum(label[..., 2], axis=-3, keepdims=True) <= 19), tf.float32)
+        L1 = multi_loss(loss_weight[[0, 1, 2, 6, 7, 8]], 3)(label1, target1)
+        L2 = multi_loss(loss_weight[[3, 4, 5]], 3)(label2, target2)
+        return ((mask1 * mask2 + loss_weight[9] * mask1 * (1 - mask2)
+                 + loss_weight[10] * (1 - mask1)) * L1 + loss_weight[11] * L2)
+
+    return loss_
