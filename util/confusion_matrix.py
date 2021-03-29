@@ -195,3 +195,19 @@ if __name__ == "__main__":
             f.write(report_out)
 
     print('Saved in %s' % report_file)
+
+    # confusion plot
+    metrics = ('TPR', 'TNR', 'Acc', 'Dice')
+    classes_label = ('Outside', 'Lumen', 'Intima' , 'Media', 'Guidewire', 'Plaque')
+    slice_performance = pd.DataFrame(columns=[('performance', float), ('metric', "category"), ('class', "category")])
+    for z in np.nonzero(np.logical_not(isTrain))[0]:
+        for i_class in classes:
+            valid_confusion_matrix = confusion_matrix(label[z, ...] == i_class,  target[z, ...] == i_class,
+                                                      mask[z, ...])
+            for j in range(4):
+                slice_performance = slice_performance.append({'performance': valid_confusion_matrix[4+j],
+                                                              'metric': metrics[j], 'class': classes_label[i_class]},
+                                                             ignore_index=True)
+
+    sns.catplot(x="class", y="performance", hue="metric", kind="box", data=slice_performance).fig.show()
+    input('Press a key')
