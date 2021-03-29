@@ -226,7 +226,7 @@ def boundary_transition_loss(isPixel = False):
             return tf.abs(num_boundary_pixel(label, False) - num_boundary_pixel(target, False)) * \
                    num_boundary_pixel(target, True)
         else:
-            tf.abs(num_boundary(label) - num_boundary(target))
+            return tf.abs(num_boundary(label) - num_boundary(target))
 
     return boundary_transition_loss_
 
