@@ -8,3 +8,4 @@ tifffile == 2019.7.20
 tqdm == 4.31.1
 matplotlib == 3.0.3
 visdom == 0.1.8.9
+opencv == 4.2.0
