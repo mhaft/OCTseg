@@ -23,10 +23,11 @@ def read_parameter_from_log_file(args, log_file):
 
     """
 
-    f = open(log_file, 'r')
-    params = re.findall(r"\b[\w-]+\=\'.*?\'[,)]|\b[\w-]+\=.*?[,)]", f.readline())
-    f.close()
-    testEpoch = args.testEpoch  # it should not get updated.
+    with open(log_file, 'r') as f:
+        params = re.findall(r"\b[\w-]+\=\'.*?\'[,)]|\b[\w-]+\=.*?[,)]", f.readline())
+
+    # it should not get updated.
+    testEpoch, isTest, testDir, models_path = args.testEpoch, args.isTest, args.testDir, args.models_path
 
     for param in params:
         a, v = param.split("=")
@@ -40,5 +41,5 @@ def read_parameter_from_log_file(args, log_file):
         else:
             warnings.warn('The parameter %s in the log file is deprecated. log file: %s ' % (a, log_file))
 
-    args.testEpoch = testEpoch
+    args.testEpoch, args.isTest, args.testDir, args.models_path = testEpoch, isTest, testDir, models_path
     return args
