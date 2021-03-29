@@ -89,6 +89,27 @@ def boundary_accuracy(label, target):
     return out
 
 
+def boundary_accuracy_column_wise(label, target, mask=None):
+
+    def boundary_error_2d(label_2d, target_2d):
+        def segment2boundary(im_2d):
+            return cv2.filter2D(im_2d.astype('uint8'), cv2.CV_32F, np.array([[-1], [2], [-1]]) / 4) != 0
+
+        label_b, target_b, nc = segment2boundary(label_2d), segment2boundary(target_2d), label_2d.shape[1]
+        dist = np.zeros(nc)
+        for j in range(nc):
+            dist_l = np.nonzero(label_b[:, j])[0][np.newaxis, :]
+            dist_t = np.nonzero(target_b[:, j])[0][:, np.newaxis]
+            dist[j] = np.min(np.abs(dist_l - dist_t)) if dist_l.size and dist_t.size else np.nan
+
+        return np.nanmean(dist) if not np.all(np.isnan(dist)) else np.nan
+
+    if mask is not None:
+        label, target = np.logical_and(label, mask), np.logical_and(target, mask)
+    out = np.array([boundary_error_2d(label[k, ...], target[k, ...]) for k in range(label.shape[0])])
+    return np.nanmean(out), np.nanstd(out), out
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-exp_def", type=str, default="1z", help="experiment definition")
