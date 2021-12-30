@@ -6,6 +6,9 @@ An image processing package for analysis of OCT images.
 * keras
 * nativeTensorFlow
 
+## Publication
+* Haft-Javaherian, Mohammad, et al. "Segmentation of Anatomical Layers and Artifacts in Intravascular Polarization Sensitive Optical Coherence Tomography Using Attending Physician and Boundary Cardinality Lost Terms." arXiv preprint arXiv:2105.05137 (2021). [Open Access link] (https://arxiv.org/abs/2105.05137). 
+
 ## Contact
 * Mohammad Haft-Javaherian <mh973@cornell.edu>, <haft@csail.mit.edu>.
 
